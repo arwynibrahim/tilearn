@@ -1,0 +1,9 @@
+{
+  "name": "til-load-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node run.js"
+  },
+  "dependencies": {}
+}

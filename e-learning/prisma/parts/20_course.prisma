@@ -1,0 +1,51 @@
+model Course {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  description String?
+  thumbnail   String?
+  domainId    String
+  level       CourseLevel @default(BEGINNER)
+  duration    Int?
+  language    String     @default("fr")
+  price       Float?
+  isPublished Boolean   @default(false)
+  createdBy   String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  domain      Domain     @relation(fields: [domainId], references: [id])
+  creator     User       @relation("CourseCreator", fields: [createdBy], references: [id])
+  modules     Module[]
+  enrollments Enrollment[]
+  certificates Certificate[]
+  reviews     CourseReview[]
+  learningPathCourses LearningPathCourse[]
+}
+
+model Domain {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  icon        String?
+  description String?
+  courses     Course[]
+}
+
+model Module {
+  id              String     @id @default(cuid())
+  courseId        String
+  title           String
+  type            ModuleType
+  order           Int
+  contentUrl      String?
+  durationSeconds Int?
+  isRequired      Boolean    @default(true)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  course     Course      @relation(fields: [courseId], references: [id])
+  vrScene    VRScene?
+  quizzes    Quiz[]
+  progresses Progress[]
+}

@@ -1,0 +1,73 @@
+model Organization {
+  id           String           @id @default(cuid())
+  name         String
+  type         OrganizationType
+  emailDomain  String?
+  logo         String?
+  address      String?
+  country      String?
+  phone        String?
+  contractStart DateTime?
+  contractEnd  DateTime?
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  licenses       License[]
+  learningPaths  LearningPath[]
+  vrHeadsets     VRHeadset[]
+  chargingStations ChargingStation[]
+}
+
+model License {
+  id             String      @id @default(cuid())
+  organizationId String
+  plan           LicensePlan
+  quantity       Int
+  usedCount      Int         @default(0)
+  startDate      DateTime
+  endDate        DateTime
+  price          Float?
+  autoRenew      Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id])
+  assignments  LicenseAssignment[]
+}
+
+model LicenseAssignment {
+  id           String    @id @default(cuid())
+  licenseId    String
+  userId       String
+  assignedBy   String?
+  assignedAt   DateTime  @default(now())
+  revokedAt    DateTime?
+
+  license License @relation(fields: [licenseId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+model LearningPath {
+  id             String   @id @default(cuid())
+  organizationId String
+  title          String
+  description    String?
+  isMandatory    Boolean  @default(false)
+  createdBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization         @relation(fields: [organizationId], references: [id])
+  courses      LearningPathCourse[]
+}
+
+model LearningPathCourse {
+  id        String @id @default(cuid())
+  pathId    String
+  courseId  String
+  order     Int
+
+  path   LearningPath @relation(fields: [pathId], references: [id])
+  course Course       @relation(fields: [courseId], references: [id])
+}

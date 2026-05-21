@@ -1,0 +1,13 @@
+model VRScene {
+  id            String   @id @default(cuid())
+  moduleId      String   @unique
+  title         String
+  sceneData     Json?
+  interactions  Json?
+  branches      Json?
+  fallback360Url String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  module Module @relation(fields: [moduleId], references: [id])
+}

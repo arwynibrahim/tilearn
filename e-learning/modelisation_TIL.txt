@@ -1,0 +1,445 @@
+═══════════════════════════════════════════════════════════════
+ MODÉLISATION — TOTAL INNOVATION LEARNING (TIL)
+ Cahier des Charges v1.0 — Phase d'Analyse & Conception
+═══════════════════════════════════════════════════════════════
+
+1. MODÈLE DE DONNÉES (ENTITÉS PRINCIPALES)
+───────────────────────────────────────────────
+
+1.1 ENTITÉS CŒUR (AUTH & PROFIL)
+┌─────────────────────────────────────────────────────────────┐
+│ User (id, email, password_hash, role, nom, prenom,         │
+│   telephone, avatar, email_verified_at, created_at,        │
+│   updated_at, last_login_at, deleted_at)                   │
+│                                                             │
+│ Rôles (enum Role) :                                         │
+│   ┣━ LEARNER       — Apprenant B2C                          │
+│   ┣━ INSTRUCTOR    — Créateur de contenu                    │
+│   ┣━ ADMIN_INSTITUTION — Admin organisation                │
+│   ┗━ SUPER_ADMIN   — Admin plateforme TIL                  │
+│                                                             │
+│ Relations :                                                 │
+│   User 1──* Enrollment (inscriptions cours)                │
+│   User 1──* Certificate (certificats obtenus)              │
+│   User 1──* Payment (historique paiements)                 │
+│   User 1──* Progress (progression par module)              │
+│   User *──* Organization (via LicenseAssignment) — B2B     │
+└─────────────────────────────────────────────────────────────┘
+
+1.2 ENTITÉS CATALOGUE & FORMATION
+┌─────────────────────────────────────────────────────────────┐
+│ Course (id, title, slug, description, thumbnail,           │
+│   domain_id, level, duration, language, price,             │
+│   is_published, created_by, created_at, updated_at)        │
+│                                                             │
+│ Domain (id, name, slug, icon, description)                 │
+│   Ex: Informatique, Santé, Agronomie, Design, Marketing... │
+│                                                             │
+│ Module (id, course_id, title, type, order, content_url,     │
+│   duration_seconds, is_required)                            │
+│   Type d'exercice : VIDEO | VR | QUIZ | TEXT               │
+│                                                             │
+│ Relations :                                                 │
+│   Course *──1 Domain                                        │
+│   Course 1──* Module                                        │
+│   Course *──* User (via Enrollment)                         │
+│   Course 1──* Certificate (template)                       │
+└─────────────────────────────────────────────────────────────┘
+
+1.3 ENTITÉS VR
+┌─────────────────────────────────────────────────────────────┐
+│ VRScene (id, module_id, title, scene_data,                  │
+│   interactions, branches, fallback_360_url,                 │
+│   created_at, updated_at)                                   │
+│                                                             │
+│ Interaction (id, scene_id, type, trigger, action,           │
+│   position_x, position_y, position_z, rotation, scale)     │
+│   Types : CLICK | GRAB | LOOK_AT | COLLISION               │
+│                                                             │
+│ Branch (id, scene_id, condition, target_scene_id,          │
+│   label)  — Scénario à embranchements                     │
+│                                                             │
+│ Relations :                                                 │
+│   VRScene 1──* Interaction                                  │
+│   VRScene 1──* Branch                                       │
+│   Module 0..1 VRScene (optionnel si type=VR)               │
+└─────────────────────────────────────────────────────────────┘
+
+1.4 ENTITÉS APPRENTISSAGE & ÉVALUATION
+┌─────────────────────────────────────────────────────────────┐
+│ Enrollment (id, user_id, course_id, status,                 │
+│   enrolled_at, completed_at, expiry_date)                   │
+│   Status : ACTIVE | COMPLETED | EXPIRED | DROPPED           │
+│                                                             │
+│ Progress (id, user_id, module_id, status, score,            │
+│   time_spent_seconds, last_position, started_at,            │
+│   completed_at)                                             │
+│                                                             │
+│ Quiz (id, module_id, title, passing_score,                  │
+│   max_attempts, shuffle_questions)                          │
+│                                                             │
+│ Question (id, quiz_id, text, type, options,                 │
+│   correct_answer, points, explanation)                      │
+│   Types : QCM | VRAI_FAUX | DRAG_DROP | ORDER              │
+│                                                             │
+│ QuizAttempt (id, user_id, quiz_id, score, answers,          │
+│   started_at, completed_at, passed)                         │
+│                                                             │
+│ Certificate (id, user_id, course_id, template_id,           │
+│   certificate_uid, issued_at, qr_code_hash,                 │
+│   verification_url, revoked_at)                             │
+│                                                             │
+│ Relations :                                                 │
+│   Enrollment ──> Course, User                               │
+│   Progress ──> Module, User                                 │
+│   Quiz *──1 Module                                          │
+│   Question *──1 Quiz                                        │
+│   QuizAttempt ──> Quiz, User                                │
+│   Certificate ──> Course, User                              │
+└─────────────────────────────────────────────────────────────┘
+
+1.5 ENTITÉS B2B & INSTITUTION
+┌─────────────────────────────────────────────────────────────┐
+│ Organization (id, name, type, email_domain,                 │
+│   logo, address, country, phone, contract_start,            │
+│   contract_end, is_active)                                  │
+│   Types : UNIVERSITY | COMPANY | HOSPITAL | NGO | GOV      │
+│                                                             │
+│ License (id, organization_id, plan, quantity,              │
+│   used_count, start_date, end_date, price,                  │
+│   auto_renew)                                               │
+│   Plans : STARTER_10 | PRO_30 | PREMIUM_50 |               │
+│           ENTERPRISE_100 | UNLIMITED                        │
+│                                                             │
+│ LicenseAssignment (id, license_id, user_id,                 │
+│   assigned_by, assigned_at, revoked_at)                     │
+│                                                             │
+│ LearningPath (id, organization_id, title,                   │
+│   description, is_mandatory, created_by, created_at)        │
+│                                                             │
+│ LearningPathCourse (id, path_id, course_id, order)         │
+│                                                             │
+│ Relations :                                                 │
+│   Organization 1──* License                                 │
+│   License 1──* LicenseAssignment                            │
+│   LicenseAssignment *──1 User                               │
+│   Organization 1──* LearningPath                            │
+│   LearningPath *──* Course (via LearningPathCourse)        │
+└─────────────────────────────────────────────────────────────┘
+
+1.6 ENTITÉS PAIEMENT
+┌─────────────────────────────────────────────────────────────┐
+│ Payment (id, user_id, transaction_id, amount,               │
+│   currency, provider, status, payment_method,               │
+│   subscription_id, invoice_url, paid_at, refunded_at)      │
+│   Providers : CINETPAY | STRIPE                            │
+│   Status : PENDING | SUCCESS | FAILED | REFUNDED           │
+│   Methods : ORANGE_MONEY | MOOV_MONEY | CARD               │
+│                                                             │
+│ Subscription (id, user_id, plan, status,                    │
+│   current_period_start, current_period_end,                 │
+│   canceled_at)                                              │
+│   Plans : FREEMIUM | STARTER | PRO | EXPERT                │
+│   Status : ACTIVE | PAST_DUE | CANCELED | EXPIRED          │
+│                                                             │
+│ Invoice (id, subscription_id, payment_id, number,          │
+│   total, tax, pdf_url, created_at)                          │
+│                                                             │
+│ Relations :                                                 │
+│   Payment *──1 Subscription (optionnel)                    │
+│   Payment *──1 User                                         │
+│   Subscription *──1 User                                    │
+│   Invoice 1──1 Payment (optionnel)                         │
+└─────────────────────────────────────────────────────────────┘
+
+1.7 ENTITÉS MDM & MATÉRIEL VR
+┌─────────────────────────────────────────────────────────────┐
+│ VRHeadset (id, organization_id, serial_number,              │
+│   model, firmware_version, status, battery_level,           │
+│   last_ping, assigned_user_id, kiosk_mode_enabled,          │
+│   purchase_date, warranty_until)                            │
+│   Modèles : META_QUEST_2 | META_QUEST_3 | PICO_4           │
+│   Status : ONLINE | OFFLINE | CHARGING | IN_USE |          │
+│            MAINTENANCE | LOST                               │
+│                                                             │
+│ ChargingStation (id, organization_id, model,                │
+│   ports_total, ports_available, location)                   │
+│                                                             │
+│ Relations :                                                 │
+│   VRHeadset *──1 Organization                               │
+│   VRHeadset *──0..1 User (assigned_user)                   │
+└─────────────────────────────────────────────────────────────┘
+
+1.8 ENTITÉS CONTENU & INSTRUCTEUR
+┌─────────────────────────────────────────────────────────────┐
+│ InstructorProfile (id, user_id, bio, expertise_areas,       │
+│   total_students, total_revenue, rating, is_verified,       │
+│   bank_account_info, tax_id)                                │
+│                                                             │
+│ CourseReview (id, course_id, user_id, rating,               │
+│   comment, created_at)                                      │
+│                                                             │
+│ Relations :                                                 │
+│   InstructorProfile 1──1 User                               │
+│   CourseReview *──1 Course                                  │
+│   CourseReview *──1 User                                    │
+└─────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════
+2. MODÈLE D'ARCHITECTURE TECHNIQUE
+═══════════════════════════════════════════════════════════════
+
+2.1 ARCHITECTURE GLOBALE (3-TIER + VR)
+┌──────────────────────────────────────────────┐
+│              CLIENT LAYER                      │
+│                                                │
+│  ┌──────────┐  ┌──────────┐  ┌────────────┐  │
+│  │   Web    │  │  Mobile   │  │  VR Headsets│ │
+│  │ (Next.js)│  │(React Nat)│  │ (WebXR/APK)│  │
+│  └────┬─────┘  └────┬─────┘  └──────┬─────┘  │
+│       │             │               │        │
+├───────┴─────────────┴───────────────┴────────┤
+│           API GATEWAY (Nginx/AWS ALB)         │
+│               HTTPS — TLS 1.3                 │
+├──────────────────────────────────────────────┤
+│           APPLICATION LAYER                   │
+│                                               │
+│  ┌─────────────────────────┐                  │
+│  │    NestJS API Server     │                  │
+│  │  GraphQL + REST (REST)   │                  │
+│  │  Auth JWT RS256 (15min)  │                  │
+│  │  Rate Limiting / IP+User │                  │
+│  │  RBAC (4 rôles)          │                  │
+│  └──────────┬──────────────┘                  │
+│             │                                 │
+│  ┌──────────┴──────────────┐                  │
+│  │  Services / Use Cases    │                  │
+│  └──────────┬──────────────┘                  │
+│             │                                 │
+│  ┌──────────┴──────────────┐                  │
+│  │  Data Access (Prisma)   │                  │
+│  └──────────┬──────────────┘                  │
+├──────────────┴────────────────────────────────┤
+│           DATA LAYER                          │
+│                                               │
+│  ┌────────────┐  ┌──────────┐  ┌─────────┐  │
+│  │ PostgreSQL │  │  Redis   │  │   S3     │  │
+│  │ (RDS, Auro)│  │(Cache/Se)│  │(Assets) │  │
+│  └─────┬──────┘  └────┬─────┘  └────┬────┘  │
+│        │               │             │       │
+│  ┌─────┴──────┐  ┌────┴─────┐       │       │
+│  │  Read Repl.│  │Pub/Sub   │       │       │
+│  │ (Multi-AZ) │  │Bull Queu │       │       │
+│  └────────────┘  └──────────┘       │       │
+└──────────────────────────────────────┴───────┘
+
+2.2 INFRASTRUCTURE AWS (MULTI-ENVIRONNEMENTS)
+┌─────────────────────────────────────────────────────────┐
+│ ENVIRONNEMENTS                                          │
+│   ┣━ DEV   : t3.medium × 1, RDS db.t3.small            │
+│   ┣━ STAGING : t3.large × 2, RDS db.t3.medium,         │
+│   │            WAF + OWASP ZAP CI/CD                    │
+│   ┗━ PROD  : t3.xlarge × 3+ (auto-scaling),            │
+│              RDS db.r6g.large Multi-AZ, ElastiCache,    │
+│              CloudFront CDN, WAF, Shield               │
+│                                                         │
+│ SERVICES AWS UTILISÉS                                   │
+│   ┣━ Compute  : ECS Fargate / EC2 Auto Scaling         │
+│   ┣━ Database : RDS PostgreSQL Aurora                   │
+│   ┣━ Cache    : ElastiCache Redis                       │
+│   ┣━ Storage  : S3 (assets, certificates, backups)      │
+│   ┣━ CDN      : CloudFront (edge caching)              │
+│   ┣━ Security : WAF, Shield, Secrets Manager, KMS      │
+│   ┣━ DNS      : Route 53                               │
+│   ┣━ CI/CD    : CodePipeline / GitHub Actions          │
+│   ┗━ Email    : Amazon SES                             │
+└─────────────────────────────────────────────────────────┘
+
+2.3 STACK TECHNOLOGIQUE
+┌─────────────────────────────────────────────────────────┐
+│ COUCHE          │ TECHNOLOGIE                           │
+├─────────────────────────────────────────────────────────┤
+│ Frontend Web    │ Next.js 14, React 18, TypeScript,     │
+│                 │ Tailwind CSS, Framer Motion           │
+├─────────────────────────────────────────────────────────┤
+│ Frontend Mobile │ React Native, Expo, WebView VR       │
+├─────────────────────────────────────────────────────────┤
+│ Backend API     │ NestJS (Node.js), TypeScript,         │
+│                 │ REST + GraphQL (Apollo)               │
+├─────────────────────────────────────────────────────────┤
+│ Base de données │ PostgreSQL 15+ (Prisma ORM)           │
+│ Cache / Queue   │ Redis, Bull Queue                    │
+├─────────────────────────────────────────────────────────┤
+│ VR Engine       │ Three.js, WebXR, A-Frame, Blender    │
+├─────────────────────────────────────────────────────────┤
+│ Auth            │ JWT RS256, bcrypt (cost 12),          │
+│                 │ OAuth2 (Google), SSO SAML (V1.1)      │
+├─────────────────────────────────────────────────────────┤
+│ Paiement        │ CinetPay (Mobile Money),              │
+│                 │ Stripe (CB internationale)            │
+├─────────────────────────────────────────────────────────┤
+│ Hébergement     │ AWS (ECS/EKS, RDS, S3, CloudFront)   │
+├─────────────────────────────────────────────────────────┤
+│ CI/CD           │ GitHub Actions, Docker, Terraform     │
+├─────────────────────────────────────────────────────────┤
+│ Monitoring      │ CloudWatch, Sentry, DataDog           │
+├─────────────────────────────────────────────────────────┤
+│ i18n            │ react-i18next / nuxt-i18n             │
+│                 │ (FR, EN, Mooré, Bambara — roadmap)    │
+└─────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════
+3. MODÈLE ÉCONOMIQUE
+═══════════════════════════════════════════════════════════════
+
+3.1 SEGMENTS DE CLIENTÈLE
+┌─────────────────────────────────────────────────────────────┐
+│ B2C Individuel  │ Jeunes 20-35 ans, mobile,               │
+│                 │ abonnement 50K FCFA/mois                │
+├─────────────────────────────────────────────────────────────┤
+│ B2B Universités │ Modernisation pédagogique,               │
+│                 │ packs institutionnels + matériel VR      │
+├─────────────────────────────────────────────────────────────┤
+│ B2B Entreprises │ Formation continue employés, ROI        │
+├─────────────────────────────────────────────────────────────┤
+│ B2B ONG/Gouvern │ Projets subventionnés, tarification      │
+│                 │ sociale                                   │
+├─────────────────────────────────────────────────────────────┤
+│ B2B Médical     │ Pack Médical, simulation VR             │
+├─────────────────────────────────────────────────────────────┤
+│ Diaspora        │ Paiement devise/crypto, abonnements      │
+│                 │ familiaux                                 │
+└─────────────────────────────────────────────────────────────┘
+
+3.2 GRILLE TARIFAIRE B2C
+┌─────────────────────────────────────────────────────────────┐
+│ Formule   │ Mensuel      │ Annuel        │ Accès           │
+├─────────────────────────────────────────────────────────────┤
+│ Freemium  │ 0 FCFA       │ 0 FCFA        │ 3 cours démo    │
+│ Starter   │ 35 000 FCFA  │ 360 000 FCFA  │ 20 cours        │
+│ Pro       │ 50 000 FCFA  │ 480 000 FCFA  │ Tout catalogue  │
+│ Expert    │ 80 000 FCFA  │ 768 000 FCFA  │ VIP + live      │
+│ Famille   │ 120 000 FCFA │ 1 100 000 FCFA│ 5 comptes       │
+└─────────────────────────────────────────────────────────────┘
+
+3.3 GRILLE TARIFAIRE B2B (Licences/an)
+┌─────────────────────────────────────────────────────────────┐
+│ Pack       │ Prix/an       │ Users │ White-label │ Support │
+├─────────────────────────────────────────────────────────────┤
+│ 10 licences│ 3 500 000 FCFA│  10   │ Non         │ 48h     │
+│ 30 licences│ 9 000 000 FCFA│  30   │ Non         │ <24h    │
+│ 50 licences│13 500 000 FCFA│  50   │ Oui         │ <4h     │
+│ 100 licen. │24 000 000 FCFA│ 100   │ Oui         │ SLA 2h  │
+│ Illimité   │ Sur devis      │ ∞     │ Oui         │ Dédié   │
+└─────────────────────────────────────────────────────────────┘
+
+3.4 PACKS MATÉRIEL VR
+┌─────────────────────────────────────────────────────────────┐
+│ Pack             │ Prix          │ Casques │ Marge estimée │
+├─────────────────────────────────────────────────────────────┤
+│ Starter          │ 6 500 000 FCFA│   10    │ ~35%          │
+│ Université       │17 500 000 FCFA│   30    │ ~30%          │
+│ Entreprise       │20 000 000 FCFA│   20    │ ~32%          │
+│ Médical          │18 500 000 FCFA│   15    │ ~28%          │
+│ Premium          │55 000 000 FCFA│   50    │ ~33%          │
+└─────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════
+4. MODÈLE DE DÉPLOIEMENT & ROADMAP
+═══════════════════════════════════════════════════════════════
+
+4.1 PHASES DE LA ROADMAP
+┌─────────────────────────────────────────────────────────────┐
+│ Phase   │ Période   │ Objectif                        │
+├─────────────────────────────────────────────────────────────┤
+│ MVP     │ Mois 1-4  │ Proof of Concept, 3 modules VR, │
+│         │           │ levée de fonds                  │
+├─────────────────────────────────────────────────────────────┤
+│ V1.0    │ Mois 5-8  │ Lancement commercial, 5K users │
+├─────────────────────────────────────────────────────────────┤
+│ V1.1    │ Mois 9-12 │ Marketplace, SSO, offline,      │
+│         │           │ offre matérielle complète       │
+├─────────────────────────────────────────────────────────────┤
+│ V2.0    │ Année 2   │ Expansion UEMOA, IA, multi-VR  │
+├─────────────────────────────────────────────────────────────┤
+│ V3.0    │ Année 3   │ IA générative, 10 pays CEDEAO  │
+└─────────────────────────────────────────────────────────────┘
+
+4.2 SPRINTS MVP (16 semaines)
+┌─────────────────────────────────────────────────────────────┐
+│ Sprint 0 (S1-S2)  │ Setup AWS, CI/CD, Docker, repo        │
+│ Sprint 1 (S3-S4)  │ Auth (email+OAuth, JWT, RBAC)         │
+│ Sprint 2 (S5-S6)  │ Catalogue, cours, vidéo HLS            │
+│ Sprint 3 (S7-S8)  │ Module VR Informatique (Three.js/WXR) │
+│ Sprint 4 (S9-S10) │ Modules VR Santé + Agronomie          │
+│ Sprint 5 (S11-S12)│ Quiz, certificats PDF + QR code       │
+│ Sprint 6 (S13-S14)│ Paiement CinetPay + Stripe            │
+│ Sprint 7 (S15-S16)│ Dashboards (instructeur, admin B2B)   │
+│ Sprint 8 (S17-S18)│ QA, perf 500 users, OWASP, docs       │
+└─────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════
+5. RÈGLES DE GESTION & CONTRAINTES NON-FONCTIONNELLES
+═══════════════════════════════════════════════════════════════
+
+5.1 SÉCURITÉ
+┌─────────────────────────────────────────────────────────────┐
+│ RG01 — Chiffrement TLS 1.3 obligatoire tous endpoints      │
+│ RG02 — AES-256 pour données au repos (RDS, S3)             │
+│ RG03 — Conformité RGPD : consentement, droit à l'oubli,    │
+│        portabilité, DPO                                    │
+│ RG04 — Hash bcrypt cost 12 pour mots de passe              │
+│ RG05 — JWT RS256 (15min), refresh tokens avec rotation     │
+│ RG06 — Rate limiting par IP + user, CAPTCHA inscription    │
+│ RG07 — OWASP ZAP + Snyk dans CI/CD                         │
+│ RG08 — Audit logs 12 mois pour actions sensibles           │
+│ RG09 — Pen test externe annuel                             │
+└─────────────────────────────────────────────────────────────┘
+
+5.2 PERFORMANCE & COMPATIBILITÉ
+┌─────────────────────────────────────────────────────────────┐
+│ RG10 — LCP < 2s sur 4G (10-15 Mbps)                        │
+│ RG11 — Bundle JS initial < 200 Ko                          │
+│ RG12 — Images WebP progressives, lazy loading, BlurHash    │
+│ RG13 — Offline-first via Service Workers (PWA)             │
+│ RG14 — Support Chrome, Firefox, Safari, Edge (2 versions)  │
+│ RG15 — iOS 14+, Android 9+ (API 28)                        │
+│ RG16 — Meta Quest 2/3, Pico 4, HTC Vive Focus              │
+│ RG17 — 1 Mbps pour VR 360°, 5 Mbps pour VR 1080p          │
+│ RG18 — WCAG 2.1 AA (contraste 4.5:1, ARIA, clavier)       │
+│ RG19 — i18n FR, EN, Mooré, Bambara, Wolof, Haoussa         │
+│ RG20 — Test obligatoire à 5 Mbps / latence 80ms            │
+└─────────────────────────────────────────────────────────────┘
+
+5.3 MÉTHODOLOGIE & GOUVERNANCE
+┌─────────────────────────────────────────────────────────────┐
+│ RG21 — Scrum (sprints 2 semaines)                          │
+│ RG22 — Git Flow (main/develop/feature/*)                   │
+│ RG23 — DoD MVP : auth <2min, 3 modules VR, paiement MM    │
+│        + CB, certificat PDF, 500 users simultanés          │
+│ RG24 — Gates stratégiques : Gate 1 (S8), Gate 2 (S18)     │
+│ RG25 — Couverture tests > 70%, 0 échec E2E en staging     │
+│ RG26 — 100% endpoints documentés Swagger/OpenAPI           │
+└─────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════
+6. PROCHAINES ÉTAPES (POST-MODÉLISATION)
+═══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│ 1. Validation du présent modèle par l'équipe projet        │
+│ 2. Création du MCD (Modèle Conceptuel de Données)          │
+│    → Schéma Entité-Relation exportable                     │
+│ 3. Création du MLD (Modèle Logique de Données)             │
+│    → Tables PostgreSQL + migrations Prisma                 │
+│ 4. Diagrammes d'architecture détaillés (draw.io)           │
+│ 5. Spécifications API détaillées (OpenAPI 3.0)             │
+│ 6. Wireframes Figma (Mobile-first 360px → 1920px)         │
+│ 7. Sprint 0 — Mise en place infrastructure AWS             │
+└─────────────────────────────────────────────────────────────┘
+

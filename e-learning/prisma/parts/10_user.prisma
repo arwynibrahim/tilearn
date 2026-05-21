@@ -1,0 +1,46 @@
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  passwordHash     String
+  role             Role     @default(LEARNER)
+  nom              String
+  prenom           String
+  telephone        String?
+  avatar           String?
+  emailVerifiedAt  DateTime?
+  lastLoginAt      DateTime?
+  deletedAt        DateTime?
+  resetToken       String?
+  resetTokenExpiresAt DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  enrollments         Enrollment[]
+  certificates        Certificate[]
+  payments            Payment[]
+  progresses          Progress[]
+  licenseAssignments  LicenseAssignment[]
+  subscriptions       Subscription[]
+  reviews             CourseReview[]
+  instructorProfile   InstructorProfile?
+  vrHeadset           VRHeadset[]
+  coursesCreated      Course[]             @relation("CourseCreator")
+  quizAttempts        QuizAttempt[]
+}
+
+model InstructorProfile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  bio            String?
+  expertiseAreas String[]
+  totalStudents  Int     @default(0)
+  totalRevenue   Float   @default(0)
+  rating         Float   @default(0)
+  isVerified     Boolean @default(false)
+  bankAccountInfo String?
+  taxId          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}

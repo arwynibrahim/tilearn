@@ -1,0 +1,104 @@
+enum Role {
+  LEARNER
+  INSTRUCTOR
+  ADMIN_INSTITUTION
+  SUPER_ADMIN
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+  DROPPED
+}
+
+enum ModuleType {
+  VIDEO
+  VR
+  QUIZ
+  TEXT
+}
+
+enum QuestionType {
+  QCM
+  VRAI_FAUX
+  DRAG_DROP
+  ORDER
+}
+
+enum PaymentProvider {
+  CINETPAY
+  STRIPE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  ORANGE_MONEY
+  MOOV_MONEY
+  CARD
+}
+
+enum SubscriptionPlan {
+  FREEMIUM
+  STARTER
+  PRO
+  EXPERT
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum LicensePlan {
+  STARTER_10
+  PRO_30
+  PREMIUM_50
+  ENTERPRISE_100
+  UNLIMITED
+}
+
+enum OrganizationType {
+  UNIVERSITY
+  COMPANY
+  HOSPITAL
+  NGO
+  GOV
+}
+
+enum VRHeadsetModel {
+  META_QUEST_2
+  META_QUEST_3
+  PICO_4
+}
+
+enum VRHeadsetStatus {
+  ONLINE
+  OFFLINE
+  CHARGING
+  IN_USE
+  MAINTENANCE
+  LOST
+}
+
+enum InteractionType {
+  CLICK
+  GRAB
+  LOOK_AT
+  COLLISION
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}

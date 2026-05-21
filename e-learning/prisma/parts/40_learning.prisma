@@ -1,0 +1,87 @@
+model Enrollment {
+  id          String           @id @default(cuid())
+  userId      String
+  courseId    String
+  status      EnrollmentStatus @default(ACTIVE)
+  enrolledAt  DateTime         @default(now())
+  completedAt DateTime?
+  expiryDate  DateTime?
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+}
+
+model Progress {
+  id               String   @id @default(cuid())
+  userId           String
+  moduleId         String
+  status           String   @default("NOT_STARTED")
+  score            Float?
+  timeSpentSeconds Int?
+  lastPosition     String?
+  startedAt        DateTime?
+  completedAt      DateTime?
+
+  user   User   @relation(fields: [userId], references: [id])
+  module Module @relation(fields: [moduleId], references: [id])
+
+  @@unique([userId, moduleId])
+}
+
+model Quiz {
+  id             String   @id @default(cuid())
+  moduleId       String
+  title          String
+  passingScore   Float?
+  maxAttempts    Int?     @default(3)
+  shuffleQuestions Boolean @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  module         Module         @relation(fields: [moduleId], references: [id])
+  questions      Question[]
+  attempts       QuizAttempt[]
+}
+
+model Question {
+  id            String       @id @default(cuid())
+  quizId        String
+  text          String
+  type          QuestionType
+  options       Json?
+  correctAnswer String?
+  points        Float?       @default(1)
+  explanation   String?
+  order         Int?         @default(0)
+
+  quiz Quiz @relation(fields: [quizId], references: [id])
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  quizId      String
+  score       Float?
+  answers     Json?
+  startedAt   DateTime?
+  completedAt DateTime?
+  passed      Boolean?
+
+  user User @relation(fields: [userId], references: [id])
+  quiz Quiz @relation(fields: [quizId], references: [id])
+}
+
+model Certificate {
+  id               String    @id @default(cuid())
+  userId           String
+  courseId         String
+  templateId       String?
+  certificateUid   String    @unique
+  issuedAt         DateTime  @default(now())
+  qrCodeHash       String?
+  verificationUrl  String?
+  revokedAt        DateTime?
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+}
