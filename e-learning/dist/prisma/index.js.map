@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/prisma/index.ts"],"sourcesContent":["export { PrismaModule } from './prisma.module';\nexport { PrismaService } from './prisma.service';\n"],"names":["PrismaModule","PrismaService"],"mappings":";;;;;;;;;;;QAASA;eAAAA,0BAAY;;QACZC;eAAAA,4BAAa;;;8BADO;+BACC"}
