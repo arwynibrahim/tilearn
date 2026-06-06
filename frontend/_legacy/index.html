@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title data-i18n="page.title">Total Innovation Learning - Plateforme VR/IA e-Learning</title>
+<meta name="description" data-i18n-attr-content="page.description" content="TIL - Apprendre en faisant. Plateforme SaaS e-Learning avec Réalité Virtuelle et IA pour l'Afrique francophone." />
+<link rel="icon" href="logo_carre.png" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        orange: { DEFAULT: '#E8650A', 600: '#E8650A', 500: '#F47A26', 700: '#C5520A' },
+        navy:   { DEFAULT: '#1A2A4A', 900: '#0F1A33', 800: '#1A2A4A', 700: '#243759' },
+      },
+      fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
+    }
+  }
+}
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; }
+  .grad-hero { background: radial-gradient(1200px 600px at 80% -10%, rgba(232,101,10,.25), transparent 60%), radial-gradient(900px 500px at 0% 10%, rgba(36,55,89,.6), transparent 60%), linear-gradient(180deg, #0F1A33, #1A2A4A); }
+  .glow { box-shadow: 0 10px 50px -10px rgba(232,101,10,.55); }
+  .card-hover { transition: transform .25s ease, box-shadow .25s ease; }
+  .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -20px rgba(0,0,0,.35); }
+  .chip { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); }
+  .ring-orange { box-shadow: 0 0 0 3px rgba(232,101,10,.25); }
+  #vrCanvas { display:block; width:100%; height:100%; cursor: grab; }
+  #vrCanvas:active { cursor: grabbing; }
+  .badge-must { background:#fde7d4; color:#8a3a04; }
+  .badge-mvp  { background:#dbf3e2; color:#125c2e; }
+  .badge-v1   { background:#dde6f7; color:#1a3a8f; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display:none; }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  @keyframes float { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-10px) } }
+  .marquee { mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+  .lang-selector { display: inline-flex; gap: 0.375rem; align-items: center; }
+  .lang-btn {
+    width: 26px; height: 18px; padding: 0;
+    border-radius: 3px; overflow: hidden;
+    border: 1.5px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity .2s, border-color .2s, transform .15s;
+    display: inline-flex; align-items: center; justify-content: center;
+    line-height: 0;
+  }
+  .lang-btn:hover { opacity: 1; transform: translateY(-1px); }
+  .lang-btn.active { opacity: 1; border-color: #E8650A; box-shadow: 0 0 0 1px #E8650A; }
+  .lang-btn svg { display: block; width: 100%; height: 100%; }
+</style>
+<script src="i18n.js"></script>
+</head>
+<body class="bg-white text-navy">
+
+<!-- NAV -->
+<header class="fixed top-0 inset-x-0 z-50 backdrop-blur bg-white/80 border-b border-navy/5">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2">
+      <img src="logo_carre.png" alt="TIL" class="h-9 w-9 rounded-md object-cover" />
+      <div class="leading-tight">
+        <div class="font-extrabold tracking-tight text-navy">Total Innovation <span class="text-orange">Learning</span></div>
+        <div class="text-[10px] uppercase tracking-widest text-navy/60" data-i18n="brand.tagline">VR · IA · Afrique</div>
+      </div>
+    </a>
+    <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-navy/80">
+      <a href="#features" class="hover:text-orange" data-i18n="nav.platform">Plateforme</a>
+      <a href="#catalog"  class="hover:text-orange" data-i18n="nav.catalog">Catalogue</a>
+      <a href="demo.html" class="hover:text-orange" data-i18n="nav.demos">Démos VR</a>
+      <a href="#pricing"  class="hover:text-orange" data-i18n="nav.pricing">Pour qui</a>
+      <a href="#hardware" class="hover:text-orange" data-i18n="nav.hardware">Casques</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <div class="lang-selector"></div>
+      <a href="#cta" class="hidden sm:inline-flex text-sm font-semibold text-navy hover:text-orange" data-i18n="nav.login">Se connecter</a>
+      <a href="#cta" class="inline-flex items-center gap-2 bg-orange text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-orange-700 glow" data-i18n="nav.trial">
+        Essai gratuit 14j
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="grad-hero text-white pt-28 pb-20 sm:pt-36 sm:pb-28 overflow-hidden relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <div class="inline-flex items-center gap-2 chip rounded-full px-3 py-1 text-xs font-medium">
+        <span class="h-2 w-2 rounded-full bg-orange animate-pulse"></span>
+        <span data-i18n="hero.badge">Formation professionnelle immersive · Afrique francophone</span>
+      </div>
+      <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.05]">
+        <span data-i18n="hero.title.1">Apprendre </span><span class="text-orange" data-i18n="hero.title.2">en faisant</span>,<br/>
+        <span data-i18n="hero.title.3">grâce à la </span><span class="text-orange" data-i18n="hero.title.4">Réalité Virtuelle</span>.
+      </h1>
+      <p class="mt-5 text-lg text-white/80 max-w-xl" data-i18n-html="hero.desc">
+        Première plateforme e-Learning <strong>VR + IA</strong> d'Afrique francophone.
+        Formations certifiantes en informatique, médecine, agronomie - accessibles dès <strong>1 Mbps</strong>, payables en <strong>Mobile Money</strong>.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="demo.html" class="inline-flex items-center gap-2 bg-orange hover:bg-orange-700 transition px-6 py-3 rounded-xl font-semibold glow" data-i18n="hero.btn1">
+          Tester les démos VR
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </a>
+        <a href="#catalog" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 px-6 py-3 rounded-xl font-semibold" data-i18n="hero.btn2">
+          Explorer le catalogue
+        </a>
+      </div>
+      <div class="mt-10 grid grid-cols-3 gap-6 max-w-lg">
+        <div><div class="text-3xl font-extrabold text-orange">+75%</div><div class="text-xs text-white/70 mt-1" data-i18n="hero.stat1">de rétention</div></div>
+        <div><div class="text-3xl font-extrabold text-orange">120+</div><div class="text-xs text-white/70 mt-1" data-i18n="hero.stat2">modules disponibles</div></div>
+        <div><div class="text-3xl font-extrabold text-orange">15</div><div class="text-xs text-white/70 mt-1" data-i18n="hero.stat3">institutions partenaires</div></div>
+      </div>
+    </div>
+
+    <!-- Hero visual: stacked cards + headset SVG -->
+    <div class="relative">
+      <div class="absolute -inset-10 bg-orange/10 rounded-[3rem] blur-3xl"></div>
+      <div class="relative animate-float">
+        <svg viewBox="0 0 520 360" class="w-full drop-shadow-2xl">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#E8650A"/>
+              <stop offset="100%" stop-color="#C5520A"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#243759"/>
+              <stop offset="100%" stop-color="#0F1A33"/>
+            </linearGradient>
+          </defs>
+          <!-- Headset -->
+          <rect x="80" y="100" width="360" height="170" rx="60" fill="url(#g2)" stroke="rgba(255,255,255,.08)"/>
+          <rect x="110" y="135" width="140" height="100" rx="18" fill="#0a1224"/>
+          <rect x="270" y="135" width="140" height="100" rx="18" fill="#0a1224"/>
+          <circle cx="180" cy="185" r="28" fill="url(#g1)" opacity=".9"/>
+          <circle cx="340" cy="185" r="28" fill="url(#g1)" opacity=".9"/>
+          <path d="M80 160 Q40 180 40 230 Q40 280 100 270" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M440 160 Q480 180 480 230 Q480 280 420 270" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="8" stroke-linecap="round"/>
+          <!-- Floating UI cards -->
+          <g transform="translate(330,40)">
+            <rect width="160" height="60" rx="12" fill="white" opacity=".95"/>
+            <circle cx="22" cy="30" r="12" fill="#E8650A"/>
+            <rect x="42" y="18" width="100" height="8" rx="3" fill="#1A2A4A"/>
+            <rect x="42" y="32" width="70"  height="6" rx="3" fill="#1A2A4A" opacity=".4"/>
+          </g>
+          <g transform="translate(20,250)">
+            <rect width="180" height="70" rx="12" fill="white" opacity=".95"/>
+            <rect x="14" y="14" width="40" height="40" rx="8" fill="#1A2A4A"/>
+            <rect x="64" y="20" width="100" height="9" rx="3" fill="#1A2A4A"/>
+            <rect x="64" y="36" width="80"  height="6" rx="3" fill="#E8650A"/>
+            <rect x="64" y="48" width="60"  height="6" rx="3" fill="#1A2A4A" opacity=".3"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Partner marquee -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-16">
+    <div class="text-xs uppercase tracking-widest text-white/50 mb-4 text-center" data-i18n="partners.title">Partenaires & technologies</div>
+    <div class="marquee flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-white/60 text-sm font-semibold">
+      <span>AWS Partner Network</span><span>·</span>
+      <span>Banque Mondiale</span><span>·</span>
+      <span>EY</span><span>·</span>
+      <span>FAFPA</span><span>·</span>
+      <span>Orange Money</span><span>·</span>
+      <span>Moov Money</span><span>·</span>
+      <span>Wave</span><span>·</span>
+      <span>Meta Quest</span>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMS / VALUE -->
+<section class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="max-w-3xl">
+      <div class="text-orange font-semibold text-sm uppercase tracking-widest" data-i18n="problem.badge">Le problème</div>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold" data-i18n-html="problem.title">80% de théorie, 20% de pratique. <br> Résultat : des diplômés non opérationnels.</h2>
+      <p class="mt-4 text-navy/70 text-lg" data-i18n-html="problem.desc">TIL inverse l'équation grâce à des <strong>simulations VR ultra-réalistes</strong>, un mode <strong>hors-ligne</strong>, et un contenu mis à jour <strong>chaque trimestre</strong>.</p>
+    </div>
+
+    <div class="mt-12 grid md:grid-cols-3 gap-6">
+      <div class="p-6 rounded-2xl bg-navy text-white card-hover">
+        <div class="h-12 w-12 rounded-xl bg-orange/20 flex items-center justify-center text-orange mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3 class="font-bold text-lg" data-i18n="problem.card1.title">Immersion VR</h3>
+        <p class="text-white/70 text-sm mt-2" data-i18n="problem.card1.desc">Gestes infirmiers, déploiement AWS, gestion d'une exploitation agricole - exécutés en environnement 3D sécurisé.</p>
+      </div>
+      <div class="p-6 rounded-2xl bg-navy text-white card-hover">
+        <div class="h-12 w-12 rounded-xl bg-orange/20 flex items-center justify-center text-orange mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+        <h3 class="font-bold text-lg" data-i18n="problem.card2.title">IA pédagogique</h3>
+        <p class="text-white/70 text-sm mt-2" data-i18n="problem.card2.desc">Recommandations personnalisées, sous-titres auto (Whisper), détection des décrochages, génération de quiz par LLM.</p>
+      </div>
+      <div class="p-6 rounded-2xl bg-navy text-white card-hover">
+        <div class="h-12 w-12 rounded-xl bg-orange/20 flex items-center justify-center text-orange mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h6"/></svg>
+        </div>
+        <h3 class="font-bold text-lg" data-i18n="problem.card3.title">Mobile Money natif</h3>
+        <p class="text-white/70 text-sm mt-2" data-i18n="problem.card3.desc">Orange Money, Moov Money, Wave - payez votre formation depuis votre téléphone, sans carte bancaire.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="py-24 bg-gradient-to-b from-white to-orange/5">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <div class="text-orange font-semibold text-sm uppercase tracking-widest" data-i18n="platform.badge">La plateforme</div>
+        <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold" data-i18n="platform.title">Une seule plateforme, trois mondes connectés.</h2>
+        <p class="mt-4 text-navy/70 text-lg" data-i18n="platform.desc">Apprenant, instructeur, institution - chacun dispose d'outils dédiés, sans friction, sans installation.</p>
+
+        <div class="mt-8 space-y-4">
+          <div class="flex gap-4">
+            <div class="h-10 w-10 rounded-lg bg-orange text-white flex items-center justify-center font-bold shrink-0">1</div>
+            <div>
+              <div class="font-semibold" data-i18n="platform.item1.title">Catalogue intelligent</div>
+              <div class="text-sm text-navy/70" data-i18n="platform.item1.desc">Recommandations IA, filtres avancés, preview gratuite, certifications vérifiables.</div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="h-10 w-10 rounded-lg bg-orange text-white flex items-center justify-center font-bold shrink-0">2</div>
+            <div>
+              <div class="font-semibold" data-i18n="platform.item2.title">Studio instructeur</div>
+              <div class="text-sm text-navy/70" data-i18n="platform.item2.desc">Drag & drop : vidéos, quiz, scènes VR (GLTF/GLB), évaluations notées dans la simulation.</div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="h-10 w-10 rounded-lg bg-orange text-white flex items-center justify-center font-bold shrink-0">3</div>
+            <div>
+              <div class="font-semibold" data-i18n="platform.item3.title">Dashboard institutionnel</div>
+              <div class="text-sm text-navy/70" data-i18n="platform.item3.desc">SSO Active Directory, gestion de flotte VR (MDM), rapports ROI, white-labeling.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="p-5 rounded-2xl bg-white border border-navy/10 card-hover">
+          <div class="text-3xl font-extrabold text-orange">99.9%</div>
+          <div class="text-sm text-navy/70 mt-1" data-i18n="platform.stat1">Uptime SLA visé</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-navy/10 card-hover">
+          <div class="text-3xl font-extrabold text-orange">&lt;1.5s</div>
+          <div class="text-sm text-navy/70 mt-1" data-i18n="platform.stat2">Temps de chargement</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-navy/10 card-hover">
+          <div class="text-3xl font-extrabold text-orange">1 Mbps</div>
+          <div class="text-sm text-navy/70 mt-1" data-i18n="platform.stat3">Connexion minimale</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-navy/10 card-hover">
+          <div class="text-3xl font-extrabold text-orange">RGPD</div>
+          <div class="text-sm text-navy/70 mt-1" data-i18n="platform.stat4">AES-256 + TLS 1.3</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-navy text-white col-span-2 card-hover">
+          <div class="text-sm uppercase tracking-widest text-orange font-semibold" data-i18n="platform.stack">Stack</div>
+          <div class="mt-3 flex flex-wrap gap-2 text-xs">
+            <span class="chip px-2 py-1 rounded">Next.js 14</span>
+            <span class="chip px-2 py-1 rounded">NestJS</span>
+            <span class="chip px-2 py-1 rounded">Three.js + WebXR</span>
+            <span class="chip px-2 py-1 rounded">PostgreSQL</span>
+            <span class="chip px-2 py-1 rounded">Redis</span>
+            <span class="chip px-2 py-1 rounded">AWS ECS</span>
+            <span class="chip px-2 py-1 rounded">CinetPay</span>
+            <span class="chip px-2 py-1 rounded">Stripe Connect</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATALOG -->
+<section id="catalog" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex items-end justify-between flex-wrap gap-4">
+      <div>
+        <div class="text-orange font-semibold text-sm uppercase tracking-widest" data-i18n="catalog.badge">Prototype interactif</div>
+        <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold" data-i18n="catalog.title">Catalogue de formations</h2>
+        <p class="mt-2 text-navy/70"><span data-i18n="catalog.filterPrefix">Filtrez parmi</span> <span id="courseCount">…</span> <span data-i18n="catalog.filterSuffix">modules. Cliquez pour voir le détail.</span></p>
+      </div>
+      <div class="flex gap-2 flex-wrap" id="filters">
+        <button data-filter="all"  class="filter-btn active px-4 py-2 rounded-full text-sm font-semibold bg-orange text-white" data-i18n="catalog.filter.all">Tous</button>
+        <button data-filter="dev"  class="filter-btn px-4 py-2 rounded-full text-sm font-semibold bg-navy/5 text-navy hover:bg-navy/10" data-i18n="catalog.filter.dev">Dev Info</button>
+        <button data-filter="sante"class="filter-btn px-4 py-2 rounded-full text-sm font-semibold bg-navy/5 text-navy hover:bg-navy/10" data-i18n="catalog.filter.sante">Santé</button>
+        <button data-filter="agro" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold bg-navy/5 text-navy hover:bg-navy/10" data-i18n="catalog.filter.agro">Agronomie</button>
+        <button data-filter="vr"   class="filter-btn px-4 py-2 rounded-full text-sm font-semibold bg-navy/5 text-navy hover:bg-navy/10" data-i18n="catalog.filter.vr">VR seulement</button>
+      </div>
+    </div>
+
+    <div id="courseGrid" class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </div>
+</section>
+
+<!-- VR DEMO -->
+<section id="vr" class="py-24 bg-navy text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-30">
+    <div class="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-orange blur-3xl"></div>
+    <div class="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-orange blur-3xl"></div>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 relative">
+    <div class="grid lg:grid-cols-5 gap-10 items-center">
+      <div class="lg:col-span-2">
+        <div class="text-orange font-semibold text-sm uppercase tracking-widest" data-i18n="vrdemo.badge">Démo interactive</div>
+        <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold" data-i18n="vrdemo.title">Atelier - Maintenance Informatique</h2>
+        <p class="mt-4 text-white/80" data-i18n-html="vrdemo.desc">Une tour d'ordinateur est défectueuse. <strong>Cliquez sur chaque composant</strong> pour le diagnostiquer, identifiez la panne (composant rouge clignotant), puis remplacez-le pour finaliser la réparation.</p>
+        <div class="mt-6 grid grid-cols-3 gap-3" id="vrStats">
+          <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+            <div class="text-[10px] uppercase tracking-widest text-white/50" data-i18n="vrdemo.stats.inspected">Diagnostiqués</div>
+            <div class="text-2xl font-extrabold text-orange"><span id="statInspected">0</span>/7</div>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+            <div class="text-[10px] uppercase tracking-widest text-white/50" data-i18n="vrdemo.stats.fault">Panne</div>
+            <div class="text-2xl font-extrabold" id="statFault">?</div>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+            <div class="text-[10px] uppercase tracking-widest text-white/50" data-i18n="vrdemo.stats.score">Score</div>
+            <div class="text-2xl font-extrabold text-orange"><span id="statScore">0</span>%</div>
+          </div>
+        </div>
+        <div class="mt-4 rounded-xl bg-black/40 border border-white/10 p-4 text-sm min-h-[110px]" id="vrInfoPanel">
+          <div class="text-orange font-bold text-xs uppercase tracking-widest" data-i18n="vrdemo.console.title">Console technicien</div>
+          <div class="mt-2 text-white/80" data-i18n="vrdemo.console.hint">→ Cliquez un composant dans la tour pour afficher sa fiche technique.</div>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-3">
+          <button id="vrAutoRotate" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-sm font-semibold" data-i18n="vrdemo.btn.rotate">Rotation auto</button>
+          <button id="vrReset" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-sm font-semibold" data-i18n="vrdemo.btn.reset">Recentrer</button>
+          <button id="vrRestart" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-sm font-semibold" data-i18n="vrdemo.btn.newFault">Nouvelle panne</button>
+        </div>
+        <a href="demo.html" class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-orange hover:text-orange-700" data-i18n="vrdemo.link">
+          Voir les 6 simulations VR
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="lg:col-span-3">
+        <div class="aspect-[16/10] rounded-3xl overflow-hidden border border-white/10 bg-black/40 shadow-2xl relative">
+          <canvas id="vrCanvas"></canvas>
+          <div class="absolute top-3 left-3 flex items-center gap-2 text-xs font-semibold bg-black/60 backdrop-blur px-3 py-1.5 rounded-full">
+            <span class="h-2 w-2 rounded-full bg-orange animate-pulse"></span>
+            <span data-i18n="vrdemo.live">LIVE · Three.js WebGL</span>
+          </div>
+          <div class="absolute top-3 right-3 text-xs font-semibold bg-red-500/90 backdrop-blur px-3 py-1.5 rounded-full hidden" id="vrFaultBadge">
+            <span data-i18n="vrdemo.faultDetected">⚠ Panne détectée</span>
+          </div>
+          <div class="absolute bottom-3 left-3 text-xs text-white/60 bg-black/40 px-2 py-1 rounded" data-i18n="vrdemo.hint">Drag · Scroll · Click composants</div>
+          <div class="absolute bottom-3 right-3 text-xs text-white/80 bg-black/60 px-3 py-1.5 rounded font-semibold hidden" id="vrSuccessBanner">
+            <span data-i18n="vrdemo.success">✓ Tour réparée - Module validé</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIENCES -->
+<section id="pricing" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center max-w-2xl mx-auto">
+      <div class="text-orange font-semibold text-sm uppercase tracking-widest" data-i18n="audience.badge">Pour qui</div>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold" data-i18n="audience.title">Une plateforme, plusieurs publics.</h2>
+      <p class="mt-3 text-navy/70" data-i18n="audience.desc">Particuliers, universités, entreprises, ONG - chaque profil dispose d'un parcours et d'outils adaptés.</p>
+    </div>
+    <div class="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="rounded-2xl border border-navy/10 p-6 card-hover bg-white">
+        <div class="h-12 w-12 rounded-xl bg-orange/10 flex items-center justify-center text-orange mb-4">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="font-bold text-lg" data-i18n="audience.individual.title">Apprenant individuel</div>
+        <p class="mt-2 text-sm text-navy/70" data-i18n="audience.individual.desc">Étudiants, jeunes professionnels, personnes en reconversion. Accès mobile, certifications reconnues.</p>
+        <ul class="mt-4 space-y-1.5 text-sm text-navy/80">
+          <li data-i18n="audience.individual.b1">✓ Catalogue complet</li>
+          <li data-i18n="audience.individual.b2">✓ Mode hors-ligne</li>
+          <li data-i18n="audience.individual.b3">✓ Certificat numérique</li>
+        </ul>
+        <a href="#cta" class="mt-6 block text-center py-2.5 rounded-lg bg-orange hover:bg-orange-700 text-white font-semibold text-sm" data-i18n="audience.individual.cta">Commencer gratuitement</a>
+      </div>
+
+      <div class="rounded-2xl border-2 border-orange p-6 card-hover bg-white relative shadow-xl">
+        <div class="absolute -top-3 left-6 bg-orange text-white text-xs font-bold px-3 py-1 rounded-full" data-i18n="audience.recommended">RECOMMANDÉ</div>
+        <div class="h-12 w-12 rounded-xl bg-orange/10 flex items-center justify-center text-orange mb-4">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <div class="font-bold text-lg" data-i18n="audience.schools.title">Universités & écoles</div>
+        <p class="mt-2 text-sm text-navy/70" data-i18n="audience.schools.desc">Modernisez votre pédagogie avec des simulations VR et un suivi pédagogique consolidé.</p>
+        <ul class="mt-4 space-y-1.5 text-sm text-navy/80">
+          <li data-i18n="audience.schools.b1">✓ Parcours sur mesure</li>
+          <li data-i18n="audience.schools.b2">✓ Dashboard cohortes</li>
+          <li data-i18n="audience.schools.b3">✓ Gestion de flotte VR</li>
+        </ul>
+        <a href="#cta" class="mt-6 block text-center py-2.5 rounded-lg bg-orange hover:bg-orange-700 text-white font-semibold text-sm" data-i18n="audience.schools.cta">Demander une démo</a>
+      </div>
+
+      <div class="rounded-2xl border border-navy/10 p-6 card-hover bg-white">
+        <div class="h-12 w-12 rounded-xl bg-orange/10 flex items-center justify-center text-orange mb-4">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+        </div>
+        <div class="font-bold text-lg" data-i18n="audience.companies.title">Entreprises</div>
+        <p class="mt-2 text-sm text-navy/70" data-i18n="audience.companies.desc">Formation continue de vos équipes avec ROI mesurable et reporting RH intégré.</p>
+        <ul class="mt-4 space-y-1.5 text-sm text-navy/80">
+          <li data-i18n="audience.companies.b1">✓ SSO Active Directory</li>
+          <li data-i18n="audience.companies.b2">✓ Rapports ROI</li>
+          <li data-i18n="audience.companies.b3">✓ Intégration SIRH</li>
+        </ul>
+        <a href="#cta" class="mt-6 block text-center py-2.5 rounded-lg bg-navy/5 hover:bg-navy/10 font-semibold text-sm" data-i18n="audience.companies.cta">Nous contacter</a>
+      </div>
+
+      <div class="rounded-2xl p-6 card-hover bg-navy text-white">
+        <div class="h-12 w-12 rounded-xl bg-orange/20 flex items-center justify-center text-orange mb-4">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="font-bold text-lg" data-i18n="audience.public.title">ONG & secteur public</div>
+        <p class="mt-2 text-sm text-white/70" data-i18n="audience.public.desc">Renforcement de capacités à grande échelle, tarification sociale, projets subventionnés.</p>
+        <ul class="mt-4 space-y-1.5 text-sm text-white/80">
+          <li data-i18n="audience.public.b1">✓ Déploiement massif</li>
+          <li data-i18n="audience.public.b2">✓ White-labeling</li>
+          <li data-i18n="audience.public.b3">✓ Modules sur mesure</li>
+        </ul>
+        <a href="#cta" class="mt-6 block text-center py-2.5 rounded-lg bg-orange hover:bg-orange-700 font-semibold text-sm" data-i18n="audience.public.cta">Discuter d'un projet</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HARDWARE -->
+<section id="hardware" class="py-24 bg-gradient-to-b from-orange/5 to-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="max-w-3xl">
+      <div class="text-orange font-semibold text-sm uppercase tracking-widest" data-i18n="hardware.badge">Offre matérielle</div>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold" data-i18n="hardware.title">Casques VR clé en main pour vos institutions.</h2>
+      <p class="mt-3 text-navy/70 text-lg" data-i18n="hardware.desc">Achat, location longue durée, leasing ou pilote gratuit 30 jours. Installation, formation des formateurs et support inclus.</p>
+    </div>
+
+    <div class="mt-12 overflow-x-auto">
+      <table class="w-full text-sm border border-navy/10 rounded-xl overflow-hidden">
+        <thead class="bg-navy text-white">
+          <tr class="text-left">
+            <th class="px-4 py-3 font-semibold" data-i18n="hardware.table.pack">Pack</th>
+            <th class="px-4 py-3 font-semibold" data-i18n="hardware.table.headsets">Casques</th>
+            <th class="px-4 py-3 font-semibold" data-i18n="hardware.table.included">Inclus</th>
+            <th class="px-4 py-3 font-semibold text-right" data-i18n="hardware.table.action">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-navy/5">
+          <tr class="bg-white hover:bg-orange/5">
+            <td class="px-4 py-4 font-semibold" data-i18n="hardware.row1.pack">Starter École</td>
+            <td class="px-4 py-4" data-i18n="hardware.row1.headsets">10× Meta Quest 3</td>
+            <td class="px-4 py-4 text-navy/70" data-i18n="hardware.row1.included">50 modules, formation formateurs, garantie 2 ans</td>
+            <td class="px-4 py-4 text-right"><a href="#cta" class="text-orange font-semibold hover:underline" data-i18n="hardware.quote">Devis →</a></td>
+          </tr>
+          <tr class="bg-white hover:bg-orange/5">
+            <td class="px-4 py-4 font-semibold" data-i18n="hardware.row2.pack">Université</td>
+            <td class="px-4 py-4" data-i18n="hardware.row2.headsets">30× Meta Quest 3</td>
+            <td class="px-4 py-4 text-navy/70" data-i18n="hardware.row2.included">150 modules, support prioritaire, rapport trimestriel</td>
+            <td class="px-4 py-4 text-right"><a href="#cta" class="text-orange font-semibold hover:underline" data-i18n="hardware.quote">Devis →</a></td>
+          </tr>
+          <tr class="bg-white hover:bg-orange/5">
+            <td class="px-4 py-4 font-semibold" data-i18n="hardware.row3.pack">Entreprise</td>
+            <td class="px-4 py-4" data-i18n="hardware.row3.headsets">20× Pico 4 Enterprise</td>
+            <td class="px-4 py-4 text-navy/70" data-i18n="hardware.row3.included">MDM, intégration SIRH, modules sur mesure</td>
+            <td class="px-4 py-4 text-right"><a href="#cta" class="text-orange font-semibold hover:underline" data-i18n="hardware.quote">Devis →</a></td>
+          </tr>
+          <tr class="bg-white hover:bg-orange/5">
+            <td class="px-4 py-4 font-semibold" data-i18n="hardware.row4.pack">Médical</td>
+            <td class="px-4 py-4" data-i18n="hardware.row4.headsets">15× Meta Quest 3 Pro</td>
+            <td class="px-4 py-4 text-navy/70" data-i18n="hardware.row4.included">25 modules santé, casques hygiéniques, maintenance mensuelle</td>
+            <td class="px-4 py-4 text-right"><a href="#cta" class="text-orange font-semibold hover:underline" data-i18n="hardware.quote">Devis →</a></td>
+          </tr>
+          <tr class="bg-navy/5 hover:bg-orange/5">
+            <td class="px-4 py-4 font-semibold" data-i18n="hardware.row5.pack">Premium</td>
+            <td class="px-4 py-4" data-i18n="hardware.row5.headsets">50× au choix</td>
+            <td class="px-4 py-4 text-navy/70" data-i18n="hardware.row5.included">Tous modules, 5 custom, white-label, support 24/7</td>
+            <td class="px-4 py-4 text-right"><a href="#cta" class="text-orange font-semibold hover:underline" data-i18n="hardware.quote">Devis →</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="py-24 bg-white">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6">
+    <div class="text-center">
+      <div class="text-orange font-semibold text-sm uppercase tracking-widest" data-i18n="faq.badge">FAQ</div>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold" data-i18n="faq.title">Questions fréquentes</h2>
+    </div>
+    <div class="mt-10 space-y-3">
+      <details class="group rounded-xl border border-navy/10 p-5 open:bg-orange/5 open:border-orange/30">
+        <summary class="flex justify-between items-center font-semibold">
+          <span data-i18n="faq.q1">Faut-il un casque VR pour utiliser TIL ?</span>
+          <span class="text-orange text-2xl group-open:rotate-45 transition">+</span>
+        </summary>
+        <p class="mt-3 text-sm text-navy/70" data-i18n="faq.a1">Non. Tous les modules VR fonctionnent en mode 360° dans un navigateur classique. Le casque amplifie l'expérience mais n'est pas obligatoire.</p>
+      </details>
+      <details class="group rounded-xl border border-navy/10 p-5 open:bg-orange/5 open:border-orange/30">
+        <summary class="flex justify-between items-center font-semibold">
+          <span data-i18n="faq.q2">Comment payer depuis le Burkina Faso ?</span>
+          <span class="text-orange text-2xl group-open:rotate-45 transition">+</span>
+        </summary>
+        <p class="mt-3 text-sm text-navy/70" data-i18n="faq.a2">Orange Money, Moov Money, Wave (intégration CinetPay / PayDunya), virement bancaire, ou carte Visa/Mastercard via Stripe pour les apprenants de la diaspora.</p>
+      </details>
+      <details class="group rounded-xl border border-navy/10 p-5 open:bg-orange/5 open:border-orange/30">
+        <summary class="flex justify-between items-center font-semibold">
+          <span data-i18n="faq.q3">Mes certificats sont-ils reconnus ?</span>
+          <span class="text-orange text-2xl group-open:rotate-45 transition">+</span>
+        </summary>
+        <p class="mt-3 text-sm text-navy/70" data-i18n="faq.a3">Chaque certificat est signé numériquement, vérifiable par QR code. Des partenariats avec AWS, Google et Coursera sont prévus pour la co-certification (V2).</p>
+      </details>
+      <details class="group rounded-xl border border-navy/10 p-5 open:bg-orange/5 open:border-orange/30">
+        <summary class="flex justify-between items-center font-semibold">
+          <span data-i18n="faq.q4">Mon institution peut-elle louer des casques ?</span>
+          <span class="text-orange text-2xl group-open:rotate-45 transition">+</span>
+        </summary>
+        <p class="mt-3 text-sm text-navy/70" data-i18n="faq.a4">Oui : achat, location longue durée (12-36 mois), leasing avec option d'achat (24-48 mois), ou abonnement SaaS incluant le matériel. Un pilote gratuit de 30 jours est proposé avec 5 casques.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta" class="py-24 bg-navy text-white relative overflow-hidden">
+  <div class="absolute -top-32 left-1/2 -translate-x-1/2 h-96 w-[600px] rounded-full bg-orange/30 blur-3xl"></div>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center relative">
+    <h2 class="text-3xl sm:text-5xl font-extrabold leading-tight" data-i18n-html="cta.title">Rejoignez la révolution<br/>de la formation immersive en Afrique.</h2>
+    <p class="mt-5 text-white/80 max-w-2xl mx-auto" data-i18n="cta.desc">Investisseurs, institutions, apprenants - parlons-nous. Démonstration personnalisée sous 48h.</p>
+    <form class="mt-10 max-w-xl mx-auto flex flex-col sm:flex-row gap-3" onsubmit="event.preventDefault(); this.querySelector('button').innerText=i18n.t('cta.sent'); this.querySelector('button').classList.add('bg-green-500');">
+      <input required type="email" data-i18n-placeholder="cta.placeholder" placeholder="votre@email.com" class="flex-1 px-5 py-3 rounded-xl bg-white/10 border border-white/20 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange" />
+      <button class="px-6 py-3 rounded-xl bg-orange hover:bg-orange-700 font-semibold glow transition" data-i18n="cta.button">Demander une démo</button>
+    </form>
+    <div class="mt-8 text-sm text-white/60">
+      <span data-i18n="cta.contact">Contact direct :</span> <a href="mailto:ismael.ouiya@total-innovation.net" class="text-orange font-semibold">ismael.ouiya@total-innovation.net</a> · +226 64 84 33 33
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-navy-900 text-white/60 text-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid md:grid-cols-4 gap-8">
+    <div>
+      <div class="flex items-center gap-2">
+        <img src="logo_carre.png" class="h-8 w-8 rounded" />
+        <div class="font-bold text-white">Total Innovation Learning</div>
+      </div>
+      <p class="mt-3 text-xs" data-i18n-html="footer.address">Ouaga 2000, Immeuble NLVI<br/>Ouagadougou, Burkina Faso<br/>RCCM : BF-OUA-01-2022-013-14820</p>
+    </div>
+    <div>
+      <div class="text-white font-semibold mb-3" data-i18n="footer.product">Produit</div>
+      <ul class="space-y-1.5">
+        <li><a href="#features" class="hover:text-orange" data-i18n="footer.link.platform">Plateforme</a></li>
+        <li><a href="#catalog"  class="hover:text-orange" data-i18n="footer.link.catalog">Catalogue</a></li>
+        <li><a href="#vr"       class="hover:text-orange" data-i18n="footer.link.vr">VR</a></li>
+        <li><a href="#hardware" class="hover:text-orange" data-i18n="footer.link.hardware">Casques</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="text-white font-semibold mb-3" data-i18n="footer.company">Entreprise</div>
+      <ul class="space-y-1.5">
+        <li><a href="#" class="hover:text-orange" data-i18n="footer.link.about">À propos</a></li>
+        <li><a href="#" class="hover:text-orange" data-i18n="footer.link.partners">Partenaires</a></li>
+        <li><a href="#" class="hover:text-orange" data-i18n="footer.link.careers">Carrières</a></li>
+        <li><a href="#" class="hover:text-orange" data-i18n="footer.link.press">Presse</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="text-white font-semibold mb-3" data-i18n="footer.legal">Légal</div>
+      <ul class="space-y-1.5">
+        <li><a href="#" class="hover:text-orange" data-i18n="footer.link.terms">CGU</a></li>
+        <li><a href="#" class="hover:text-orange" data-i18n="footer.link.privacy">Confidentialité (RGPD)</a></li>
+        <li><a href="#" class="hover:text-orange" data-i18n="footer.link.legal">Mentions légales</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 text-xs flex flex-wrap justify-between gap-3 items-center">
+      <div data-i18n="footer.text">© 2026 Total Innovation Learning - Ouagadougou, Burkina Faso</div>
+      <div class="lang-selector"></div>
+    </div>
+  </div>
+</footer>
+
+<!-- COURSE MODAL -->
+<div id="courseModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 relative shadow-2xl">
+    <button onclick="closeModal()" class="absolute top-3 right-3 h-9 w-9 rounded-full hover:bg-navy/5 flex items-center justify-center text-2xl text-navy/60">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- ===== DATA + LOGIC ===== -->
+<script>
+const ICON_PATHS = {
+  cloud:    '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
+  code:     '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+  shield:   '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+  kanban:   '<rect x="3" y="3" width="6" height="18" rx="1"/><rect x="11" y="3" width="6" height="11" rx="1"/><rect x="19" y="3" width="2" height="16" rx="1"/>',
+  syringe:  '<path d="m18 2 4 4M15 5l4 4"/><path d="M11.5 8.5 4 16v4h4l7.5-7.5"/><path d="m13 7 4 4"/>',
+  ambulance:'<path d="M10 10H6m2 2V8"/><rect x="3" y="7" width="14" height="11" rx="2"/><path d="M17 11h3l2 3v4h-5"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="17.5" cy="18.5" r="1.5"/>',
+  heart:    '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+  stethoscope:'<path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6 6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/>',
+  sprout:   '<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>',
+  flask:    '<path d="M10 2v7.31"/><path d="M14 9.3V2"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/>',
+  leaf:     '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96c1.4 9.3-2.46 14.85-8.2 17.04Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>',
+  droplet:  '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+  wrench:   '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.121 2.121 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  network:  '<rect x="3" y="3" width="18" height="6" rx="1"/><rect x="3" y="15" width="18" height="6" rx="1"/><path d="M7 12v3M17 12v3M12 9v6"/><circle cx="7" cy="6" r="0.5" fill="currentColor"/><circle cx="7" cy="18" r="0.5" fill="currentColor"/>',
+  zap:      '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  vr:       '<path d="M3 9a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-2l-2-2h-4l-2 2H6a3 3 0 0 1-3-3z"/><circle cx="8" cy="12" r="1.5" fill="currentColor"/><circle cx="16" cy="12" r="1.5" fill="currentColor"/>',
+  maximize: '<polyline points="9 21 3 21 3 15"/><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  phone:    '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  clock:    '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  pointer:  '<path d="M22 14a8 8 0 0 1-8 8"/><path d="M18 11v-1a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V9a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v1"/><path d="M10 9.5V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v10"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>',
+  play:     '<polygon points="6 4 20 12 6 20 6 4" fill="currentColor"/>',
+  close:    '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  refresh:  '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  mouse:    '<rect x="6" y="3" width="12" height="18" rx="6"/><line x1="12" y1="7" x2="12" y2="11"/>',
+  user:     '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  monitor:  '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  expand:   '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>',
+};
+function svgIcon(name, cls='w-16 h-16', sw=1.5) {
+  const p = ICON_PATHS[name];
+  if (!p) return '';
+  return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+}
+
+const COURSES = [
+  { id:1, titleKey:"course.1.title", descKey:"course.1.desc", cat:"dev",   vr:true,  hours:4, levelKey:"course.level.intermediate", tagKey:"course.tag.popular", students:1240, rating:4.8, icon:"cloud" },
+  { id:2, titleKey:"course.2.title", descKey:"course.2.desc", cat:"dev",   vr:true,  hours:6, levelKey:"course.level.beginner",     tagKey:"course.tag.new",     students:842,  rating:4.7, icon:"code" },
+  { id:3, titleKey:"course.3.title", descKey:"course.3.desc", cat:"dev",   vr:true,  hours:5, levelKey:"course.level.advanced",     tagKey:"course.tag.certifying", students:567,  rating:4.9, icon:"shield" },
+  { id:4, titleKey:"course.4.title", descKey:"course.4.desc", cat:"dev",   vr:true,  hours:4, levelKey:"course.level.all",          tagKey:"",                    students:923,  rating:4.6, icon:"kanban" },
+  { id:5, titleKey:"course.5.title", descKey:"course.5.desc", cat:"sante", vr:true,  hours:5, levelKey:"course.level.practice",     tagKey:"course.tag.popular", students:1580, rating:4.9, icon:"syringe" },
+  { id:6, titleKey:"course.6.title", descKey:"course.6.desc", cat:"sante", vr:true,  hours:6, levelKey:"course.level.advanced",     tagKey:"course.tag.certifying", students:734,  rating:4.8, icon:"ambulance" },
+  { id:7, titleKey:"course.7.title", descKey:"course.7.desc", cat:"sante", vr:true,  hours:8, levelKey:"course.level.beginner",     tagKey:"",                    students:2105, rating:4.7, icon:"heart" },
+  { id:8, titleKey:"course.8.title", descKey:"course.8.desc", cat:"sante", vr:true,  hours:4, levelKey:"course.level.practice",     tagKey:"course.tag.new",     students:412,  rating:4.8, icon:"stethoscope" },
+  { id:9, titleKey:"course.9.title", descKey:"course.9.desc", cat:"agro",  vr:true,  hours:8, levelKey:"course.level.all",          tagKey:"course.tag.popular", students:1876, rating:4.7, icon:"sprout" },
+  { id:10,titleKey:"course.10.title",descKey:"course.10.desc",cat:"agro",  vr:true,  hours:3, levelKey:"course.level.beginner",     tagKey:"",                    students:654,  rating:4.5, icon:"flask" },
+  { id:11,titleKey:"course.11.title",descKey:"course.11.desc",cat:"agro",  vr:true,  hours:4, levelKey:"course.level.intermediate", tagKey:"",                    students:891,  rating:4.6, icon:"leaf" },
+  { id:12,titleKey:"course.12.title",descKey:"course.12.desc",cat:"agro",  vr:false, hours:3, levelKey:"course.level.intermediate", tagKey:"",                    students:328,  rating:4.4, icon:"droplet" },
+];
+
+const grid = document.getElementById('courseGrid');
+const countEl = document.getElementById('courseCount');
+let activeFilter = 'all';
+
+function t(key) {
+  if (typeof i18n === 'undefined') return key;
+  return i18n.t(key);
+}
+
+function formatNumber(num) {
+  const locale = typeof i18n === 'undefined' ? 'fr-FR' : (i18n.currentLang === 'fr' ? 'fr-FR' : 'en-US');
+  return new Intl.NumberFormat(locale).format(num);
+}
+
+function renderCourses() {
+  const items = COURSES.filter(c => {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'vr')  return c.vr;
+    return c.cat === activeFilter;
+  });
+  countEl.textContent = items.length;
+  grid.innerHTML = items.map(c => `
+    <article class="card-hover rounded-2xl border border-navy/10 bg-white overflow-hidden flex flex-col" onclick="openCourse(${c.id})">
+      <div class="aspect-[16/9] bg-gradient-to-br from-navy to-navy-700 flex items-center justify-center relative">
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_20%,#E8650A,transparent_50%)]"></div>
+        <div class="relative text-orange">${svgIcon(c.icon, 'w-20 h-20', 1.25)}</div>
+        ${c.vr ? `<span class="absolute top-3 right-3 text-[10px] font-bold bg-orange text-white px-2 py-1 rounded-full">VR</span>` : ''}
+        ${c.tagKey ? `<span class="absolute top-3 left-3 text-[10px] font-bold bg-white/95 text-navy px-2 py-1 rounded-full">${t(c.tagKey)}</span>` : ''}
+      </div>
+      <div class="p-5 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 text-xs">
+          <span class="text-navy/50">${c.hours}${t('course.hoursSuffix')} · ${t(c.levelKey)}</span>
+          <span class="inline-flex items-center gap-1 text-navy/70 font-semibold">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#E8650A"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            ${c.rating}
+          </span>
+        </div>
+        <h3 class="mt-3 font-bold text-navy">${t(c.titleKey)}</h3>
+        <p class="mt-2 text-sm text-navy/70 flex-1">${t(c.descKey)}</p>
+        <div class="mt-4 flex items-center justify-between pt-3 border-t border-navy/5">
+          <div class="text-xs text-navy/60">${formatNumber(c.students)} ${t('course.students')}</div>
+          <button class="text-sm font-semibold text-orange hover:text-orange-700 flex items-center gap-1">${t('course.view')} →</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+renderCourses();
+window.addEventListener('languageChanged', renderCourses);
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.remove('active','bg-orange','text-white');
+      b.classList.add('bg-navy/5','text-navy');
+    });
+    btn.classList.add('active','bg-orange','text-white');
+    btn.classList.remove('bg-navy/5','text-navy');
+    activeFilter = btn.dataset.filter;
+    renderCourses();
+  });
+});
+
+function openCourse(id) {
+  const c = COURSES.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('modalContent').innerHTML = `
+    <div class="mb-3 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-orange/10 text-orange">${svgIcon(c.icon, 'w-10 h-10', 1.5)}</div>
+    <div class="flex gap-2 text-xs flex-wrap">
+      ${c.tagKey ? `<span class="px-2 py-0.5 rounded-full font-bold bg-orange/10 text-orange">${t(c.tagKey)}</span>` : ''}
+      ${c.vr ? `<span class="px-2 py-0.5 rounded-full font-bold bg-navy/10 text-navy">${t('course.vr')}</span>` : ''}
+      <span class="px-2 py-0.5 rounded-full font-bold bg-green-100 text-green-700">${t('course.certifying')}</span>
+    </div>
+    <h3 class="mt-3 text-2xl font-extrabold">${t(c.titleKey)}</h3>
+    <p class="mt-2 text-navy/70">${t(c.descKey)}</p>
+    <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
+      <div class="p-3 rounded-lg bg-navy/5"><div class="text-navy/50 text-xs">${t('course.duration')}</div><div class="font-bold">${c.hours}${t('course.hoursSuffix')}</div></div>
+      <div class="p-3 rounded-lg bg-navy/5"><div class="text-navy/50 text-xs">${t('course.level')}</div><div class="font-bold">${t(c.levelKey)}</div></div>
+      <div class="p-3 rounded-lg bg-navy/5">
+        <div class="text-navy/50 text-xs">${t('course.rating')}</div>
+        <div class="font-bold inline-flex items-center gap-1">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#E8650A"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          ${c.rating}
+        </div>
+      </div>
+    </div>
+    <div class="mt-3 text-xs text-navy/60">${formatNumber(c.students)} ${t('course.studentsRegistered')}</div>
+    <div class="mt-6 flex gap-3">
+      <a href="#vr" onclick="closeModal()" class="flex-1 text-center py-3 rounded-xl bg-orange text-white font-semibold hover:bg-orange-700">${t('course.launchDemo')}</a>
+      <a href="#cta" onclick="closeModal()" class="flex-1 text-center py-3 rounded-xl bg-navy/5 hover:bg-navy/10 font-semibold">${t('course.enroll')}</a>
+    </div>
+  `;
+  const m = document.getElementById('courseModal');
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+}
+function closeModal() {
+  const m = document.getElementById('courseModal');
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+}
+document.getElementById('courseModal').addEventListener('click', (e) => {
+  if (e.target.id === 'courseModal') closeModal();
+});
+</script>
+
+<!-- THREE.JS VR DEMO -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const canvas = document.getElementById('vrCanvas');
+const container = canvas.parentElement;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1e2c4a);
+scene.fog = new THREE.Fog(0x1e2c4a, 20, 55);
+
+const camera = new THREE.PerspectiveCamera(55, container.clientWidth/container.clientHeight, 0.1, 100);
+const HOME = new THREE.Vector3(7, 5, 9);
+camera.position.copy(HOME);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(container.clientWidth, container.clientHeight, false);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 5;
+controls.maxDistance = 20;
+controls.target.set(0, 2.5, 0);
+controls.maxPolarAngle = Math.PI / 2 - 0.05;
+controls.autoRotate = false;
+controls.autoRotateSpeed = 0.6;
+
+// Lights
+scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+const hemi = new THREE.HemisphereLight(0xffffff, 0x445577, 0.9);
+scene.add(hemi);
+const dir = new THREE.DirectionalLight(0xfff4e0, 1.8);
+dir.position.set(6, 12, 5); dir.castShadow = true;
+dir.shadow.mapSize.set(1024,1024);
+dir.shadow.camera.near = 1; dir.shadow.camera.far = 30;
+dir.shadow.camera.left = -10; dir.shadow.camera.right = 10;
+dir.shadow.camera.top = 10; dir.shadow.camera.bottom = -10;
+scene.add(dir);
+const fill = new THREE.PointLight(0xffaa55, 1.6, 25);
+fill.position.set(-5, 4, 4);
+scene.add(fill);
+const back = new THREE.PointLight(0x88bbff, 1.2, 22);
+back.position.set(4, 3, -4);
+scene.add(back);
+const interior = new THREE.PointLight(0xffffff, 1.4, 10);
+interior.position.set(0.5, 3, 1);
+scene.add(interior);
+
+// Workbench (floor + desk)
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(40, 40),
+  new THREE.MeshStandardMaterial({ color: 0x0f1a33, roughness: 0.9 })
+);
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true;
+scene.add(floor);
+const grid = new THREE.GridHelper(40, 40, 0xE8650A, 0x243759);
+grid.material.opacity = 0.18; grid.material.transparent = true;
+scene.add(grid);
+
+const desk = new THREE.Mesh(
+  new THREE.BoxGeometry(10, 0.2, 6),
+  new THREE.MeshStandardMaterial({ color: 0x1A2A4A, roughness: 0.5, metalness: 0.4 })
+);
+desk.position.y = 0.1; desk.receiveShadow = true; desk.castShadow = true;
+scene.add(desk);
+
+// ===== PC TOWER =====
+const tower = new THREE.Group();
+scene.add(tower);
+
+// Case body (open side panel - we see internals from +X side)
+const caseMat = new THREE.MeshStandardMaterial({ color: 0x4a5a78, roughness: 0.5, metalness: 0.4 });
+const caseW = 2.6, caseH = 5, caseD = 4.5;
+// back panel
+const back1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, caseH, caseD), caseMat);
+back1.position.set(-caseW/2, caseH/2 + 0.2, 0); back1.castShadow = back1.receiveShadow = true;
+tower.add(back1);
+// top
+const topP = new THREE.Mesh(new THREE.BoxGeometry(caseW, 0.1, caseD), caseMat);
+topP.position.set(0, caseH + 0.2, 0); topP.castShadow = topP.receiveShadow = true;
+tower.add(topP);
+// bottom
+const botP = new THREE.Mesh(new THREE.BoxGeometry(caseW, 0.1, caseD), caseMat);
+botP.position.set(0, 0.25, 0); botP.castShadow = botP.receiveShadow = true;
+tower.add(botP);
+// rear
+const rearP = new THREE.Mesh(new THREE.BoxGeometry(caseW, caseH, 0.1), caseMat);
+rearP.position.set(0, caseH/2 + 0.2, -caseD/2); rearP.castShadow = rearP.receiveShadow = true;
+tower.add(rearP);
+// front
+const frontP = new THREE.Mesh(
+  new THREE.BoxGeometry(caseW, caseH, 0.1),
+  new THREE.MeshStandardMaterial({ color: 0x2a3a5a, roughness: 0.4, metalness: 0.7 })
+);
+frontP.position.set(0, caseH/2 + 0.2, caseD/2); frontP.castShadow = true;
+tower.add(frontP);
+// front power LED
+const powerLed = new THREE.Mesh(
+  new THREE.CircleGeometry(0.08, 16),
+  new THREE.MeshBasicMaterial({ color: 0xE8650A })
+);
+powerLed.position.set(0, caseH - 0.3, caseD/2 + 0.06);
+tower.add(powerLed);
+
+// Motherboard (background plane inside the case, mounted on back panel)
+const mobo = new THREE.Mesh(
+  new THREE.BoxGeometry(0.08, 4, 3.8),
+  new THREE.MeshStandardMaterial({ color: 0x1f8a4c, roughness: 0.55, metalness: 0.2 })
+);
+mobo.position.set(-caseW/2 + 0.12, caseH/2 + 0.2, 0);
+mobo.castShadow = true; mobo.receiveShadow = true;
+tower.add(mobo);
+// circuit traces on mobo (decorative lines)
+for (let i = 0; i < 8; i++) {
+  const trace = new THREE.Mesh(
+    new THREE.BoxGeometry(0.02, 0.02, 0.5 + Math.random()*2),
+    new THREE.MeshBasicMaterial({ color: 0xE8650A, transparent: true, opacity: 0.4 })
+  );
+  trace.position.set(-caseW/2 + 0.17, 1 + Math.random()*3, -1.5 + Math.random()*3);
+  tower.add(trace);
+}
+
+// ===== INTERACTIVE COMPONENTS =====
+const COMPONENTS = [];
+const baseX = -caseW/2 + 0.25; // sit on top of motherboard surface
+
+function t(key) {
+  if (typeof i18n === 'undefined') return key;
+  return i18n.t(key);
+}
+
+function makeComponent(opts) {
+  const group = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({
+    color: opts.color,
+    emissive: 0x000000,
+    roughness: 0.4,
+    metalness: 0.5,
+  });
+  const mesh = new THREE.Mesh(opts.geometry, mat);
+  mesh.castShadow = true; mesh.receiveShadow = true;
+  group.add(mesh);
+  group.position.set(opts.x, opts.y, opts.z);
+  if (opts.rotY) group.rotation.y = opts.rotY;
+
+  // Outline glow (halo) - sphere or thin shell
+  const halo = new THREE.Mesh(
+    opts.geometry.clone(),
+    new THREE.MeshBasicMaterial({ color: 0xE8650A, transparent: true, opacity: 0, side: THREE.BackSide })
+  );
+  halo.scale.set(1.15, 1.15, 1.15);
+  group.add(halo);
+
+  const data = {
+    group, mesh, mat, halo,
+    id: opts.id, nameKey: opts.nameKey, roleKey: opts.roleKey, actionKey: opts.actionKey,
+    baseColor: opts.color,
+    inspected: false,
+    faulty: false,
+    repaired: false,
+  };
+  COMPONENTS.push(data);
+  tower.add(group);
+  return data;
+}
+
+// CPU with heatsink+fan on top
+const cpu = makeComponent({
+  id: 'cpu',
+  nameKey: 'vrdemo.comp.cpu.name',
+  roleKey: 'vrdemo.comp.cpu.role',
+  actionKey: 'vrdemo.comp.cpu.action',
+  color: 0xc8ccd4,
+  geometry: new THREE.BoxGeometry(0.4, 0.15, 0.4),
+  x: baseX + 0.2, y: caseH - 0.6, z: 0.6,
+});
+// heatsink visual (decoration, not clickable on its own)
+const heatsink = new THREE.Mesh(
+  new THREE.BoxGeometry(0.55, 0.3, 0.55),
+  new THREE.MeshStandardMaterial({ color: 0xdde2ea, roughness: 0.25, metalness: 0.9 })
+);
+heatsink.position.y = 0.22;
+cpu.group.add(heatsink);
+const fanBlade = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.27, 0.27, 0.05, 16),
+  new THREE.MeshStandardMaterial({ color: 0x555a66, roughness: 0.4 })
+);
+fanBlade.position.y = 0.4;
+cpu.group.add(fanBlade);
+cpu.fan = fanBlade;
+
+// RAM sticks x2
+makeComponent({
+  id: 'ram1', nameKey: 'vrdemo.comp.ram1.name',
+  roleKey: 'vrdemo.comp.ram1.role',
+  actionKey: 'vrdemo.comp.ram1.action',
+  color: 0x1aaf5f,
+  geometry: new THREE.BoxGeometry(0.08, 1.0, 0.5),
+  x: baseX + 0.2, y: caseH - 0.6, z: -0.2,
+});
+makeComponent({
+  id: 'ram2', nameKey: 'vrdemo.comp.ram2.name',
+  roleKey: 'vrdemo.comp.ram2.role',
+  actionKey: 'vrdemo.comp.ram2.action',
+  color: 0x1aaf5f,
+  geometry: new THREE.BoxGeometry(0.08, 1.0, 0.5),
+  x: baseX + 0.2, y: caseH - 0.6, z: -0.5,
+});
+
+// GPU - long horizontal card
+makeComponent({
+  id: 'gpu', nameKey: 'vrdemo.comp.gpu.name',
+  roleKey: 'vrdemo.comp.gpu.role',
+  actionKey: 'vrdemo.comp.gpu.action',
+  color: 0x3a4258,
+  geometry: new THREE.BoxGeometry(0.25, 0.5, 2.2),
+  x: baseX + 0.3, y: caseH - 2.0, z: 0.2,
+});
+
+// SSD - small flat
+makeComponent({
+  id: 'ssd', nameKey: 'vrdemo.comp.ssd.name',
+  roleKey: 'vrdemo.comp.ssd.role',
+  actionKey: 'vrdemo.comp.ssd.action',
+  color: 0x6b7388,
+  geometry: new THREE.BoxGeometry(0.1, 0.4, 0.7),
+  x: baseX + 0.2, y: 1.2, z: -1.0,
+});
+
+// PSU - bottom block
+makeComponent({
+  id: 'psu', nameKey: 'vrdemo.comp.psu.name',
+  roleKey: 'vrdemo.comp.psu.role',
+  actionKey: 'vrdemo.comp.psu.action',
+  color: 0x40485a,
+  geometry: new THREE.BoxGeometry(2.0, 0.9, 1.4),
+  x: 0, y: 0.75, z: -1.3,
+});
+
+// Case Fan - front of case
+const caseFan = makeComponent({
+  id: 'fan', nameKey: 'vrdemo.comp.fan.name',
+  roleKey: 'vrdemo.comp.fan.role',
+  actionKey: 'vrdemo.comp.fan.action',
+  color: 0x363c4a,
+  geometry: new THREE.CylinderGeometry(0.45, 0.45, 0.15, 6),
+  x: 0.4, y: 1.5, z: caseD/2 - 0.3,
+  rotY: 0,
+});
+caseFan.group.rotation.x = Math.PI/2;
+caseFan.group.rotation.y = 0;
+// fan blades
+const fan2Blades = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.4, 0.4, 0.06, 16),
+  new THREE.MeshStandardMaterial({ color: 0x7a818f, roughness: 0.4 })
+);
+fan2Blades.rotation.x = Math.PI/2;
+fan2Blades.position.copy(caseFan.group.position);
+fan2Blades.position.x += 0.05;
+tower.add(fan2Blades);
+caseFan.fan = fan2Blades;
+
+// ===== INTERACTION =====
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let hovered = null;
+let faultyId = null;
+
+const statInspected = document.getElementById('statInspected');
+const statFault = document.getElementById('statFault');
+const statScore = document.getElementById('statScore');
+const infoPanel = document.getElementById('vrInfoPanel');
+const faultBadge = document.getElementById('vrFaultBadge');
+const successBanner = document.getElementById('vrSuccessBanner');
+
+function pickFault() {
+  faultyId = COMPONENTS[Math.floor(Math.random() * COMPONENTS.length)].id;
+  COMPONENTS.forEach(c => {
+    c.faulty = (c.id === faultyId);
+    c.inspected = false;
+    c.repaired = false;
+    c.mat.color.setHex(c.baseColor);
+    c.mat.emissive.setHex(0x000000);
+    c.halo.material.opacity = 0;
+  });
+  faultBadge.classList.remove('hidden');
+  successBanner.classList.add('hidden');
+  statInspected.textContent = '0';
+  statFault.textContent = '?';
+  statFault.classList.remove('text-orange','text-red-400','text-green-400');
+  statFault.classList.add('text-white');
+  statScore.textContent = '0';
+  infoPanel.innerHTML = `
+    <div class="text-orange font-bold text-xs uppercase tracking-widest">Console technicien</div>
+    <div class="mt-2 text-white/80">→ Cliquez chaque composant pour diagnostiquer la tour. Une panne est cachée.</div>`;
+}
+pickFault();
+
+function updateScore() {
+  const inspectedCount = COMPONENTS.filter(c => c.inspected).length;
+  statInspected.textContent = inspectedCount;
+  const allInspected = inspectedCount === COMPONENTS.length;
+  const faulty = COMPONENTS.find(c => c.id === faultyId);
+  let score = Math.round((inspectedCount / COMPONENTS.length) * 70);
+  if (faulty.repaired) score = 100;
+  else if (faulty.inspected) score = Math.max(score, 80);
+  statScore.textContent = score;
+  if (faulty.repaired) {
+    successBanner.classList.remove('hidden');
+    faultBadge.classList.add('hidden');
+  }
+}
+
+function showComponentInfo(c) {
+  const isFaulty = c.faulty && !c.repaired;
+  const statusBadge = c.repaired
+    ? `<span class="px-2 py-0.5 rounded bg-green-500/20 text-green-300 text-[10px] font-bold">RÉPARÉ ✓</span>`
+    : c.faulty
+      ? `<span class="px-2 py-0.5 rounded bg-red-500/20 text-red-300 text-[10px] font-bold">⚠ PANNE DÉTECTÉE</span>`
+      : `<span class="px-2 py-0.5 rounded bg-green-500/20 text-green-300 text-[10px] font-bold">FONCTIONNEL</span>`;
+  infoPanel.innerHTML = `
+    <div class="flex items-center gap-2">
+      <div class="text-orange font-bold text-xs uppercase tracking-widest">${c.name}</div>
+      ${statusBadge}
+    </div>
+    <div class="mt-2 text-white/80 text-xs"><strong class="text-white">Rôle :</strong> ${c.role}</div>
+    <div class="mt-1 text-white/70 text-xs"><strong class="text-white">Procédure :</strong> ${c.action}</div>
+    ${isFaulty ? `<button id="repairBtn" class="mt-3 w-full py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-bold uppercase tracking-widest">Remplacer le composant</button>` : ''}
+  `;
+  if (isFaulty) {
+    document.getElementById('repairBtn').addEventListener('click', () => repairComponent(c));
+  }
+}
+
+function repairComponent(c) {
+  c.repaired = true;
+  c.mat.color.setHex(0x22c55e);
+  c.mat.emissive.setHex(0x114a22);
+  statFault.textContent = '✓';
+  statFault.classList.remove('text-white');
+  statFault.classList.add('text-green-400');
+  updateScore();
+  showComponentInfo(c);
+}
+
+function onPointerMove(e) {
+  const r = canvas.getBoundingClientRect();
+  mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+  mouse.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = COMPONENTS.map(c => c.mesh);
+  const hits = raycaster.intersectObjects(meshes, false);
+  const target = hits[0]?.object;
+  const newHover = COMPONENTS.find(c => c.mesh === target) || null;
+  if (newHover !== hovered) {
+    if (hovered && !hovered.repaired && !(hovered.faulty && hovered.inspected)) {
+      hovered.halo.material.opacity = 0;
+    }
+    hovered = newHover;
+    if (hovered) {
+      hovered.halo.material.color.setHex(0xffffff);
+      hovered.halo.material.opacity = 0.25;
+      canvas.style.cursor = 'pointer';
+    } else {
+      canvas.style.cursor = 'grab';
+    }
+  }
+}
+
+function onClick(e) {
+  if (!hovered) return;
+  const c = hovered;
+  if (!c.inspected) {
+    c.inspected = true;
+    if (c.faulty) {
+      // red glow
+      c.mat.emissive.setHex(0x661111);
+      c.halo.material.color.setHex(0xff3344);
+      c.halo.material.opacity = 0.6;
+      statFault.textContent = '!';
+      statFault.classList.remove('text-white');
+      statFault.classList.add('text-red-400');
+    } else {
+      // green check
+      c.mat.emissive.setHex(0x113322);
+      c.halo.material.color.setHex(0x22c55e);
+      c.halo.material.opacity = 0.35;
+    }
+    updateScore();
+  }
+  showComponentInfo(c);
+}
+
+canvas.addEventListener('pointermove', onPointerMove);
+canvas.addEventListener('click', onClick);
+
+// ===== UI BUTTONS =====
+document.getElementById('vrAutoRotate').addEventListener('click', (e) => {
+  controls.autoRotate = !controls.autoRotate;
+  e.currentTarget.classList.toggle('bg-orange');
+  e.currentTarget.classList.toggle('bg-white/10');
+});
+document.getElementById('vrReset').addEventListener('click', () => {
+  camera.position.copy(HOME);
+  controls.target.set(0, 2.5, 0);
+  controls.update();
+});
+document.getElementById('vrRestart').addEventListener('click', () => {
+  pickFault();
+});
+
+// Resize
+function onResize() {
+  const w = container.clientWidth, h = container.clientHeight;
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false);
+}
+window.addEventListener('resize', onResize);
+new ResizeObserver(onResize).observe(container);
+
+// Animate
+const clock = new THREE.Clock();
+function animate() {
+  const t = clock.getElapsedTime();
+  // CPU fan + case fan spinning
+  if (cpu.fan) cpu.fan.rotation.y = t * 8;
+  if (caseFan.fan) caseFan.fan.rotation.y = t * 6;
+  // Faulty component pulse if not yet repaired
+  COMPONENTS.forEach(c => {
+    if (c.faulty && c.inspected && !c.repaired) {
+      const pulse = 0.4 + Math.sin(t * 6) * 0.3;
+      c.halo.material.opacity = pulse;
+    }
+  });
+  // Power LED pulse
+  powerLed.material.color.setHSL(0.07, 1, 0.45 + Math.sin(t*3)*0.1);
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+
+</body>
+</html>

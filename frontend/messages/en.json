@@ -1,0 +1,152 @@
+{
+  "nav": {
+    "features": "Features",
+    "courses": "Courses",
+    "pricing": "Pricing",
+    "about": "About",
+    "login": "Login",
+    "register": "Free trial",
+    "dashboard": "Dashboard"
+  },
+  "hero": {
+    "badge": "🚀 #1 VR Platform in French-speaking Africa",
+    "title1": "Learn",
+    "title2": "through immersion",
+    "title3": "VR & AI",
+    "desc": "Africa's first e-learning platform combining virtual reality, artificial intelligence and Mobile Money to train tomorrow's professionals.",
+    "cta_vr": "Try VR",
+    "cta_explore": "Explore courses",
+    "stat_users": "Active learners",
+    "stat_courses": "Certified courses",
+    "stat_vr": "VR simulations",
+    "stat_partners": "Partners"
+  },
+  "courses": {
+    "title": "Course Catalog",
+    "subtitle": "Certified training in high-demand fields",
+    "filter_all": "All",
+    "filter_dev": "Development",
+    "filter_health": "Healthcare",
+    "filter_agro": "Agriculture",
+    "filter_vr": "VR only",
+    "level_beginner": "Beginner",
+    "level_intermediate": "Intermediate",
+    "level_advanced": "Advanced",
+    "enroll": "Enroll",
+    "students": "students",
+    "hours": "hours",
+    "empty": "No courses available at the moment.",
+    "view_all": "View full catalog"
+  },
+  "pricing": {
+    "title": "Transparent Pricing",
+    "subtitle": "Choose the plan that fits your needs",
+    "per_month": "/ month",
+    "most_popular": "Most popular",
+    "cta": "Get started",
+    "features": "Includes:",
+    "free": {
+      "name": "Free",
+      "price": "0",
+      "features": ["3 free courses", "Community access", "Basic certificates"]
+    },
+    "basic": {
+      "name": "Basic",
+      "price": "5,000 FCFA",
+      "features": ["20 courses", "VR simulations (limited)", "Recognized certificates", "Email support"]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "15,000 FCFA",
+      "features": ["Unlimited courses", "Full VR", "Premium certificates", "Mentoring", "Priority support"]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Custom",
+      "features": ["Volume licenses", "B2B dashboard", "VR headset MDM", "Dedicated API", "Guaranteed SLA"]
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": "What equipment is needed for VR?",
+    "a1": "Our platform works on Meta Quest 2/3 and Pico 4. For 3D simulations without a headset, a browser is enough.",
+    "q2": "Are certificates recognized?",
+    "a2": "Yes, our certificates are QR-code verifiable and recognized by our employer partners (EY, AWS, public institutions).",
+    "q3": "How does Mobile Money payment work?",
+    "a3": "We accept payments via LigdiCash, CinetPay and Stripe. All FCFA transactions are supported.",
+    "q4": "Can I train my team as a company?",
+    "a4": "Yes, our B2B offer includes volume licenses, an admin dashboard and VR headset fleet management (MDM)."
+  },
+  "footer": {
+    "tagline": "Training tomorrow's Africa through immersion",
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "rights": "All rights reserved",
+    "courses": "Courses",
+    "vr_demos": "VR Demos",
+    "pricing": "Pricing",
+    "about": "About",
+    "careers": "Careers",
+    "blog": "Blog",
+    "contact": "Contact",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "auth": {
+    "login_title": "Sign in",
+    "login_subtitle": "Access your learning space",
+    "register_title": "Create an account",
+    "register_subtitle": "Start your learning journey",
+    "email": "Email address",
+    "password": "Password",
+    "confirm_password": "Confirm password",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "forgot_password": "Forgot password?",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "sign_up": "Sign up",
+    "sign_in": "Sign in",
+    "or_continue": "Or continue with",
+    "google": "Google",
+    "linkedin": "LinkedIn",
+    "logging_in": "Signing in...",
+    "registering": "Registering...",
+    "error_invalid": "Invalid email or password.",
+    "error_exists": "An account already exists with this email.",
+    "success_register": "Account created! You can now sign in."
+  },
+  "admin": {
+    "title": "Administration",
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "organizations": "Organizations",
+    "licenses": "Licenses",
+    "mdm": "VR Fleet (MDM)",
+    "total_users": "Total users",
+    "total_orgs": "Organizations",
+    "active_licenses": "Active licenses",
+    "headsets": "VR Headsets",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search...",
+    "add": "Add",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm_delete": "Confirm deletion",
+    "roles": {
+      "LEARNER": "Learner",
+      "INSTRUCTOR": "Instructor",
+      "ADMIN_INSTITUTION": "Institution Admin",
+      "SUPER_ADMIN": "Super Admin"
+    },
+    "headset_status": {
+      "ONLINE": "Online",
+      "OFFLINE": "Offline",
+      "CHARGING": "Charging",
+      "MAINTENANCE": "Maintenance"
+    }
+  }
+}

@@ -1,0 +1,1135 @@
+// i18n - Gestion de la langue (FR/EN)
+const i18n = {
+  currentLang: localStorage.getItem('til-lang') || 'fr',
+  
+  langs: {
+    fr: {
+      name: 'Français',
+      flag: `<svg viewBox="0 0 3 2" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="1" height="2" fill="#0055A4"/>
+        <rect x="1" width="1" height="2" fill="#FFFFFF"/>
+        <rect x="2" width="1" height="2" fill="#EF4135"/>
+      </svg>`
+    },
+    en: {
+      name: 'English',
+      flag: `<svg viewBox="0 0 60 30" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="60" height="30" fill="#012169"/>
+        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#FFFFFF" stroke-width="6"/>
+        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="3"/>
+        <path d="M30,0 V30 M0,15 H60" stroke="#FFFFFF" stroke-width="10"/>
+        <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" stroke-width="6"/>
+      </svg>`
+    }
+  },
+  
+  translations: {
+    fr: {
+      // Page meta
+      'page.title': 'Total Innovation Learning - Plateforme VR/IA e-Learning',
+      'page.description': "TIL - Apprendre en faisant. Plateforme SaaS e-Learning avec Réalité Virtuelle et IA pour l'Afrique francophone.",
+      'page.demoTitle': 'Démos VR - Total Innovation Learning',
+      'page.demoDescription': 'Bibliothèque de simulations VR interactives - développement informatique, médecine, agronomie. Compatible casques Meta Quest, Pico, HTC Vive.',
+      'brand.tagline': 'VR · IA · Afrique',
+
+      // Header
+      'nav.platform': 'Plateforme',
+      'nav.catalog': 'Catalogue',
+      'nav.demos': 'Démos VR',
+      'nav.pricing': 'Pour qui',
+      'nav.hardware': 'Casques',
+      'nav.login': 'Se connecter',
+      'nav.trial': 'Essai gratuit 14j',
+      
+      // Hero
+      'hero.badge': 'Formation professionnelle immersive · Afrique francophone',
+      'hero.title.1': 'Apprendre ',
+      'hero.title.2': 'en faisant',
+      'hero.title.3': 'grâce à la ',
+      'hero.title.4': 'Réalité Virtuelle',
+      'hero.desc': 'Première plateforme e-Learning <strong>VR + IA</strong> d\'Afrique francophone. Formations certifiantes en informatique, médecine, agronomie - accessibles dès <strong>1 Mbps</strong>, payables en <strong>Mobile Money</strong>.',
+      'hero.btn1': 'Tester les démos VR',
+      'hero.btn2': 'Explorer le catalogue',
+      'hero.stat1': 'de rétention',
+      'hero.stat2': 'modules disponibles',
+      'hero.stat3': 'institutions partenaires',
+      
+      // Footer
+      'footer.text': '© 2026 Total Innovation Learning - Ouagadougou, Burkina Faso',
+      'footer.home': 'Accueil',
+      'footer.catalog': 'Catalogue',
+      'footer.contact': 'Contact',
+      
+      // Demo page
+      'demo.title': 'Bibliothèque de simulations VR interactives',
+      'demo.desc': 'Lancez n\'importe quelle simulation en un clic, basculez en plein écran, ou enfilez un casque Meta Quest / Pico / HTC Vive pour une immersion complète. Aucune installation requise.',
+      'demo.chip1': 'WebGL temps réel',
+      'demo.chip2': 'Compatible WebXR',
+      'demo.chip3': 'Plein écran',
+      'demo.chip4': 'Mobile + desktop',
+      'demo.filter': 'Filtrer par domaine',
+      'demo.all': 'Tous',
+      'demo.dev': 'Développement',
+      'demo.health': 'Médecine & Santé',
+      'demo.agro': 'Agronomie',
+      'demo.help': 'Comment ça marche',
+      'demo.ways': '3 façons de vivre la simulation',
+      'demo.browser': 'Navigateur',
+      'demo.browser.desc': 'Souris + clavier sur PC, touch sur mobile. Idéal pour découvrir une simulation rapidement.',
+      'demo.fullscreen': 'Plein écran',
+      'demo.fullscreen.desc': 'Bouton plein écran ou touche <kbd class="px-1.5 py-0.5 text-xs bg-navy/5 rounded">F</kbd> concentration maximale, sans distraction.',
+      'demo.vr': 'Casque VR',
+      'demo.vr.desc': 'Bouton "Entrer en VR" avec Meta Quest, Pico 4, HTC Vive Focus - immersion totale 6DOF via WebXR.',
+      'demo.launch': 'Lancer',
+      'demo.drag': 'Drag pour pivoter',
+      'demo.scroll': 'Scroll pour zoomer',
+      'demo.click': 'Click pour interagir',
+      
+      // Simulations
+      'sim.maintenance-pc': 'Atelier Maintenance PC',
+      'sim.maintenance-pc.desc': 'Diagnostiquez 7 composants d\'une tour, identifiez la panne, remplacez la pièce défectueuse.',
+      'sim.datacenter': 'Datacenter & Réseau',
+      'sim.datacenter.desc': 'Explorez une salle serveurs, observez les flux réseau en temps réel, isolez un nœud défaillant.',
+      'sim.anatomie': 'Anatomie cardiaque',
+      'sim.anatomie.desc': 'Cœur 3D battant en temps réel - identifiez les 4 cavités et le rythme cardiaque normal.',
+      'sim.salle-soins': 'Salle de soins infirmiers',
+      'sim.salle-soins.desc': 'Chambre hospitalière virtuelle : reconnaissez le matériel, préparez une pose de perfusion.',
+      'sim.ferme': 'Ferme virtuelle intégrée',
+      'sim.ferme.desc': 'Diagnostiquez 4 parcelles cultivées, identifiez celle qui souffre du manque d\'eau.',
+      'sim.irrigation': 'Système d\'irrigation',
+      'sim.irrigation.desc': 'Réseau goutte-à-goutte : ouvrez les vannes dans le bon ordre pour alimenter tout le champ.',
+      
+      'sim.domain.dev': 'Développement informatique',
+      'sim.domain.sante': 'Médecine & Santé',
+      'sim.domain.agro': 'Agronomie',
+      
+      // Simulation UI
+      'sim.probe': 'Sonde',
+      'sim.watering-can': 'Arrosoir',
+      'sim.moisture': 'Humidité du sol',
+      'sim.season': 'Saison',
+      'sim.weather': 'Météo',
+      'sim.temperature': 'Température',
+      'sim.humidity': 'Humidité',
+      'sim.rainfall': 'Pluie',
+
+      // --- Scenario engine (shared) ---
+      'scenario.title': 'Scénario',
+      'scenario.step': 'Étape',
+      'scenario.score': 'Score',
+      'scenario.time': 'Temps',
+      'scenario.complete': '✓ Scénario terminé',
+      'scenario.replay': 'Rejouer',
+      'scenario.wrongChoice': 'Mauvais choix - réessayez (-10 pts)',
+      'scenario.stars3': 'Maîtrise parfaite ★★★',
+      'scenario.stars2': 'Bonne pratique ★★☆',
+      'scenario.stars1': 'À retravailler ★☆☆',
+      'scenario.mode.tuto': 'Tutoriel guidé',
+      'scenario.mode.quiz': 'Quiz',
+      'scenario.mode.free': 'Exploration libre',
+
+      // --- Simulation scene content ---
+      // Common
+      'sim.fault.detected': '⚠ PANNE DÉTECTÉE',
+      'sim.fault.replace': 'Remplacer le composant',
+      'sim.fault.repaired': 'remplacé. Tour réparée - module validé.',
+      'sim.fault.functional': 'Fonctionnel ✓',
+
+      // PC Maintenance
+      'sim.pc.intro': 'Diagnostiquez chaque composant en cliquant dessus. Un composant est défectueux - identifiez-le grâce à sa fiche technique et remplacez-le.',
+      'sim.pc.cpu.name': 'Processeur (CPU)',
+      'sim.pc.cpu.role': "Cerveau de l'ordinateur. Vérifier la pâte thermique tous les 2 ans, contrôler la fixation du ventirad, surveiller la température (< 90°C en charge).",
+      'sim.pc.ram1.name': 'Mémoire RAM (DIMM 1)',
+      'sim.pc.ram2.name': 'Mémoire RAM (DIMM 2)',
+      'sim.pc.ram.role': "Stockage temporaire ultra-rapide des programmes actifs. Retirer, nettoyer les contacts dorés à la gomme blanche, reclipser jusqu'au déclic. Tester avec MemTest86 en cas de doute.",
+      'sim.pc.gpu.name': 'Carte Graphique (GPU)',
+      'sim.pc.gpu.role': "Traitement vidéo et 3D - indispensable pour les modules VR. Dépoussiérer les ventilateurs à l'air sec comprimé, vérifier l'alimentation PCIe 8 broches, surveiller la température GPU (< 85°C).",
+      'sim.pc.ssd.name': 'Disque SSD (SATA)',
+      'sim.pc.ssd.role': "Stockage rapide du système et des applications. Vérifier la santé via S.M.A.R.T. (CrystalDiskInfo), remplacer dès apparition de secteurs défectueux ou si TBW dépassé.",
+      'sim.pc.psu.name': 'Alimentation (PSU)',
+      'sim.pc.psu.role': "Convertit le 220V secteur en tensions internes 12V / 5V / 3.3V. Tester les rails au multimètre, vérifier la certification 80+ Bronze/Gold, remplacer si tension hors tolérance ±5%.",
+      'sim.pc.fan.name': 'Ventilateur boîtier (120mm)',
+      'sim.pc.fan.role': "Évacue la chaleur du boîtier - assure le refroidissement global du PC. Dépoussiérer les pales et la grille à l'air sec, lubrifier l'axe si bruit anormal.",
+
+      // Datacenter
+      'sim.dc.intro': "Cliquez sur un serveur pour consulter ses métriques. Un rack est défaillant (LEDs rouges) - identifiez-le.",
+      'sim.dc.fault': 'DÉFAILLANT',
+      'sim.dc.faultInfo': 'Latence : 850ms · Paquets perdus : 42%',
+      'sim.dc.faultAction': "→ Vérifier l'alimentation et le câble réseau du switch dorsal.",
+      'sim.dc.ok': 'Opérationnel',
+      'sim.dc.latency': 'Latence',
+      'sim.dc.traffic': 'Trafic',
+      'sim.dc.cpu': 'CPU',
+      'sim.dc.temp': 'Température',
+
+      // Anatomy
+      'sim.anat.intro': 'Cliquez les <span class="text-orange font-bold">points orange</span> pour identifier les structures cardiaques. <span class="text-red-300">Rouge</span> = sang oxygéné · <span class="text-blue-300">Bleu</span> = sang désoxygéné. FC normale : 72 BPM.',
+      'sim.anat.oxy': 'Sang oxygéné',
+      'sim.anat.deoxy': 'Sang désoxygéné',
+      'sim.anat.ra.name': 'Oreillette droite',
+      'sim.anat.ra.desc': 'Reçoit le sang désoxygéné via les veines caves supérieure et inférieure. Pression normale : 0-5 mmHg. Communique avec le ventricule droit par la valve tricuspide.',
+      'sim.anat.la.name': 'Oreillette gauche',
+      'sim.anat.la.desc': 'Reçoit le sang oxygéné des 4 veines pulmonaires. Communique avec le ventricule gauche par la valve mitrale.',
+      'sim.anat.rv.name': 'Ventricule droit',
+      'sim.anat.rv.desc': "Pompe le sang vers les poumons via l'artère pulmonaire. Paroi musculaire fine (3-5 mm). Pression systolique : 25 mmHg.",
+      'sim.anat.lv.name': 'Ventricule gauche',
+      'sim.anat.lv.desc': "Pompe le sang oxygéné dans toute la circulation systémique via l'aorte. Paroi épaisse (10-15 mm). Pression systolique : 120 mmHg.",
+      'sim.anat.aorta.name': 'Aorte',
+      'sim.anat.aorta.desc': "Plus grosse artère du corps (diamètre 2,5-3,5 cm). Distribue le sang oxygéné à tous les organes via ses branches : tronc brachiocéphalique, carotide commune gauche, subclavière gauche.",
+      'sim.anat.pulm.name': 'Tronc pulmonaire',
+      'sim.anat.pulm.desc': "Achemine le sang désoxygéné du ventricule droit vers les poumons via les artères pulmonaires droite et gauche. Seule artère du corps transportant du sang non oxygéné.",
+      'sim.anat.rhythm': 'Rythme sinusal',
+      // Anatomy scenarios
+      'sim.anat.mode.flow': 'Parcours du sang',
+      'sim.anat.mode.quiz': 'Quiz identification',
+      'sim.anat.mode.patho': 'Cas pathologique',
+      'sim.anat.flow.intro': 'Reconstituez le parcours du sang dans le cœur. Cliquez les structures dans l\'ordre, en commençant par l\'entrée veineuse.',
+      'sim.anat.flow.next': 'Cliquez maintenant',
+      'sim.anat.flow.wrong': 'Ce n\'est pas la prochaine étape du circuit.',
+      'sim.anat.flow.done': '<strong class="text-green-300">✓ Circuit complet</strong> - vous avez identifié le grand et le petit circuit.',
+      'sim.anat.quiz.intro': 'Quiz d\'identification : cliquez la structure demandée. 6 questions tirées aléatoirement.',
+      'sim.anat.quiz.find': 'Identifiez',
+      'sim.anat.quiz.correct': '✓ Bonne réponse',
+      'sim.anat.patho.normal': 'Rythme sinusal normal · FC 72 bpm',
+      'sim.anat.patho.tachy': 'Tachycardie sinusale · FC 140 bpm - effort physique ou stress',
+      'sim.anat.patho.brady': 'Bradycardie sinusale · FC 45 bpm - athlète entraîné ou hypothyroïdie',
+      'sim.anat.patho.afib': 'Fibrillation atriale · rythme irrégulier - risque thromboembolique',
+      'sim.anat.patho.mi': 'Infarctus antérieur · sus-décalage ST en V1-V4',
+      'sim.anat.patho.intro': 'Cas pathologique :',
+      // PC scenarios
+      'sim.pc.scenario.cpu': 'Panne CPU - le PC redémarre dès qu\'il chauffe',
+      'sim.pc.scenario.ram': 'Panne RAM - écran bleu aléatoire, BSOD MEMORY_MANAGEMENT',
+      'sim.pc.scenario.gpu': 'Panne GPU - artefacts visuels en jeu, écran noir possible',
+      'sim.pc.scenario.psu': 'Panne PSU - le PC ne s\'allume pas, voyant éteint',
+      'sim.pc.scenario.ssd': 'Panne SSD - Windows met 5 min à démarrer, secteurs défectueux SMART',
+      'sim.pc.scenario.fan': 'Panne ventilateur - bruit anormal, températures CPU trop hautes',
+      'sim.pc.step.observe': 'Observez les symptômes au démarrage',
+      'sim.pc.step.diag': 'Cliquez le composant suspect d\'après les symptômes',
+      'sim.pc.step.confirm': 'Confirmez le diagnostic en consultant la fiche technique',
+      'sim.pc.step.replace': 'Remplacez le composant défectueux',
+      'sim.pc.step.test': 'Test post-réparation : système opérationnel',
+      'sim.pc.symptom.cpu': 'BIOS : "CPU Over Temperature Error". Le PC s\'éteint sous charge.',
+      'sim.pc.symptom.ram': 'BSOD au boot Windows - code MEMORY_MANAGEMENT. MemTest86 détecte des erreurs.',
+      'sim.pc.symptom.gpu': 'Lignes verticales colorées à l\'écran. DxDiag rapporte "Display driver crashed".',
+      'sim.pc.symptom.psu': 'Aucune LED ne s\'allume au bouton power. Aucune ventilation.',
+      'sim.pc.symptom.ssd': 'Temps de démarrage 5 min au lieu de 30s. SMART : "Reallocated Sectors Count" en hausse.',
+      'sim.pc.symptom.fan': 'Bruit de roulement sec à chaque allumage. Température CPU 95°C au repos.',
+      'sim.pc.wrong.diag': 'Ce composant est fonctionnel. Relisez les symptômes.',
+      // Datacenter
+      'sim.dc.mode.tuto': 'Mission de supervision',
+      'sim.dc.scenario.power': 'Coupure de courant - 1 rack hors ligne',
+      'sim.dc.scenario.cpu': 'Surcharge CPU - 1 rack à 100%',
+      'sim.dc.scenario.storage': 'Stockage dégradé - RAID en panne',
+      'sim.dc.scenario.network': 'Goulot réseau - latence anormale sur 1 nœud',
+      'sim.dc.step.observe': 'Observez le tableau de supervision',
+      'sim.dc.step.locate': 'Localisez le rack en anomalie (rouge)',
+      'sim.dc.step.inspect': 'Consultez ses métriques détaillées',
+      'sim.dc.step.fix': 'Cliquez "Redémarrer" pour appliquer le correctif',
+      'sim.dc.svc.web': 'Serveur Web',
+      'sim.dc.svc.db': 'Base de données',
+      'sim.dc.svc.storage': 'Stockage NAS',
+      'sim.dc.svc.app': 'Serveur applicatif',
+      'sim.dc.svc.cache': 'Cache Redis',
+      'sim.dc.svc.dns': 'DNS / DHCP',
+      'sim.dc.restart': 'Redémarrer le rack',
+      'sim.dc.restarted': '✓ Rack redémarré - service restauré',
+      // Nursing scenarios
+      'sim.soins.mode.iv': 'Procédure : pose de perfusion',
+      'sim.soins.scenario.routine': 'Pose de perfusion - patient stable',
+      'sim.soins.scenario.urgence': 'Pose de perfusion - patient hypotendu, urgence',
+      'sim.soins.scenario.pediatrie': 'Pose de perfusion - patient pédiatrique',
+      'sim.soins.step.1': '1. Hygiène des mains à la solution hydro-alcoolique (30s)',
+      'sim.soins.step.2': '2. Préparer le matériel sur le plateau stérile',
+      'sim.soins.step.3': '3. Vérifier l\'identité du patient et le poser en décubitus',
+      'sim.soins.step.4': '4. Connecter la poche de NaCl 0,9% à la tubulure',
+      'sim.soins.step.5': '5. Enfiler les gants stériles',
+      'sim.soins.step.6': '6. Désinfecter le site d\'injection et insérer le cathéter',
+      'sim.soins.step.7': '7. Éliminer l\'aiguille dans le collecteur DASRI',
+      'sim.soins.wrong': 'Ce n\'est pas l\'étape attendue. Suivez la procédure dans l\'ordre.',
+      'sim.soins.click.gloves': 'Cliquez les gants stériles',
+      'sim.soins.click.iv': 'Cliquez la poche de perfusion',
+      'sim.soins.click.bed': 'Cliquez le lit',
+      'sim.soins.click.syringe': 'Cliquez la seringue',
+      'sim.soins.click.monitor': 'Cliquez le moniteur',
+      'sim.soins.click.bin': 'Cliquez le collecteur DASRI',
+      'sim.soins.click.tray': 'Cliquez le plateau (table)',
+
+      // Nursing room
+      'sim.soins.intro': 'Identifiez le matériel de la chambre. Cliquez chaque élément pour découvrir sa fonction et les bonnes pratiques associées.',
+      'sim.soins.bed.name': 'Lit médicalisé',
+      'sim.soins.bed.desc': "Positionnement du patient en décubitus dorsal. Tête de lit relevée à 30° pour prévenir les escarres.",
+      'sim.soins.iv.name': 'Poche de perfusion (NaCl 0,9%)',
+      'sim.soins.iv.desc': "Solution saline isotonique 500 ml. Vérifier la date de péremption, l'intégrité de la poche et la limpidité du liquide avant la pose.",
+      'sim.soins.monitor.name': 'Moniteur multiparamétrique',
+      'sim.soins.monitor.desc': 'FC : 78 bpm · SpO₂ : 98% · PA : 124/82 · FR : 16/min · T : 36.8°C - toutes constantes normales.',
+      'sim.soins.syringe.name': 'Seringue 10 ml',
+      'sim.soins.syringe.desc': "Aiguille intramusculaire 21G. Vérifier l'asepsie, purger l'air avant injection.",
+      'sim.soins.gloves.name': 'Gants stériles (taille 7)',
+      'sim.soins.gloves.desc': "Hygiène des mains à la SHA pendant 30 secondes avant l'enfilage. Les gants ne remplacent pas le lavage des mains.",
+      'sim.soins.bin.name': 'Collecteur DASRI',
+      'sim.soins.bin.desc': "Boîte à objets piquants/coupants/tranchants. Élimination obligatoire des aiguilles utilisées - JAMAIS recapuchonner.",
+
+      // Farm
+      'sim.farm.intro': "Survolez la ferme depuis le ciel. Cliquez chaque parcelle pour diagnostiquer l'état des cultures - une parcelle souffre.",
+      'sim.farm.healthy': '✓ État sain',
+      'sim.farm.faultStatus': '⚠ Diagnostic : Stress hydrique',
+      'sim.farm.p1.name': 'Parcelle Nord - Maïs',
+      'sim.farm.p1.desc': 'Maïs en croissance - stade végétatif V8. Pluviométrie suffisante (78 mm/sem).',
+      'sim.farm.p2.name': 'Parcelle Sud - Sorgho',
+      'sim.farm.p2.desc': 'Sorgho - épiaison en cours. Sol riche, prochaine récolte dans 6 semaines.',
+      'sim.farm.p3.name': 'Parcelle Est - Niébé',
+      'sim.farm.p3.desc': "Niébé (haricot) - floraison. Légumineuse fixatrice d'azote, bénéfique pour la rotation.",
+      'sim.farm.p4.name': 'Parcelle Ouest - Arachide',
+      'sim.farm.p4.desc': '⚠ Arachide - feuilles jaunissantes, sol sec. Stress hydrique sévère - irrigation urgente requise.',
+      'sim.farm.hud.title': 'Ferme - Tableau de bord',
+      'sim.farm.hud.stage': 'Étape',
+      'sim.farm.hud.inspected': 'Parcelles inspectées',
+      'sim.farm.hud.stressed': 'Parcelles en stress',
+      'sim.farm.hud.moist': 'Humidité moyenne',
+      'sim.farm.hud.weather': 'Météo',
+      'sim.farm.hud.season': 'Saison',
+      'sim.farm.hud.dry': 'Sèche',
+      'sim.farm.hud.rain': 'Pluie',
+      'sim.farm.hud.tip': "Astuce : glissez la sonde et l'arrosoir vers les parcelles.",
+      'sim.farm.step1': "Étape 1 : utilisez la sonde pour mesurer toutes les parcelles. Glissez la sonde ou l'arrosoir sur une parcelle.",
+      'sim.farm.step2': 'Étape 2 : identifiez la parcelle en stress et arrosez-la.',
+      'sim.farm.success': '<strong class="text-green-300">Succès</strong> - diagnostic et action corrects.',
+      'sim.farm.probe.label': 'Sonde',
+      'sim.farm.probe.moisture': 'Humidité sol',
+      'sim.farm.water.fixed': 'Irrigation - réhabilitée.',
+      'sim.farm.water.already': 'Arrosage - déjà saine.',
+      'sim.farm.water.label': 'Arrosage',
+      'sim.farm.irrig.label': 'Irrigation',
+
+      // Irrigation
+      'sim.irrig.intro': "Ouvrez les 4 vannes rouges (cliquez-les) dans l'ordre que vous voulez pour alimenter l'ensemble du champ en eau.",
+      'sim.irrig.valve': 'Vanne',
+      'sim.irrig.open': 'OUVERTE',
+      'sim.irrig.closed': 'FERMÉE',
+      'sim.irrig.lines': 'lignes alimentées.',
+      'sim.irrig.complete': '✓ Champ entièrement irrigué.',
+      'sim.irrig.hint': 'Ouvrez toutes les vannes pour irriguer le champ entier.',
+      'sim.irrig.controls.title': 'Irrigation - Contrôles',
+      'sim.irrig.pump': 'Pompe',
+      'sim.irrig.auto': 'Auto',
+      'sim.irrig.line': 'Ligne',
+      'sim.irrig.sliderHint': '(Glissez les curseurs pour régler le débit par ligne)',
+      'sim.irrig.autoMode': '<strong class="text-orange">Mode Auto</strong> - optimisation en cours.',
+      'sim.irrig.manualMode': 'Mode manuel activé.',
+      'sim.irrig.stage1': '<strong class="text-orange">Étape 1</strong> - Ouvrez au moins 2 vannes pour commencer.',
+      'sim.irrig.stage2': '<strong class="text-orange">Étape 2</strong> - Obtenez une humidité moyenne du champ > 0.6.',
+      'sim.irrig.stage2.progress': '<strong class="text-orange">Étape 2</strong> - Humidité moyenne',
+      'sim.irrig.stage3': '<strong class="text-orange">Étape 3</strong> - Maintenez l\'humidité pendant 5s.',
+      'sim.irrig.stage3.hold': '<strong class="text-orange">Étape 3</strong> - Maintenir',
+      'sim.irrig.stage3.lost': '<strong class="text-orange">Étape 3</strong> - L\'humidité a baissé, réajustez les vannes.',
+      'sim.irrig.successFinal': '<strong class="text-green-300">✓ Succès - Champ irrigué correctement.</strong>',
+
+      // Demo viewer
+      'demo.subtitle': 'Bibliothèque VR',
+      'demo.titleHtml': 'Bibliothèque de <span class="text-orange">simulations VR</span> interactives',
+      'demo.vrReady': 'VR Ready',
+      'demo.interactions': 'interactions',
+      'viewer.vr': 'Entrer en VR',
+      'viewer.fullscreen': 'Plein écran',
+      'viewer.fullscreenTitle': 'Plein écran (F)',
+      'viewer.reset': 'Recentrer',
+      'viewer.close': 'Fermer',
+      'viewer.console': 'Console de simulation',
+      'viewer.loading': 'Chargement…',
+
+      // Nav
+      'nav.contact': 'Nous contacter',
+
+      // Partners
+      'partners.title': 'Partenaires & technologies',
+
+      // Problem section
+      'problem.badge': 'Le problème',
+      'problem.title': '80% de théorie, 20% de pratique. <br> Résultat : des diplômés non opérationnels.',
+      'problem.desc': "TIL inverse l'équation grâce à des <strong>simulations VR ultra-réalistes</strong>, un mode <strong>hors-ligne</strong>, et un contenu mis à jour <strong>chaque trimestre</strong>.",
+      'problem.card1.title': 'Immersion VR',
+      'problem.card1.desc': "Gestes infirmiers, déploiement AWS, gestion d'une exploitation agricole - exécutés en environnement 3D sécurisé.",
+      'problem.card2.title': 'IA pédagogique',
+      'problem.card2.desc': 'Recommandations personnalisées, sous-titres auto (Whisper), détection des décrochages, génération de quiz par LLM.',
+      'problem.card3.title': 'Mobile Money natif',
+      'problem.card3.desc': 'Orange Money, Moov Money, Wave - payez votre formation depuis votre téléphone, sans carte bancaire.',
+
+      // Platform section
+      'platform.badge': 'La plateforme',
+      'platform.title': 'Une seule plateforme, trois mondes connectés.',
+      'platform.desc': "Apprenant, instructeur, institution - chacun dispose d'outils dédiés, sans friction, sans installation.",
+      'platform.item1.title': 'Catalogue intelligent',
+      'platform.item1.desc': 'Recommandations IA, filtres avancés, preview gratuite, certifications vérifiables.',
+      'platform.item2.title': 'Studio instructeur',
+      'platform.item2.desc': 'Drag & drop : vidéos, quiz, scènes VR (GLTF/GLB), évaluations notées dans la simulation.',
+      'platform.item3.title': 'Dashboard institutionnel',
+      'platform.item3.desc': 'SSO Active Directory, gestion de flotte VR (MDM), rapports ROI, white-labeling.',
+      'platform.stat1': 'Uptime SLA visé',
+      'platform.stat2': 'Temps de chargement',
+      'platform.stat3': 'Connexion minimale',
+      'platform.stat4': 'AES-256 + TLS 1.3',
+      'platform.stack': 'Stack',
+
+      // Catalog
+      'catalog.badge': 'Prototype interactif',
+      'catalog.title': 'Catalogue de formations',
+      'catalog.filterPrefix': 'Filtrez parmi',
+      'catalog.filterSuffix': 'modules. Cliquez pour voir le détail.',
+      'catalog.filter.all': 'Tous',
+      'catalog.filter.dev': 'Dev Info',
+      'catalog.filter.sante': 'Santé',
+      'catalog.filter.agro': 'Agronomie',
+      'catalog.filter.vr': 'VR seulement',
+
+      // VR demo section
+      'vrdemo.badge': 'Démo interactive',
+      'vrdemo.title': 'Atelier - Maintenance Informatique',
+      'vrdemo.desc': "Une tour d'ordinateur est défectueuse. <strong>Cliquez sur chaque composant</strong> pour le diagnostiquer, identifiez la panne (composant rouge clignotant), puis remplacez-le pour finaliser la réparation.",
+      'vrdemo.stats.inspected': 'Diagnostiqués',
+      'vrdemo.stats.fault': 'Panne',
+      'vrdemo.stats.score': 'Score',
+      'vrdemo.console.title': 'Console technicien',
+      'vrdemo.console.hint': '→ Cliquez un composant dans la tour pour afficher sa fiche technique.',
+      'vrdemo.btn.rotate': 'Rotation auto',
+      'vrdemo.btn.reset': 'Recentrer',
+      'vrdemo.btn.newFault': 'Nouvelle panne',
+      'vrdemo.link': 'Voir les 6 simulations VR',
+      'vrdemo.live': 'LIVE · Three.js WebGL',
+      'vrdemo.faultDetected': '⚠ Panne détectée',
+      'vrdemo.hint': 'Drag · Scroll · Click composants',
+      'vrdemo.success': '✓ Tour réparée - Module validé',
+
+      // Audience
+      'audience.badge': 'Pour qui',
+      'audience.title': 'Une plateforme, plusieurs publics.',
+      'audience.desc': "Particuliers, universités, entreprises, ONG - chaque profil dispose d'un parcours et d'outils adaptés.",
+      'audience.recommended': 'RECOMMANDÉ',
+      'audience.individual.title': 'Apprenant individuel',
+      'audience.individual.desc': 'Étudiants, jeunes professionnels, personnes en reconversion. Accès mobile, certifications reconnues.',
+      'audience.individual.b1': '✓ Catalogue complet',
+      'audience.individual.b2': '✓ Mode hors-ligne',
+      'audience.individual.b3': '✓ Certificat numérique',
+      'audience.individual.cta': 'Commencer gratuitement',
+      'audience.schools.title': 'Universités & écoles',
+      'audience.schools.desc': 'Modernisez votre pédagogie avec des simulations VR et un suivi pédagogique consolidé.',
+      'audience.schools.b1': '✓ Parcours sur mesure',
+      'audience.schools.b2': '✓ Dashboard cohortes',
+      'audience.schools.b3': '✓ Gestion de flotte VR',
+      'audience.schools.cta': 'Demander une démo',
+      'audience.companies.title': 'Entreprises',
+      'audience.companies.desc': 'Formation continue de vos équipes avec ROI mesurable et reporting RH intégré.',
+      'audience.companies.b1': '✓ SSO Active Directory',
+      'audience.companies.b2': '✓ Rapports ROI',
+      'audience.companies.b3': '✓ Intégration SIRH',
+      'audience.companies.cta': 'Nous contacter',
+      'audience.public.title': 'ONG & secteur public',
+      'audience.public.desc': 'Renforcement de capacités à grande échelle, tarification sociale, projets subventionnés.',
+      'audience.public.b1': '✓ Déploiement massif',
+      'audience.public.b2': '✓ White-labeling',
+      'audience.public.b3': '✓ Modules sur mesure',
+      'audience.public.cta': "Discuter d'un projet",
+
+      // Hardware
+      'hardware.badge': 'Offre matérielle',
+      'hardware.title': 'Casques VR clé en main pour vos institutions.',
+      'hardware.desc': 'Achat, location longue durée, leasing ou pilote gratuit 30 jours. Installation, formation des formateurs et support inclus.',
+      'hardware.table.pack': 'Pack',
+      'hardware.table.headsets': 'Casques',
+      'hardware.table.included': 'Inclus',
+      'hardware.table.action': 'Action',
+      'hardware.quote': 'Devis →',
+      'hardware.row1.pack': 'Starter École',
+      'hardware.row1.headsets': '10× Meta Quest 3',
+      'hardware.row1.included': '50 modules, formation formateurs, garantie 2 ans',
+      'hardware.row2.pack': 'Université',
+      'hardware.row2.headsets': '30× Meta Quest 3',
+      'hardware.row2.included': '150 modules, support prioritaire, rapport trimestriel',
+      'hardware.row3.pack': 'Entreprise',
+      'hardware.row3.headsets': '20× Pico 4 Enterprise',
+      'hardware.row3.included': 'MDM, intégration SIRH, modules sur mesure',
+      'hardware.row4.pack': 'Médical',
+      'hardware.row4.headsets': '15× Meta Quest 3 Pro',
+      'hardware.row4.included': '25 modules santé, casques hygiéniques, maintenance mensuelle',
+      'hardware.row5.pack': 'Premium',
+      'hardware.row5.headsets': '50× au choix',
+      'hardware.row5.included': 'Tous modules, 5 custom, white-label, support 24/7',
+
+      // FAQ
+      'faq.badge': 'FAQ',
+      'faq.title': 'Questions fréquentes',
+      'faq.q1': 'Faut-il un casque VR pour utiliser TIL ?',
+      'faq.a1': "Non. Tous les modules VR fonctionnent en mode 360° dans un navigateur classique. Le casque amplifie l'expérience mais n'est pas obligatoire.",
+      'faq.q2': 'Comment payer depuis le Burkina Faso ?',
+      'faq.a2': 'Orange Money, Moov Money, Wave (intégration CinetPay / PayDunya), virement bancaire, ou carte Visa/Mastercard via Stripe pour les apprenants de la diaspora.',
+      'faq.q3': 'Mes certificats sont-ils reconnus ?',
+      'faq.a3': 'Chaque certificat est signé numériquement, vérifiable par QR code. Des partenariats avec AWS, Google et Coursera sont prévus pour la co-certification (V2).',
+      'faq.q4': 'Mon institution peut-elle louer des casques ?',
+      'faq.a4': "Oui : achat, location longue durée (12-36 mois), leasing avec option d'achat (24-48 mois), ou abonnement SaaS incluant le matériel. Un pilote gratuit de 30 jours est proposé avec 5 casques.",
+
+      // CTA
+      'cta.title': 'Rejoignez la révolution<br/>de la formation immersive en Afrique.',
+      'cta.desc': 'Investisseurs, institutions, apprenants - parlons-nous. Démonstration personnalisée sous 48h.',
+      'cta.placeholder': 'votre@email.com',
+      'cta.button': 'Demander une démo',
+      'cta.sent': '✓ Demande envoyée',
+      'cta.contact': 'Contact direct :',
+
+      // Footer
+      'footer.address': 'Ouaga 2000, Immeuble NLVI<br/>Ouagadougou, Burkina Faso<br/>RCCM : BF-OUA-01-2022-013-14820',
+      'footer.product': 'Produit',
+      'footer.company': 'Entreprise',
+      'footer.legal': 'Légal',
+      'footer.link.platform': 'Plateforme',
+      'footer.link.catalog': 'Catalogue',
+      'footer.link.vr': 'VR',
+      'footer.link.hardware': 'Casques',
+      'footer.link.about': 'À propos',
+      'footer.link.partners': 'Partenaires',
+      'footer.link.careers': 'Carrières',
+      'footer.link.press': 'Presse',
+      'footer.link.terms': 'CGU',
+      'footer.link.privacy': 'Confidentialité (RGPD)',
+      'footer.link.legal': 'Mentions légales',
+
+      // Courses
+      'course.hoursSuffix': 'h',
+      'course.students': 'apprenants',
+      'course.studentsRegistered': 'apprenants inscrits',
+      'course.view': 'Voir le cours',
+      'course.vr': 'RÉALITÉ VIRTUELLE',
+      'course.certifying': 'Certifiant',
+      'course.duration': 'Durée',
+      'course.level': 'Niveau',
+      'course.rating': 'Note',
+      'course.launchDemo': 'Lancer la démo',
+      'course.enroll': "S'inscrire",
+      'course.level.beginner': 'Débutant',
+      'course.level.intermediate': 'Intermédiaire',
+      'course.level.advanced': 'Avancé',
+      'course.level.all': 'Tous niveaux',
+      'course.level.practice': 'Pratique',
+      'course.tag.popular': 'Populaire',
+      'course.tag.new': 'Nouveau',
+      'course.tag.certifying': 'Certifiant',
+      'course.1.title': 'Labo Cloud AWS Virtual',
+      'course.1.desc': 'Déployez une architecture AWS complète depuis une console 3D : EC2, S3, groupes de sécurité.',
+      'course.2.title': 'Salle de Code Immersive',
+      'course.2.desc': 'Bureau virtuel, éditeur de code 3D, debugging visuel en Python, JS et PHP.',
+      'course.3.title': 'Centre Opérations Cyber',
+      'course.3.desc': "SOC complet : détection d'intrusion, analyse de logs, réponse à incident temps réel.",
+      'course.4.title': 'Sprint Agile VR',
+      'course.4.desc': 'Kanban 3D, standup VR, code review collaborative - méthodologie Scrum.',
+      'course.5.title': 'Salle de Soins Infirmiers',
+      'course.5.desc': 'Gestes techniques : pose de perfusion, injection, prise de constantes en chambre virtuelle.',
+      'course.6.title': 'Urgences & SMUR',
+      'course.6.desc': 'Arrêt cardiaque, polytraumatisé, AVC - protocoles ACLS/BLS avec équipe médicale virtuelle.',
+      'course.7.title': 'Anatomie 3D Interactive',
+      'course.7.desc': 'Dissection virtuelle, systèmes cardiovasculaire, nerveux, digestif explorables en 3D.',
+      'course.8.title': 'Bloc Opératoire',
+      'course.8.desc': "Chirurgie virtuelle, protocoles stériles, manipulation d'instruments chirurgicaux.",
+      'course.9.title': 'Ferme Virtuelle Intégrée',
+      'course.9.desc': 'Gestion complète : cultures, sols, météo, irrigation - décisions stratégiques.',
+      'course.10.title': 'Labo Analyse des Sols',
+      'course.10.desc': "Prélèvement, analyse, interprétation, recommandations d'amendement.",
+      'course.11.title': 'Élevage & Santé Animale',
+      'course.11.desc': 'Gestion troupeau virtuel, identification maladies, vaccination, soins vétérinaires.',
+      'course.12.title': 'Irrigation & Hydraulique',
+      'course.12.desc': "Conception d'un système goutte-à-goutte, calculs hydrauliques, optimisation.",
+    },
+    
+    en: {
+      // Page meta
+      'page.title': 'Total Innovation Learning - VR/AI e-Learning Platform',
+      'page.description': 'TIL - Learn by doing. SaaS e-Learning platform with Virtual Reality and AI for French-speaking Africa.',
+      'page.demoTitle': 'VR Demos - Total Innovation Learning',
+      'page.demoDescription': 'Library of interactive VR simulations - IT, medicine, agronomy. Compatible with Meta Quest, Pico, HTC Vive headsets.',
+      'brand.tagline': 'VR · AI · Africa',
+
+      // Header
+      'nav.platform': 'Platform',
+      'nav.catalog': 'Catalog',
+      'nav.demos': 'VR Demos',
+      'nav.pricing': 'For whom',
+      'nav.hardware': 'Headsets',
+      'nav.login': 'Login',
+      'nav.trial': 'Free trial 14 days',
+      
+      // Hero
+      'hero.badge': 'Immersive professional training · French-speaking Africa',
+      'hero.title.1': 'Learn ',
+      'hero.title.2': 'by doing',
+      'hero.title.3': 'thanks to ',
+      'hero.title.4': 'Virtual Reality',
+      'hero.desc': 'First <strong>VR + AI</strong> e-Learning platform in French-speaking Africa. Certified training in IT, medicine, agronomy - accessible from <strong>1 Mbps</strong>, payable via <strong>Mobile Money</strong>.',
+      'hero.btn1': 'Try VR Demos',
+      'hero.btn2': 'Explore catalog',
+      'hero.stat1': 'retention rate',
+      'hero.stat2': 'modules available',
+      'hero.stat3': 'partner institutions',
+      
+      // Footer
+      'footer.text': '© 2026 Total Innovation Learning - Ouagadougou, Burkina Faso',
+      'footer.home': 'Home',
+      'footer.catalog': 'Catalog',
+      'footer.contact': 'Contact',
+      
+      // Demo page
+      'demo.title': 'Library of interactive VR simulations',
+      'demo.desc': 'Launch any simulation with one click, switch to fullscreen, or wear a Meta Quest / Pico / HTC Vive headset for full immersion. No installation required.',
+      'demo.chip1': 'Real-time WebGL',
+      'demo.chip2': 'WebXR compatible',
+      'demo.chip3': 'Fullscreen',
+      'demo.chip4': 'Mobile + desktop',
+      'demo.filter': 'Filter by domain',
+      'demo.all': 'All',
+      'demo.dev': 'Software Development',
+      'demo.health': 'Medicine & Health',
+      'demo.agro': 'Agronomy',
+      'demo.help': 'How it works',
+      'demo.ways': '3 ways to experience the simulation',
+      'demo.browser': 'Browser',
+      'demo.browser.desc': 'Mouse + keyboard on PC, touch on mobile. Ideal for discovering a simulation quickly.',
+      'demo.fullscreen': 'Fullscreen',
+      'demo.fullscreen.desc': 'Fullscreen button or <kbd class="px-1.5 py-0.5 text-xs bg-navy/5 rounded">F</kbd> key for maximum focus, without distraction.',
+      'demo.vr': 'VR Headset',
+      'demo.vr.desc': 'Click "Enter VR" with Meta Quest, Pico 4, HTC Vive Focus - complete 6DOF immersion via WebXR.',
+      'demo.launch': 'Launch',
+      'demo.drag': 'Drag to rotate',
+      'demo.scroll': 'Scroll to zoom',
+      'demo.click': 'Click to interact',
+      
+      // Simulations
+      'sim.maintenance-pc': 'PC Maintenance Workshop',
+      'sim.maintenance-pc.desc': 'Diagnose 7 components of a PC tower, identify the failure, replace the faulty part.',
+      'sim.datacenter': 'Datacenter & Network',
+      'sim.datacenter.desc': 'Explore a server room, observe network flows in real-time, isolate a failing node.',
+      'sim.anatomie': 'Cardiac Anatomy',
+      'sim.anatomie.desc': 'Beating 3D heart in real-time - identify the 4 chambers and normal heart rhythm.',
+      'sim.salle-soins': 'Nursing Care Room',
+      'sim.salle-soins.desc': 'Virtual hospital room: identify equipment, prepare for IV placement.',
+      'sim.ferme': 'Integrated Virtual Farm',
+      'sim.ferme.desc': 'Diagnose 4 cultivated plots, identify the one suffering from lack of water.',
+      'sim.irrigation': 'Irrigation System',
+      'sim.irrigation.desc': 'Drip network: open valves in the right order to supply the entire field.',
+      
+      'sim.domain.dev': 'Software Development',
+      'sim.domain.sante': 'Medicine & Health',
+      'sim.domain.agro': 'Agronomy',
+      
+      // Simulation UI
+      'sim.probe': 'Soil Probe',
+      'sim.watering-can': 'Watering Can',
+      'sim.moisture': 'Soil Moisture',
+      'sim.season': 'Season',
+      'sim.weather': 'Weather',
+      'sim.temperature': 'Temperature',
+      'sim.humidity': 'Humidity',
+      'sim.rainfall': 'Rainfall',
+
+      // --- Scenario engine (shared) ---
+      'scenario.title': 'Scenario',
+      'scenario.step': 'Step',
+      'scenario.score': 'Score',
+      'scenario.time': 'Time',
+      'scenario.complete': '✓ Scenario complete',
+      'scenario.replay': 'Replay',
+      'scenario.wrongChoice': 'Wrong choice - try again (-10 pts)',
+      'scenario.stars3': 'Perfect mastery ★★★',
+      'scenario.stars2': 'Good practice ★★☆',
+      'scenario.stars1': 'Needs work ★☆☆',
+      'scenario.mode.tuto': 'Guided tutorial',
+      'scenario.mode.quiz': 'Quiz',
+      'scenario.mode.free': 'Free exploration',
+
+      // --- Simulation scene content ---
+      // Common
+      'sim.fault.detected': '⚠ FAULT DETECTED',
+      'sim.fault.replace': 'Replace component',
+      'sim.fault.repaired': 'replaced. Tower fixed - module validated.',
+      'sim.fault.functional': 'Functional ✓',
+
+      // PC Maintenance
+      'sim.pc.intro': 'Diagnose each component by clicking on it. One component is faulty - identify it from its data sheet and replace it.',
+      'sim.pc.cpu.name': 'Processor (CPU)',
+      'sim.pc.cpu.role': "The computer's brain. Check thermal paste every 2 years, verify heatsink mounting, monitor temperature (< 90°C under load).",
+      'sim.pc.ram1.name': 'RAM Memory (DIMM 1)',
+      'sim.pc.ram2.name': 'RAM Memory (DIMM 2)',
+      'sim.pc.ram.role': 'Ultra-fast temporary storage for active programs. Remove, clean the gold contacts with a white eraser, click back in until it locks. Test with MemTest86 if in doubt.',
+      'sim.pc.gpu.name': 'Graphics Card (GPU)',
+      'sim.pc.gpu.role': 'Video and 3D processing - essential for VR modules. Dust the fans with dry compressed air, check the 8-pin PCIe power connector, monitor GPU temperature (< 85°C).',
+      'sim.pc.ssd.name': 'SSD Drive (SATA)',
+      'sim.pc.ssd.role': 'Fast storage for the OS and applications. Check health via S.M.A.R.T. (CrystalDiskInfo), replace as soon as bad sectors appear or if TBW is exceeded.',
+      'sim.pc.psu.name': 'Power Supply (PSU)',
+      'sim.pc.psu.role': 'Converts 220V mains into internal 12V / 5V / 3.3V voltages. Test rails with a multimeter, verify 80+ Bronze/Gold certification, replace if voltage out of ±5% tolerance.',
+      'sim.pc.fan.name': 'Case Fan (120mm)',
+      'sim.pc.fan.role': 'Evacuates heat from the case - ensures overall PC cooling. Dust the blades and grille with dry air, lubricate the axis if abnormal noise.',
+
+      // Datacenter
+      'sim.dc.intro': 'Click a server to view its metrics. One rack is failing (red LEDs) - identify it.',
+      'sim.dc.fault': 'FAILING',
+      'sim.dc.faultInfo': 'Latency: 850ms · Packet loss: 42%',
+      'sim.dc.faultAction': '→ Check power and backbone switch network cable.',
+      'sim.dc.ok': 'Operational',
+      'sim.dc.latency': 'Latency',
+      'sim.dc.traffic': 'Traffic',
+      'sim.dc.cpu': 'CPU',
+      'sim.dc.temp': 'Temperature',
+
+      // Anatomy
+      'sim.anat.intro': 'Click the <span class="text-orange font-bold">orange dots</span> to identify cardiac structures. <span class="text-red-300">Red</span> = oxygenated blood · <span class="text-blue-300">Blue</span> = deoxygenated blood. Normal HR: 72 BPM.',
+      'sim.anat.oxy': 'Oxygenated blood',
+      'sim.anat.deoxy': 'Deoxygenated blood',
+      'sim.anat.ra.name': 'Right atrium',
+      'sim.anat.ra.desc': 'Receives deoxygenated blood from the superior and inferior vena cavae. Normal pressure: 0-5 mmHg. Communicates with the right ventricle through the tricuspid valve.',
+      'sim.anat.la.name': 'Left atrium',
+      'sim.anat.la.desc': 'Receives oxygenated blood from the 4 pulmonary veins. Communicates with the left ventricle through the mitral valve.',
+      'sim.anat.rv.name': 'Right ventricle',
+      'sim.anat.rv.desc': 'Pumps blood to the lungs via the pulmonary artery. Thin muscular wall (3-5 mm). Systolic pressure: 25 mmHg.',
+      'sim.anat.lv.name': 'Left ventricle',
+      'sim.anat.lv.desc': 'Pumps oxygenated blood throughout the systemic circulation via the aorta. Thick wall (10-15 mm). Systolic pressure: 120 mmHg.',
+      'sim.anat.aorta.name': 'Aorta',
+      'sim.anat.aorta.desc': 'Largest artery in the body (diameter 2.5-3.5 cm). Distributes oxygenated blood to all organs via its branches: brachiocephalic trunk, left common carotid, left subclavian.',
+      'sim.anat.pulm.name': 'Pulmonary trunk',
+      'sim.anat.pulm.desc': 'Carries deoxygenated blood from the right ventricle to the lungs via the right and left pulmonary arteries. The only artery in the body carrying non-oxygenated blood.',
+      'sim.anat.rhythm': 'Sinus rhythm',
+      // Anatomy scenarios
+      'sim.anat.mode.flow': 'Blood flow path',
+      'sim.anat.mode.quiz': 'Identification quiz',
+      'sim.anat.mode.patho': 'Pathological case',
+      'sim.anat.flow.intro': 'Reconstruct the blood path through the heart. Click structures in order, starting from venous return.',
+      'sim.anat.flow.next': 'Click now',
+      'sim.anat.flow.wrong': 'This is not the next step of the circuit.',
+      'sim.anat.flow.done': '<strong class="text-green-300">✓ Complete circuit</strong> - you identified the systemic and pulmonary loops.',
+      'sim.anat.quiz.intro': 'Identification quiz: click the requested structure. 6 questions in random order.',
+      'sim.anat.quiz.find': 'Find',
+      'sim.anat.quiz.correct': '✓ Correct',
+      'sim.anat.patho.normal': 'Normal sinus rhythm · HR 72 bpm',
+      'sim.anat.patho.tachy': 'Sinus tachycardia · HR 140 bpm - exertion or stress',
+      'sim.anat.patho.brady': 'Sinus bradycardia · HR 45 bpm - trained athlete or hypothyroidism',
+      'sim.anat.patho.afib': 'Atrial fibrillation · irregular rhythm - thromboembolic risk',
+      'sim.anat.patho.mi': 'Anterior MI · ST elevation in V1-V4',
+      'sim.anat.patho.intro': 'Pathological case:',
+      // PC scenarios
+      'sim.pc.scenario.cpu': 'CPU failure - PC reboots whenever it heats up',
+      'sim.pc.scenario.ram': 'RAM failure - random BSOD, MEMORY_MANAGEMENT error',
+      'sim.pc.scenario.gpu': 'GPU failure - visual artifacts in games, possible black screen',
+      'sim.pc.scenario.psu': 'PSU failure - PC does not power on, no LED',
+      'sim.pc.scenario.ssd': 'SSD failure - Windows takes 5 min to boot, SMART bad sectors',
+      'sim.pc.scenario.fan': 'Fan failure - abnormal noise, CPU temperatures too high',
+      'sim.pc.step.observe': 'Observe symptoms at startup',
+      'sim.pc.step.diag': 'Click the suspect component based on symptoms',
+      'sim.pc.step.confirm': 'Confirm diagnosis by reviewing the data sheet',
+      'sim.pc.step.replace': 'Replace the faulty component',
+      'sim.pc.step.test': 'Post-repair test: system operational',
+      'sim.pc.symptom.cpu': 'BIOS: "CPU Over Temperature Error". PC shuts down under load.',
+      'sim.pc.symptom.ram': 'BSOD on Windows boot - MEMORY_MANAGEMENT code. MemTest86 detects errors.',
+      'sim.pc.symptom.gpu': 'Colored vertical lines on screen. DxDiag reports "Display driver crashed".',
+      'sim.pc.symptom.psu': 'No LED lights up when pressing power. No fans spinning.',
+      'sim.pc.symptom.ssd': 'Boot time 5 min instead of 30s. SMART: rising "Reallocated Sectors Count".',
+      'sim.pc.symptom.fan': 'Dry bearing noise on each power-on. CPU temperature 95°C at idle.',
+      'sim.pc.wrong.diag': 'This component is functional. Re-read the symptoms.',
+      // Datacenter
+      'sim.dc.mode.tuto': 'Supervision mission',
+      'sim.dc.scenario.power': 'Power outage - 1 rack offline',
+      'sim.dc.scenario.cpu': 'CPU overload - 1 rack at 100%',
+      'sim.dc.scenario.storage': 'Degraded storage - RAID failure',
+      'sim.dc.scenario.network': 'Network bottleneck - abnormal latency on 1 node',
+      'sim.dc.step.observe': 'Watch the supervision dashboard',
+      'sim.dc.step.locate': 'Locate the rack in anomaly (red)',
+      'sim.dc.step.inspect': 'Review its detailed metrics',
+      'sim.dc.step.fix': 'Click "Restart" to apply the fix',
+      'sim.dc.svc.web': 'Web server',
+      'sim.dc.svc.db': 'Database',
+      'sim.dc.svc.storage': 'NAS storage',
+      'sim.dc.svc.app': 'Application server',
+      'sim.dc.svc.cache': 'Redis cache',
+      'sim.dc.svc.dns': 'DNS / DHCP',
+      'sim.dc.restart': 'Restart rack',
+      'sim.dc.restarted': '✓ Rack restarted - service restored',
+      // Nursing scenarios
+      'sim.soins.mode.iv': 'Procedure: IV placement',
+      'sim.soins.scenario.routine': 'IV placement - stable patient',
+      'sim.soins.scenario.urgence': 'IV placement - hypotensive patient, emergency',
+      'sim.soins.scenario.pediatrie': 'IV placement - pediatric patient',
+      'sim.soins.step.1': '1. Hand hygiene with alcohol-based rub (30s)',
+      'sim.soins.step.2': '2. Prepare equipment on the sterile tray',
+      'sim.soins.step.3': '3. Verify patient identity and place them supine',
+      'sim.soins.step.4': '4. Connect the NaCl 0.9% bag to the tubing',
+      'sim.soins.step.5': '5. Don the sterile gloves',
+      'sim.soins.step.6': '6. Disinfect the injection site and insert the catheter',
+      'sim.soins.step.7': '7. Discard the needle in the sharps container',
+      'sim.soins.wrong': 'Not the expected step. Follow the procedure in order.',
+      'sim.soins.click.gloves': 'Click the sterile gloves',
+      'sim.soins.click.iv': 'Click the IV bag',
+      'sim.soins.click.bed': 'Click the bed',
+      'sim.soins.click.syringe': 'Click the syringe',
+      'sim.soins.click.monitor': 'Click the monitor',
+      'sim.soins.click.bin': 'Click the sharps container',
+      'sim.soins.click.tray': 'Click the tray (table)',
+
+      // Nursing room
+      'sim.soins.intro': 'Identify the equipment in the room. Click each item to learn about its function and associated best practices.',
+      'sim.soins.bed.name': 'Hospital bed',
+      'sim.soins.bed.desc': 'Patient positioned supine. Head of bed raised to 30° to prevent pressure ulcers.',
+      'sim.soins.iv.name': 'IV bag (NaCl 0.9%)',
+      'sim.soins.iv.desc': 'Isotonic saline solution 500 ml. Check expiration date, bag integrity, and fluid clarity before infusion.',
+      'sim.soins.monitor.name': 'Multiparameter monitor',
+      'sim.soins.monitor.desc': 'HR: 78 bpm · SpO₂: 98% · BP: 124/82 · RR: 16/min · T: 36.8°C - all vital signs normal.',
+      'sim.soins.syringe.name': 'Syringe 10 ml',
+      'sim.soins.syringe.desc': 'Intramuscular needle 21G. Verify asepsis, purge air before injection.',
+      'sim.soins.gloves.name': 'Sterile gloves (size 7)',
+      'sim.soins.gloves.desc': 'Hand hygiene with alcohol-based rub for 30 seconds before donning. Gloves do not replace hand washing.',
+      'sim.soins.bin.name': 'Sharps container',
+      'sim.soins.bin.desc': 'Container for sharp/cutting medical waste. Mandatory disposal of used needles - NEVER recap.',
+
+      // Farm
+      'sim.farm.intro': 'Fly over the farm. Click each plot to diagnose crop health - one plot is suffering.',
+      'sim.farm.healthy': '✓ Healthy',
+      'sim.farm.faultStatus': '⚠ Diagnosis: Water stress',
+      'sim.farm.p1.name': 'North Plot - Corn',
+      'sim.farm.p1.desc': 'Corn growing - vegetative stage V8. Sufficient rainfall (78 mm/week).',
+      'sim.farm.p2.name': 'South Plot - Sorghum',
+      'sim.farm.p2.desc': 'Sorghum - heading in progress. Rich soil, next harvest in 6 weeks.',
+      'sim.farm.p3.name': 'East Plot - Cowpea',
+      'sim.farm.p3.desc': 'Cowpea (bean) - flowering. Nitrogen-fixing legume, beneficial for rotation.',
+      'sim.farm.p4.name': 'West Plot - Peanut',
+      'sim.farm.p4.desc': '⚠ Peanut - yellowing leaves, dry soil. Severe water stress - urgent irrigation required.',
+      'sim.farm.hud.title': 'Farm - Dashboard',
+      'sim.farm.hud.stage': 'Stage',
+      'sim.farm.hud.inspected': 'Plots inspected',
+      'sim.farm.hud.stressed': 'Stressed plots',
+      'sim.farm.hud.moist': 'Average moisture',
+      'sim.farm.hud.weather': 'Weather',
+      'sim.farm.hud.season': 'Season',
+      'sim.farm.hud.dry': 'Dry',
+      'sim.farm.hud.rain': 'Rainy',
+      'sim.farm.hud.tip': 'Tip: drag the probe and watering can onto the plots.',
+      'sim.farm.step1': 'Step 1: use the probe to measure every plot. Drag the probe or watering can onto a plot.',
+      'sim.farm.step2': 'Step 2: identify the stressed plot and water it.',
+      'sim.farm.success': '<strong class="text-green-300">Success</strong> - correct diagnosis and action.',
+      'sim.farm.probe.label': 'Probe',
+      'sim.farm.probe.moisture': 'Soil moisture',
+      'sim.farm.water.fixed': 'Irrigation - restored.',
+      'sim.farm.water.already': 'Watering - already healthy.',
+      'sim.farm.water.label': 'Watering',
+      'sim.farm.irrig.label': 'Irrigation',
+
+      // Irrigation
+      'sim.irrig.intro': 'Open the 4 red valves (click them) in any order to supply the entire field with water.',
+      'sim.irrig.valve': 'Valve',
+      'sim.irrig.open': 'OPEN',
+      'sim.irrig.closed': 'CLOSED',
+      'sim.irrig.lines': 'lines supplied.',
+      'sim.irrig.complete': '✓ Field fully irrigated.',
+      'sim.irrig.hint': 'Open all valves to irrigate the entire field.',
+      'sim.irrig.controls.title': 'Irrigation - Controls',
+      'sim.irrig.pump': 'Pump',
+      'sim.irrig.auto': 'Auto',
+      'sim.irrig.line': 'Line',
+      'sim.irrig.sliderHint': '(Drag the sliders to adjust flow per line)',
+      'sim.irrig.autoMode': '<strong class="text-orange">Auto Mode</strong> - optimization in progress.',
+      'sim.irrig.manualMode': 'Manual mode activated.',
+      'sim.irrig.stage1': '<strong class="text-orange">Step 1</strong> - Open at least 2 valves to start.',
+      'sim.irrig.stage2': '<strong class="text-orange">Step 2</strong> - Reach average field moisture > 0.6.',
+      'sim.irrig.stage2.progress': '<strong class="text-orange">Step 2</strong> - Average moisture',
+      'sim.irrig.stage3': '<strong class="text-orange">Step 3</strong> - Hold moisture for 5s.',
+      'sim.irrig.stage3.hold': '<strong class="text-orange">Step 3</strong> - Hold',
+      'sim.irrig.stage3.lost': '<strong class="text-orange">Step 3</strong> - Moisture dropped, readjust the valves.',
+      'sim.irrig.successFinal': '<strong class="text-green-300">✓ Success - Field correctly irrigated.</strong>',
+
+      // Demo viewer
+      'demo.subtitle': 'VR Library',
+      'demo.titleHtml': 'Library of <span class="text-orange">VR simulations</span>',
+      'demo.vrReady': 'VR Ready',
+      'demo.interactions': 'interactions',
+      'viewer.vr': 'Enter VR',
+      'viewer.fullscreen': 'Fullscreen',
+      'viewer.fullscreenTitle': 'Fullscreen (F)',
+      'viewer.reset': 'Recenter',
+      'viewer.close': 'Close',
+      'viewer.console': 'Simulation console',
+      'viewer.loading': 'Loading...',
+
+      // Nav
+      'nav.contact': 'Contact us',
+
+      // Partners
+      'partners.title': 'Partners & technologies',
+
+      // Problem section
+      'problem.badge': 'The problem',
+      'problem.title': '80% theory, 20% practice. <br> Result: graduates who are not job-ready.',
+      'problem.desc': 'TIL flips the equation with <strong>ultra-realistic VR simulations</strong>, an <strong>offline</strong> mode, and content updated <strong>every quarter</strong>.',
+      'problem.card1.title': 'VR immersion',
+      'problem.card1.desc': 'Nursing gestures, AWS deployment, farm management - performed in a secure 3D environment.',
+      'problem.card2.title': 'Teaching AI',
+      'problem.card2.desc': 'Personalized recommendations, auto subtitles (Whisper), dropout detection, LLM-generated quizzes.',
+      'problem.card3.title': 'Native Mobile Money',
+      'problem.card3.desc': 'Orange Money, Moov Money, Wave - pay for training from your phone, without a bank card.',
+
+      // Platform section
+      'platform.badge': 'The platform',
+      'platform.title': 'One platform, three connected worlds.',
+      'platform.desc': 'Learner, instructor, institution - each has dedicated tools, no friction, no installation.',
+      'platform.item1.title': 'Smart catalog',
+      'platform.item1.desc': 'AI recommendations, advanced filters, free preview, verifiable certifications.',
+      'platform.item2.title': 'Instructor studio',
+      'platform.item2.desc': 'Drag & drop: videos, quizzes, VR scenes (GLTF/GLB), graded assessments inside the simulation.',
+      'platform.item3.title': 'Institution dashboard',
+      'platform.item3.desc': 'Active Directory SSO, VR fleet management (MDM), ROI reports, white-labeling.',
+      'platform.stat1': 'Target SLA uptime',
+      'platform.stat2': 'Load time',
+      'platform.stat3': 'Minimum connection',
+      'platform.stat4': 'AES-256 + TLS 1.3',
+      'platform.stack': 'Stack',
+
+      // Catalog
+      'catalog.badge': 'Interactive prototype',
+      'catalog.title': 'Training catalog',
+      'catalog.filterPrefix': 'Filter among',
+      'catalog.filterSuffix': 'modules. Click to view details.',
+      'catalog.filter.all': 'All',
+      'catalog.filter.dev': 'Dev & IT',
+      'catalog.filter.sante': 'Health',
+      'catalog.filter.agro': 'Agronomy',
+      'catalog.filter.vr': 'VR only',
+
+      // VR demo section
+      'vrdemo.badge': 'Interactive demo',
+      'vrdemo.title': 'Workshop - PC Maintenance',
+      'vrdemo.desc': 'A PC tower is faulty. <strong>Click each component</strong> to diagnose it, identify the fault (blinking red component), then replace it to complete the repair.',
+      'vrdemo.stats.inspected': 'Inspected',
+      'vrdemo.stats.fault': 'Fault',
+      'vrdemo.stats.score': 'Score',
+      'vrdemo.console.title': 'Technician console',
+      'vrdemo.console.hint': '→ Click a component in the tower to show its data sheet.',
+      'vrdemo.btn.rotate': 'Auto rotate',
+      'vrdemo.btn.reset': 'Recenter',
+      'vrdemo.btn.newFault': 'New fault',
+      'vrdemo.link': 'See the 6 VR simulations',
+      'vrdemo.live': 'LIVE · Three.js WebGL',
+      'vrdemo.faultDetected': '⚠ Fault detected',
+      'vrdemo.hint': 'Drag · Scroll · Click components',
+      'vrdemo.success': '✓ Tower fixed - Module validated',
+
+      // Audience
+      'audience.badge': 'For whom',
+      'audience.title': 'One platform, multiple audiences.',
+      'audience.desc': 'Individuals, universities, companies, NGOs - each profile has a tailored path and tools.',
+      'audience.recommended': 'RECOMMENDED',
+      'audience.individual.title': 'Individual learner',
+      'audience.individual.desc': 'Students, young professionals, career changers. Mobile access, recognized certifications.',
+      'audience.individual.b1': '✓ Full catalog',
+      'audience.individual.b2': '✓ Offline mode',
+      'audience.individual.b3': '✓ Digital certificate',
+      'audience.individual.cta': 'Start for free',
+      'audience.schools.title': 'Universities & schools',
+      'audience.schools.desc': 'Modernize your teaching with VR simulations and consolidated learning analytics.',
+      'audience.schools.b1': '✓ Customized paths',
+      'audience.schools.b2': '✓ Cohort dashboard',
+      'audience.schools.b3': '✓ VR fleet management',
+      'audience.schools.cta': 'Request a demo',
+      'audience.companies.title': 'Companies',
+      'audience.companies.desc': 'Continuous team training with measurable ROI and integrated HR reporting.',
+      'audience.companies.b1': '✓ Active Directory SSO',
+      'audience.companies.b2': '✓ ROI reports',
+      'audience.companies.b3': '✓ HRIS integration',
+      'audience.companies.cta': 'Contact us',
+      'audience.public.title': 'NGOs & public sector',
+      'audience.public.desc': 'Large-scale capacity building, social pricing, subsidized projects.',
+      'audience.public.b1': '✓ Massive deployment',
+      'audience.public.b2': '✓ White-labeling',
+      'audience.public.b3': '✓ Custom modules',
+      'audience.public.cta': 'Discuss a project',
+
+      // Hardware
+      'hardware.badge': 'Hardware offer',
+      'hardware.title': 'Turnkey VR headsets for your institutions.',
+      'hardware.desc': 'Purchase, long-term rental, leasing, or a free 30-day pilot. Installation, trainer training, and support included.',
+      'hardware.table.pack': 'Pack',
+      'hardware.table.headsets': 'Headsets',
+      'hardware.table.included': 'Included',
+      'hardware.table.action': 'Action',
+      'hardware.quote': 'Quote →',
+      'hardware.row1.pack': 'School Starter',
+      'hardware.row1.headsets': '10× Meta Quest 3',
+      'hardware.row1.included': '50 modules, trainer training, 2-year warranty',
+      'hardware.row2.pack': 'University',
+      'hardware.row2.headsets': '30× Meta Quest 3',
+      'hardware.row2.included': '150 modules, priority support, quarterly report',
+      'hardware.row3.pack': 'Company',
+      'hardware.row3.headsets': '20× Pico 4 Enterprise',
+      'hardware.row3.included': 'MDM, HRIS integration, custom modules',
+      'hardware.row4.pack': 'Medical',
+      'hardware.row4.headsets': '15× Meta Quest 3 Pro',
+      'hardware.row4.included': '25 health modules, hygienic headsets, monthly maintenance',
+      'hardware.row5.pack': 'Premium',
+      'hardware.row5.headsets': '50× of choice',
+      'hardware.row5.included': 'All modules, 5 custom, white-label, 24/7 support',
+
+      // FAQ
+      'faq.badge': 'FAQ',
+      'faq.title': 'Frequently asked questions',
+      'faq.q1': 'Do I need a VR headset to use TIL?',
+      'faq.a1': 'No. All VR modules work in 360° mode in a standard browser. The headset enhances the experience but is not required.',
+      'faq.q2': 'How can I pay from Burkina Faso?',
+      'faq.a2': 'Orange Money, Moov Money, Wave (CinetPay / PayDunya integration), bank transfer, or Visa/Mastercard via Stripe for diaspora learners.',
+      'faq.q3': 'Are my certificates recognized?',
+      'faq.a3': 'Each certificate is digitally signed and verifiable by QR code. Partnerships with AWS, Google, and Coursera are planned for co-certification (V2).',
+      'faq.q4': 'Can my institution rent headsets?',
+      'faq.a4': 'Yes: purchase, long-term rental (12-36 months), lease-to-own (24-48 months), or SaaS subscription including hardware. A free 30-day pilot with 5 headsets is available.',
+
+      // CTA
+      'cta.title': 'Join the revolution<br/>of immersive learning in Africa.',
+      'cta.desc': 'Investors, institutions, learners - let us talk. Personalized demo within 48h.',
+      'cta.placeholder': 'your@email.com',
+      'cta.button': 'Request a demo',
+      'cta.sent': '✓ Request sent',
+      'cta.contact': 'Direct contact:',
+
+      // Footer
+      'footer.address': 'Ouaga 2000, NLVI Building<br/>Ouagadougou, Burkina Faso<br/>RCCM: BF-OUA-01-2022-013-14820',
+      'footer.product': 'Product',
+      'footer.company': 'Company',
+      'footer.legal': 'Legal',
+      'footer.link.platform': 'Platform',
+      'footer.link.catalog': 'Catalog',
+      'footer.link.vr': 'VR',
+      'footer.link.hardware': 'Headsets',
+      'footer.link.about': 'About',
+      'footer.link.partners': 'Partners',
+      'footer.link.careers': 'Careers',
+      'footer.link.press': 'Press',
+      'footer.link.terms': 'Terms',
+      'footer.link.privacy': 'Privacy (GDPR)',
+      'footer.link.legal': 'Legal notice',
+
+      // Courses
+      'course.hoursSuffix': 'h',
+      'course.students': 'learners',
+      'course.studentsRegistered': 'learners enrolled',
+      'course.view': 'View course',
+      'course.vr': 'VIRTUAL REALITY',
+      'course.certifying': 'Certifying',
+      'course.duration': 'Duration',
+      'course.level': 'Level',
+      'course.rating': 'Rating',
+      'course.launchDemo': 'Launch demo',
+      'course.enroll': 'Enroll',
+      'course.level.beginner': 'Beginner',
+      'course.level.intermediate': 'Intermediate',
+      'course.level.advanced': 'Advanced',
+      'course.level.all': 'All levels',
+      'course.level.practice': 'Practice',
+      'course.tag.popular': 'Popular',
+      'course.tag.new': 'New',
+      'course.tag.certifying': 'Certifying',
+      'course.1.title': 'Virtual AWS Cloud Lab',
+      'course.1.desc': 'Deploy a full AWS architecture from a 3D console: EC2, S3, security groups.',
+      'course.2.title': 'Immersive Code Room',
+      'course.2.desc': 'Virtual desk, 3D code editor, visual debugging in Python, JS, and PHP.',
+      'course.3.title': 'Cyber Operations Center',
+      'course.3.desc': 'Full SOC: intrusion detection, log analysis, real-time incident response.',
+      'course.4.title': 'Agile Sprint VR',
+      'course.4.desc': '3D Kanban, VR standup, collaborative code review - Scrum methodology.',
+      'course.5.title': 'Nursing Care Room',
+      'course.5.desc': 'Technical gestures: IV placement, injection, vital signs in a virtual room.',
+      'course.6.title': 'Emergency & EMS',
+      'course.6.desc': 'Cardiac arrest, trauma, stroke - ACLS/BLS protocols with a virtual medical team.',
+      'course.7.title': 'Interactive 3D Anatomy',
+      'course.7.desc': 'Virtual dissection, cardiovascular, nervous, and digestive systems in 3D.',
+      'course.8.title': 'Operating Room',
+      'course.8.desc': 'Virtual surgery, sterile protocols, surgical instrument handling.',
+      'course.9.title': 'Integrated Virtual Farm',
+      'course.9.desc': 'Complete management: crops, soil, weather, irrigation - strategic decisions.',
+      'course.10.title': 'Soil Analysis Lab',
+      'course.10.desc': 'Sampling, analysis, interpretation, amendment recommendations.',
+      'course.11.title': 'Livestock & Animal Health',
+      'course.11.desc': 'Virtual herd management, disease identification, vaccination, veterinary care.',
+      'course.12.title': 'Irrigation & Hydraulics',
+      'course.12.desc': 'Design a drip system, hydraulic calculations, optimization.',
+    }
+  },
+  
+  t(key) {
+    const trans = this.translations[this.currentLang];
+    return trans && trans[key] ? trans[key] : key;
+  },
+  
+  setLang(lang) {
+    if (this.translations[lang]) {
+      this.currentLang = lang;
+      localStorage.setItem('til-lang', lang);
+      this.updatePage();
+    }
+  },
+  
+  updatePage() {
+    document.documentElement.lang = this.currentLang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      el.textContent = this.t(key);
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      el.setAttribute('placeholder', this.t(key));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.getAttribute('data-i18n-title');
+      el.setAttribute('title', this.t(key));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      el.innerHTML = this.t(key);
+    });
+    document.querySelectorAll('[data-i18n-attr-content]').forEach(el => {
+      const key = el.getAttribute('data-i18n-attr-content');
+      el.setAttribute('content', this.t(key));
+    });
+    // Trigger custom event
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: this.currentLang } }));
+  },
+  
+  init() {
+    // Ensure DOM is ready
+    if (document.readyState === 'loading') {
+      // Still loading
+      this.updatePage();
+      this.setupSelector();
+    } else {
+      // DOM is ready
+      this.updatePage();
+      this.setupSelector();
+    }
+  },
+  
+  setupSelector() {
+    document.querySelectorAll('.lang-selector').forEach(el => {
+      el.innerHTML = Object.entries(this.langs)
+        .map(([code, langObj]) => `
+          <button class="lang-btn ${code === this.currentLang ? 'active' : ''}"
+                  data-lang="${code}"
+                  title="${langObj.name}"
+                  aria-label="${langObj.name}">
+            ${langObj.flag}
+          </button>
+        `)
+        .join('');
+      el.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const targetBtn = e.target.closest('.lang-btn');
+          this.setLang(targetBtn.dataset.lang);
+          document.querySelectorAll('.lang-selector .lang-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll(`.lang-selector .lang-btn[data-lang="${targetBtn.dataset.lang}"]`).forEach(b => b.classList.add('active'));
+        });
+      });
+    });
+  }
+};
+
+// Initialize on DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => i18n.init());
+} else {
+  i18n.init();
+}

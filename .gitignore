@@ -5,8 +5,13 @@ node_modules/
 dist/
 coverage/
 logs/
+AGENTS.md
+CLAUDE.md
+claude/
 *.log
 .DS_Store
 Thumbs.db
 *.swp
 *.swo
+.next/
+.out/
