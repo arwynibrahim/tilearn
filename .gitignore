@@ -1,0 +1,12 @@
+.vscode/
+.env
+.env.*
+node_modules/
+dist/
+coverage/
+logs/
+*.log
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
