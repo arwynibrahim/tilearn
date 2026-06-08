@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useLangStore } from '@/stores/lang.store';
 import { useT } from '@/hooks/use-t';
 import { useLogout } from '@/hooks/use-auth';
+import { Brand } from '@/components/layout/brand';
 import { cn } from '@/lib/utils';
 
 export function Header() {
@@ -27,14 +28,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-navy/95 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-gradient">
-            <span className="text-base font-black text-white">T</span>
-          </div>
-          <span className="hidden font-bold text-white sm:block">
-            Total<span className="text-brand">Innovation</span>
-          </span>
-        </Link>
+        <Brand size={38} textClassName="hidden text-white sm:block" />
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-6 md:flex">

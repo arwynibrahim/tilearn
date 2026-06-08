@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { useLogin } from '@/hooks/use-auth';
 import { useT } from '@/hooks/use-t';
 import { authApi } from '@/lib/api/auth';
+import { getApiErrorMessage } from '@/lib/api/client';
 
 const schema = z.object({
   email: z.string().email(),
@@ -47,7 +48,7 @@ function LoginForm() {
 
       {error && (
         <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600">
-          {t('auth.error_invalid')}
+          {getApiErrorMessage(error, t('auth.error_invalid'))}
         </div>
       )}
 

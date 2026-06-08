@@ -1,3 +1,6 @@
+// Types aligned with the NestJS backend (Prisma models + DTOs).
+// French field names (nom/prenom) and exact enum values from prisma/parts/01_enums.prisma.
+
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 export type Role = 'LEARNER' | 'INSTRUCTOR' | 'ADMIN_INSTITUTION' | 'SUPER_ADMIN';
@@ -5,12 +8,15 @@ export type Role = 'LEARNER' | 'INSTRUCTOR' | 'ADMIN_INSTITUTION' | 'SUPER_ADMIN
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  nom: string;
+  prenom: string;
+  telephone?: string | null;
   role: Role;
-  avatar?: string;
+  avatar?: string | null;
+  emailVerifiedAt?: string | null;
+  lastLoginAt?: string | null;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
   deletedAt?: string | null;
 }
 
@@ -19,16 +25,21 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
+export interface AuthResponse extends AuthTokens {
+  user: User;
+}
+
 export interface LoginDto {
   email: string;
   password: string;
 }
 
 export interface RegisterDto {
-  firstName: string;
-  lastName: string;
+  nom: string;
+  prenom: string;
   email: string;
   password: string;
+  telephone?: string;
 }
 
 export interface ResetPasswordDto {
@@ -38,33 +49,37 @@ export interface ResetPasswordDto {
 
 // ─── Catalogue ───────────────────────────────────────────────────────────────
 
-export type CourseLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+export type CourseLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
 export type ModuleType = 'VIDEO' | 'VR' | 'QUIZ' | 'TEXT';
 
 export interface Domain {
   id: string;
   name: string;
   slug: string;
-  description?: string;
-  createdAt: string;
+  icon?: string | null;
+  description?: string | null;
+  courses?: Course[];
 }
 
 export interface Course {
   id: string;
   title: string;
   slug: string;
-  description: string;
-  level: CourseLevel;
+  description?: string | null;
+  thumbnail?: string | null;
   domainId: string;
-  domain?: Domain;
-  thumbnailUrl?: string;
-  price?: number;
+  level: CourseLevel;
+  duration?: number | null; // minutes
+  language: string;
+  price?: number | null;
   isPublished: boolean;
-  hasVR: boolean;
-  durationHours?: number;
-  enrollmentsCount?: number;
-  rating?: number;
+  createdBy: string;
   createdAt: string;
+  updatedAt: string;
+  domain?: Domain;
+  creator?: Pick<User, 'id' | 'nom' | 'prenom' | 'avatar'>;
+  modules?: Module[];
+  _count?: { modules: number; enrollments: number };
 }
 
 export interface Module {
@@ -73,40 +88,93 @@ export interface Module {
   title: string;
   type: ModuleType;
   order: number;
-  durationMinutes?: number;
+  contentUrl?: string | null;
+  durationSeconds?: number | null;
+  isRequired: boolean;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCourseDto {
+  title: string;
+  description?: string;
+  thumbnail?: string;
+  domainId: string;
+  level?: CourseLevel;
+  duration?: number;
+  language?: string;
+  price?: number;
+  isPublished?: boolean;
+}
+
+export type UpdateCourseDto = Partial<CreateCourseDto>;
+
+export interface CreateDomainDto {
+  name: string;
+  slug: string;
+  icon?: string;
+  description?: string;
+}
+
+export interface CreateModuleDto {
+  courseId: string;
+  title: string;
+  type: ModuleType;
+  order?: number;
+  contentUrl?: string;
+  durationSeconds?: number;
+  isRequired?: boolean;
 }
 
 // ─── Learning ────────────────────────────────────────────────────────────────
 
-export type EnrollmentStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+export type EnrollmentStatus = 'ACTIVE' | 'COMPLETED' | 'EXPIRED' | 'DROPPED';
+export type ProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 
 export interface Enrollment {
   id: string;
   userId: string;
   courseId: string;
-  course?: Course;
   status: EnrollmentStatus;
-  progressPercent: number;
   enrolledAt: string;
-  completedAt?: string;
+  completedAt?: string | null;
+  expiryDate?: string | null;
+  course?: Pick<Course, 'id' | 'title' | 'slug' | 'thumbnail' | 'level'>;
+}
+
+export interface ModuleProgress {
+  status: ProgressStatus | string;
+  score?: number | null;
+  timeSpentSeconds?: number | null;
+}
+
+export interface ModuleWithProgress extends Module {
+  progress: ModuleProgress;
+}
+
+export interface CourseProgress {
+  modules: ModuleWithProgress[];
+  stats: { totalModules: number; completedModules: number; completionPercent: number };
 }
 
 export interface Certificate {
   id: string;
-  uid: string;
   userId: string;
   courseId: string;
-  course?: Course;
+  certificateUid: string;
   issuedAt: string;
-  qrCodeUrl?: string;
+  qrCodeHash?: string | null;
+  verificationUrl?: string | null;
+  revokedAt?: string | null;
+  course?: Pick<Course, 'title' | 'slug'>;
 }
 
 // ─── Payment ─────────────────────────────────────────────────────────────────
 
 export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'REFUNDED';
-export type PaymentProvider = 'LIGDICASH' | 'STRIPE' | 'CINETPAY';
-export type SubscriptionPlan = 'FREE' | 'BASIC' | 'PRO' | 'ENTERPRISE';
+export type PaymentProvider = 'CINETPAY' | 'STRIPE';
+export type PaymentMethod = 'ORANGE_MONEY' | 'MOOV_MONEY' | 'CARD';
+export type SubscriptionPlan = 'FREEMIUM' | 'STARTER' | 'PRO' | 'EXPERT';
 
 export interface Payment {
   id: string;
@@ -115,51 +183,99 @@ export interface Payment {
   currency: string;
   status: PaymentStatus;
   provider: PaymentProvider;
+  method?: PaymentMethod;
   createdAt: string;
 }
 
 // ─── B2B ─────────────────────────────────────────────────────────────────────
 
-export type OrganizationType = 'UNIVERSITY' | 'COMPANY' | 'NGO' | 'GOVERNMENT';
-export type LicensePlan = 'STARTER' | 'TEAM' | 'ENTERPRISE';
+export type OrganizationType = 'UNIVERSITY' | 'COMPANY' | 'HOSPITAL' | 'NGO' | 'GOV';
+export type LicensePlan = 'STARTER_10' | 'PRO_30' | 'PREMIUM_50' | 'ENTERPRISE_100' | 'UNLIMITED';
 
 export interface Organization {
   id: string;
   name: string;
   type: OrganizationType;
-  country: string;
-  contactEmail: string;
-  adminId?: string;
+  emailDomain?: string | null;
+  logo?: string | null;
+  address?: string | null;
+  country?: string | null;
+  phone?: string | null;
+  contractStart?: string | null;
+  contractEnd?: string | null;
+  isActive: boolean;
   createdAt: string;
-  _count?: { licenses: number };
+  _count?: { licenses: number; learningPaths: number; vrHeadsets: number };
+}
+
+export interface CreateOrganizationDto {
+  name: string;
+  type: OrganizationType;
+  emailDomain?: string;
+  address?: string;
+  country?: string;
+  phone?: string;
 }
 
 export interface License {
   id: string;
   organizationId: string;
-  organization?: Organization;
   plan: LicensePlan;
-  seats: number;
-  usedSeats: number;
-  expiresAt: string;
+  quantity: number;
+  usedCount: number;
+  startDate: string;
+  endDate: string;
+  price?: number | null;
+  autoRenew: boolean;
   createdAt: string;
+  organization?: Organization;
+}
+
+export interface CreateLicenseDto {
+  organizationId: string;
+  plan: LicensePlan;
+  quantity: number;
+  startDate: string;
+  endDate: string;
+  price?: number;
+  autoRenew?: boolean;
 }
 
 // ─── MDM ─────────────────────────────────────────────────────────────────────
 
 export type HeadsetModel = 'META_QUEST_2' | 'META_QUEST_3' | 'PICO_4';
-export type HeadsetStatus = 'ONLINE' | 'OFFLINE' | 'CHARGING' | 'MAINTENANCE';
+export type HeadsetStatus = 'ONLINE' | 'OFFLINE' | 'CHARGING' | 'IN_USE' | 'MAINTENANCE' | 'LOST';
 
 export interface VRHeadset {
   id: string;
-  serial: string;
+  organizationId: string;
+  serialNumber: string;
   model: HeadsetModel;
+  firmwareVersion?: string | null;
   status: HeadsetStatus;
-  batteryLevel: number;
-  organizationId?: string;
-  organization?: Organization;
-  lastSeenAt?: string;
-  assignedUserId?: string;
+  batteryLevel?: number | null;
+  lastPing?: string | null;
+  assignedUserId?: string | null;
+  kioskModeEnabled: boolean;
+  createdAt: string;
+  assignedUser?: Pick<User, 'id' | 'nom' | 'prenom' | 'email'> | null;
+}
+
+export interface CreateVRHeadsetDto {
+  organizationId: string;
+  serialNumber: string;
+  model: HeadsetModel;
+  firmwareVersion?: string;
+  batteryLevel?: number;
+}
+
+export interface ChargingStation {
+  id: string;
+  organizationId: string;
+  model?: string | null;
+  portsTotal: number;
+  portsAvailable: number;
+  location?: string | null;
   createdAt: string;
 }
 
@@ -170,6 +286,7 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   limit: number;
+  totalPages?: number;
 }
 
 export interface ApiError {

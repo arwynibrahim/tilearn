@@ -1,12 +1,12 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Users, Building2, BadgeCheck, Headphones, TrendingUp, Activity } from 'lucide-react';
+import Link from 'next/link';
+import { Users, Building2, BadgeCheck, Headphones, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { usersApi } from '@/lib/api/users';
 import { b2bApi } from '@/lib/api/b2b';
-import { mdmApi } from '@/lib/api/mdm';
 import { formatDate } from '@/lib/utils';
 
 function StatCard({
@@ -51,17 +51,12 @@ export default function AdminDashboard() {
     retry: false,
   });
 
-  const { data: headsets } = useQuery({
-    queryKey: ['admin-headsets'],
-    queryFn: () => mdmApi.headsets.list(),
-    retry: false,
-  });
-
-  const onlineHeadsets = headsets?.filter((h) => h.status === 'ONLINE').length ?? 0;
+  // Aggregate counts from organization _count (no global endpoints needed)
+  const totalHeadsets = orgs?.reduce((sum, o) => sum + (o._count?.vrHeadsets ?? 0), 0);
+  const totalLicenses = orgs?.reduce((sum, o) => sum + (o._count?.licenses ?? 0), 0);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-gray-900">Tableau de bord</h1>
         <p className="text-sm text-gray-500">Vue d&apos;ensemble de la plateforme</p>
@@ -85,21 +80,20 @@ export default function AdminDashboard() {
         />
         <StatCard
           icon={BadgeCheck}
-          title="Licences actives"
-          value="—"
-          sub="en cours de validité"
+          title="Licences"
+          value={totalLicenses ?? '—'}
+          sub="toutes organisations"
           color="bg-green-500"
         />
         <StatCard
           icon={Headphones}
           title="Casques VR"
-          value={headsets?.length ?? '—'}
-          sub={`${onlineHeadsets} en ligne`}
+          value={totalHeadsets ?? '—'}
+          sub="parc total"
           color="bg-purple-500"
         />
       </div>
 
-      {/* Recent users + Headset status */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent users */}
         <Card>
@@ -116,11 +110,11 @@ export default function AdminDashboard() {
                   <div key={u.id} className="flex items-center justify-between py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
-                        {u.firstName[0]}{u.lastName[0]}
+                        {u.prenom?.[0]}{u.nom?.[0]}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          {u.firstName} {u.lastName}
+                          {u.prenom} {u.nom}
                         </p>
                         <p className="text-xs text-gray-400">{u.email}</p>
                       </div>
@@ -140,38 +134,44 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Headset status */}
+        {/* Organizations overview */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="size-4 text-brand" />
-              Parc VR — Statut
+              <Building2 className="size-4 text-brand" />
+              Organisations
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {headsets?.length ? (
-              <div className="space-y-3">
-                {[
-                  { status: 'ONLINE', label: 'En ligne', color: 'bg-green-500', count: headsets.filter(h => h.status === 'ONLINE').length },
-                  { status: 'OFFLINE', label: 'Hors ligne', color: 'bg-gray-400', count: headsets.filter(h => h.status === 'OFFLINE').length },
-                  { status: 'CHARGING', label: 'En charge', color: 'bg-amber-500', count: headsets.filter(h => h.status === 'CHARGING').length },
-                  { status: 'MAINTENANCE', label: 'Maintenance', color: 'bg-red-500', count: headsets.filter(h => h.status === 'MAINTENANCE').length },
-                ].map((s) => (
-                  <div key={s.status} className="flex items-center gap-3">
-                    <div className={`h-2.5 w-2.5 rounded-full ${s.color}`} />
-                    <span className="flex-1 text-sm text-gray-600">{s.label}</span>
-                    <span className="font-semibold text-gray-900">{s.count}</span>
-                    <div className="h-1.5 w-24 rounded-full bg-gray-100">
-                      <div
-                        className={`h-full rounded-full ${s.color}`}
-                        style={{ width: `${headsets.length ? (s.count / headsets.length) * 100 : 0}%` }}
-                      />
+            {orgs?.length ? (
+              <div className="divide-y divide-gray-50">
+                {orgs.slice(0, 6).map((o) => (
+                  <Link
+                    key={o.id}
+                    href="/admin/organizations"
+                    className="flex items-center justify-between py-3 hover:bg-gray-50 -mx-2 px-2 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-navy/10">
+                        <Building2 className="size-4 text-navy" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">{o.name}</span>
                     </div>
-                  </div>
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <BadgeCheck className="size-3" />
+                        {o._count?.licenses ?? 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Headphones className="size-3" />
+                        {o._count?.vrHeadsets ?? 0}
+                      </span>
+                    </div>
+                  </Link>
                 ))}
               </div>
             ) : (
-              <p className="py-8 text-center text-sm text-gray-400">Aucun casque enregistré.</p>
+              <p className="py-8 text-center text-sm text-gray-400">Aucune organisation.</p>
             )}
           </CardContent>
         </Card>

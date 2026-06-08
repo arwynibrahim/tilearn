@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { License, Organization, PaginatedResponse } from '@/types';
+import type { CreateLicenseDto, CreateOrganizationDto, License, Organization } from '@/types';
 
 export const b2bApi = {
   organizations: {
@@ -7,7 +7,11 @@ export const b2bApi = {
       const { data } = await apiClient.get('/b2b/organizations');
       return data;
     },
-    create: async (payload: Partial<Organization>): Promise<Organization> => {
+    get: async (id: string): Promise<Organization> => {
+      const { data } = await apiClient.get(`/b2b/organizations/${id}`);
+      return data;
+    },
+    create: async (payload: CreateOrganizationDto): Promise<Organization> => {
       const { data } = await apiClient.post('/b2b/organizations', payload);
       return data;
     },
@@ -18,12 +22,7 @@ export const b2bApi = {
       const { data } = await apiClient.get(`/b2b/organizations/${orgId}/licenses`);
       return data;
     },
-    create: async (payload: {
-      organizationId: string;
-      plan: string;
-      seats: number;
-      expiresAt: string;
-    }): Promise<License> => {
+    create: async (payload: CreateLicenseDto): Promise<License> => {
       const { data } = await apiClient.post('/b2b/licenses', payload);
       return data;
     },

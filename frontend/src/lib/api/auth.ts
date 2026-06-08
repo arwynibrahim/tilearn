@@ -1,13 +1,13 @@
 import apiClient from './client';
-import type { AuthTokens, LoginDto, RegisterDto, User } from '@/types';
+import type { AuthResponse, AuthTokens, LoginDto, RegisterDto, User } from '@/types';
 
 export const authApi = {
-  login: async (dto: LoginDto): Promise<AuthTokens & { user: User }> => {
+  login: async (dto: LoginDto): Promise<AuthResponse> => {
     const { data } = await apiClient.post('/auth/login', dto);
     return data;
   },
 
-  register: async (dto: RegisterDto): Promise<AuthTokens & { user: User }> => {
+  register: async (dto: RegisterDto): Promise<AuthResponse> => {
     const { data } = await apiClient.post('/auth/register', dto);
     return data;
   },

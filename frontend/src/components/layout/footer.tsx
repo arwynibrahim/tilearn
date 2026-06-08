@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Footer() {
   return (
@@ -7,14 +8,13 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
-                <span className="text-sm font-black text-white">T</span>
-              </div>
-              <span className="font-bold text-white">
-                Total<span className="text-brand">Innovation</span>
-              </span>
-            </div>
+            <Image
+              src="/logo-full.jpeg"
+              alt="Total Innovation Learning"
+              width={180}
+              height={135}
+              className="mb-4 rounded-xl"
+            />
             <p className="text-sm text-gray-500">Former l&apos;Afrique de demain par l&apos;immersion VR &amp; IA.</p>
             <p className="mt-3 text-xs text-gray-600">
               Ouagadougou, Burkina Faso

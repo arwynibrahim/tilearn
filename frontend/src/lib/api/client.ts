@@ -1,6 +1,8 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { setCookie, deleteCookie } from '@/lib/utils';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
 
 export const apiClient = axios.create({
   baseURL: `${BASE_URL}/api/v1`,
@@ -36,11 +38,13 @@ apiClient.interceptors.response.use(
           });
           localStorage.setItem('accessToken', data.accessToken);
           localStorage.setItem('refreshToken', data.refreshToken);
+          setCookie('accessToken', data.accessToken, COOKIE_MAX_AGE);
           original.headers.Authorization = `Bearer ${data.accessToken}`;
           return apiClient(original);
         } catch {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
+          deleteCookie('accessToken');
           window.location.href = '/login';
         }
       } else {
@@ -51,5 +55,22 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * Extract a human-readable message from an Axios error.
+ * NestJS returns `{ message: string | string[], statusCode }`.
+ */
+export function getApiErrorMessage(error: unknown, fallback = 'Une erreur est survenue.'): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string | string[] } | undefined;
+    if (data?.message) {
+      return Array.isArray(data.message) ? data.message.join(' · ') : data.message;
+    }
+    if (error.code === 'ERR_NETWORK') {
+      return 'Impossible de joindre le serveur. Vérifiez que l’API est démarrée.';
+    }
+  }
+  return fallback;
+}
 
 export default apiClient;

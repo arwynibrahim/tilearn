@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
@@ -13,13 +14,15 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen">
       {/* Left: decorative panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-hero flex-col justify-between p-12">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand">
-            <span className="text-base font-black text-white">T</span>
-          </div>
-          <span className="text-xl font-bold text-white">
-            Total<span className="text-brand">Innovation</span>
-          </span>
+        <Link href="/" className="inline-block">
+          <Image
+            src="/logo.png"
+            alt="Total Innovation Learning"
+            width={120}
+            height={120}
+            priority
+            className="rounded-2xl"
+          />
         </Link>
 
         <div>
@@ -49,13 +52,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className="flex w-full items-center justify-center bg-white p-8 lg:w-1/2">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="mb-8 flex items-center gap-2 lg:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
-              <span className="text-sm font-black text-white">T</span>
-            </div>
-            <span className="font-bold text-navy">
-              Total<span className="text-brand">Innovation</span>
-            </span>
+          <div className="mb-8 lg:hidden">
+            <Image src="/logo.png" alt="Total Innovation Learning" width={56} height={56} className="rounded-xl" />
           </div>
           {children}
         </div>

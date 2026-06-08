@@ -10,11 +10,12 @@ import { Label } from '@/components/ui/label';
 import { useRegister } from '@/hooks/use-auth';
 import { useT } from '@/hooks/use-t';
 import { authApi } from '@/lib/api/auth';
+import { getApiErrorMessage } from '@/lib/api/client';
 
 const schema = z
   .object({
-    firstName: z.string().min(2, 'Prénom requis'),
-    lastName: z.string().min(2, 'Nom requis'),
+    prenom: z.string().min(2, 'Prénom requis'),
+    nom: z.string().min(2, 'Nom requis'),
     email: z.string().email('Email invalide'),
     password: z.string().min(8, 'Minimum 8 caractères'),
     confirmPassword: z.string(),
@@ -44,7 +45,7 @@ export default function RegisterPage() {
 
       {error && (
         <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600">
-          {t('auth.error_exists')}
+          {getApiErrorMessage(error, t('auth.error_exists'))}
         </div>
       )}
 
@@ -83,24 +84,24 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="firstName">{t('auth.first_name')}</Label>
+            <Label htmlFor="prenom">{t('auth.first_name')}</Label>
             <Input
-              id="firstName"
+              id="prenom"
               placeholder="Moussa"
-              {...field('firstName')}
-              className={errors.firstName ? 'border-red-400' : ''}
+              {...field('prenom')}
+              className={errors.prenom ? 'border-red-400' : ''}
             />
-            {errors.firstName && <p className="text-xs text-red-500">{errors.firstName.message}</p>}
+            {errors.prenom && <p className="text-xs text-red-500">{errors.prenom.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="lastName">{t('auth.last_name')}</Label>
+            <Label htmlFor="nom">{t('auth.last_name')}</Label>
             <Input
-              id="lastName"
+              id="nom"
               placeholder="Traoré"
-              {...field('lastName')}
-              className={errors.lastName ? 'border-red-400' : ''}
+              {...field('nom')}
+              className={errors.nom ? 'border-red-400' : ''}
             />
-            {errors.lastName && <p className="text-xs text-red-500">{errors.lastName.message}</p>}
+            {errors.nom && <p className="text-xs text-red-500">{errors.nom.message}</p>}
           </div>
         </div>
 

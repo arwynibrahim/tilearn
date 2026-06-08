@@ -9,30 +9,58 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { catalogueApi } from '@/lib/api/catalogue';
 import { useT } from '@/hooks/use-t';
-import type { Course } from '@/types';
+import type { Course, CourseLevel } from '@/types';
 
-const LEVEL_VARIANT = {
+const LEVEL_VARIANT: Record<CourseLevel, 'success' | 'warning' | 'destructive' | 'info'> = {
   BEGINNER: 'success',
   INTERMEDIATE: 'warning',
   ADVANCED: 'destructive',
-} as const;
+  EXPERT: 'info',
+};
 
-// Static fallback courses for when API is unavailable
-const FALLBACK_COURSES: Course[] = [
-  { id: '1', title: 'Développement Web Full-Stack', slug: 'dev-fullstack', description: 'Maîtrisez React, Node.js et les bases de données modernes.', level: 'INTERMEDIATE', domainId: 'dev', isPublished: true, hasVR: false, durationHours: 48, enrollmentsCount: 1240, rating: 4.8, createdAt: '' },
-  { id: '2', title: 'Anatomie & Cardiologie VR', slug: 'anatomie-vr', description: 'Explorez le corps humain en réalité virtuelle avec des simulations 3D.', level: 'ADVANCED', domainId: 'sante', isPublished: true, hasVR: true, durationHours: 32, enrollmentsCount: 890, rating: 4.9, createdAt: '' },
-  { id: '3', title: 'Agriculture Durable & Précision', slug: 'agro-precision', description: "Techniques modernes d'irrigation et de gestion des cultures.", level: 'BEGINNER', domainId: 'agro', isPublished: true, hasVR: true, durationHours: 24, enrollmentsCount: 560, rating: 4.7, createdAt: '' },
-  { id: '4', title: 'DevOps & Cloud AWS', slug: 'devops-aws', description: 'CI/CD, Kubernetes, infrastructure as code sur AWS.', level: 'ADVANCED', domainId: 'dev', isPublished: true, hasVR: false, durationHours: 40, enrollmentsCount: 780, rating: 4.6, createdAt: '' },
-  { id: '5', title: 'Soins Infirmiers VR', slug: 'soins-infirmiers-vr', description: 'Simulation de salle de soins avec retour haptique.', level: 'INTERMEDIATE', domainId: 'sante', isPublished: true, hasVR: true, durationHours: 28, enrollmentsCount: 430, rating: 4.8, createdAt: '' },
-  { id: '6', title: 'Cybersécurité & Ethical Hacking', slug: 'cybersec', description: "Tests d'intrusion, OWASP, gestion des vulnérabilités.", level: 'ADVANCED', domainId: 'dev', isPublished: true, hasVR: false, durationHours: 36, enrollmentsCount: 650, rating: 4.5, createdAt: '' },
+// Marketing display shape — decoupled from the backend Course model so the
+// landing keeps working with a static fallback when the API is unavailable.
+interface DisplayCourse {
+  id: string;
+  title: string;
+  description: string;
+  slug: string;
+  level: CourseLevel;
+  domainSlug: string;
+  durationHours?: number;
+  students?: number;
+  rating?: number;
+  hasVR?: boolean;
+}
+
+const FALLBACK_COURSES: DisplayCourse[] = [
+  { id: '1', title: 'Développement Web Full-Stack', slug: 'dev-fullstack', description: 'Maîtrisez React, Node.js et les bases de données modernes.', level: 'INTERMEDIATE', domainSlug: 'dev', durationHours: 48, students: 1240, rating: 4.8 },
+  { id: '2', title: 'Anatomie & Cardiologie VR', slug: 'anatomie-vr', description: 'Explorez le corps humain en réalité virtuelle avec des simulations 3D.', level: 'ADVANCED', domainSlug: 'sante', durationHours: 32, students: 890, rating: 4.9, hasVR: true },
+  { id: '3', title: 'Agriculture Durable & Précision', slug: 'agro-precision', description: "Techniques modernes d'irrigation et de gestion des cultures.", level: 'BEGINNER', domainSlug: 'agro', durationHours: 24, students: 560, rating: 4.7, hasVR: true },
+  { id: '4', title: 'DevOps & Cloud AWS', slug: 'devops-aws', description: 'CI/CD, Kubernetes, infrastructure as code sur AWS.', level: 'EXPERT', domainSlug: 'dev', durationHours: 40, students: 780, rating: 4.6 },
+  { id: '5', title: 'Soins Infirmiers VR', slug: 'soins-infirmiers-vr', description: 'Simulation de salle de soins avec retour haptique.', level: 'INTERMEDIATE', domainSlug: 'sante', durationHours: 28, students: 430, rating: 4.8, hasVR: true },
+  { id: '6', title: 'Cybersécurité & Ethical Hacking', slug: 'cybersec', description: "Tests d'intrusion, OWASP, gestion des vulnérabilités.", level: 'EXPERT', domainSlug: 'dev', durationHours: 36, students: 650, rating: 4.5 },
 ];
+
+function toDisplay(course: Course): DisplayCourse {
+  return {
+    id: course.id,
+    title: course.title,
+    description: course.description ?? '',
+    slug: course.slug,
+    level: course.level,
+    domainSlug: course.domain?.slug ?? '',
+    durationHours: course.duration ? Math.round(course.duration / 60) : undefined,
+    students: course._count?.enrollments,
+    hasVR: course.modules?.some((m) => m.type === 'VR'),
+  };
+}
 
 const FILTERS = [
   { key: 'all', label: 'Tous' },
   { key: 'dev', label: 'Développement' },
   { key: 'sante', label: 'Santé' },
   { key: 'agro', label: 'Agro' },
-  { key: 'vr', label: 'VR uniquement' },
 ];
 
 export function CoursesSection() {
@@ -45,13 +73,11 @@ export function CoursesSection() {
     retry: false,
   });
 
-  const courses: Course[] = apiData?.data?.length ? apiData.data : FALLBACK_COURSES;
+  const courses: DisplayCourse[] = apiData?.data?.length
+    ? apiData.data.map(toDisplay)
+    : FALLBACK_COURSES;
 
-  const filtered = courses.filter((c) => {
-    if (filter === 'all') return true;
-    if (filter === 'vr') return c.hasVR;
-    return c.domainId === filter;
-  });
+  const filtered = courses.filter((c) => filter === 'all' || c.domainSlug === filter);
 
   return (
     <section id="courses" className="bg-white py-20">
@@ -104,10 +130,9 @@ export function CoursesSection() {
   );
 }
 
-function CourseCard({ course, t }: { course: Course; t: (k: string) => string }) {
+function CourseCard({ course, t }: { course: DisplayCourse; t: (k: string) => string }) {
   return (
     <Card className="card-hover group overflow-hidden">
-      {/* Thumbnail */}
       <div className="relative h-40 bg-gradient-to-br from-navy to-navy-700 overflow-hidden">
         <div className="absolute inset-0 bg-brand/10" />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -123,10 +148,7 @@ function CourseCard({ course, t }: { course: Course; t: (k: string) => string })
             VR
           </div>
         )}
-        <Badge
-          variant={LEVEL_VARIANT[course.level] ?? 'default'}
-          className="absolute bottom-3 left-3"
-        >
+        <Badge variant={LEVEL_VARIANT[course.level]} className="absolute bottom-3 left-3">
           {t(`courses.level_${course.level.toLowerCase()}`)}
         </Badge>
       </div>
@@ -138,19 +160,19 @@ function CourseCard({ course, t }: { course: Course; t: (k: string) => string })
         <p className="mb-4 text-sm text-gray-500 line-clamp-2">{course.description}</p>
 
         <div className="mb-4 flex items-center gap-4 text-xs text-gray-400">
-          {course.durationHours && (
+          {course.durationHours != null && (
             <span className="flex items-center gap-1">
               <Clock className="size-3" />
               {course.durationHours}h
             </span>
           )}
-          {course.enrollmentsCount && (
+          {course.students != null && (
             <span className="flex items-center gap-1">
               <Users className="size-3" />
-              {course.enrollmentsCount.toLocaleString()} {t('courses.students')}
+              {course.students.toLocaleString()} {t('courses.students')}
             </span>
           )}
-          {course.rating && (
+          {course.rating != null && (
             <span className="flex items-center gap-1 text-amber-500">
               <Star className="size-3 fill-current" />
               {course.rating}

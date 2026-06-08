@@ -21,6 +21,22 @@ export function formatCurrency(amount: number, currency = 'XOF') {
   }).format(amount);
 }
 
-export function getInitials(firstName: string, lastName: string) {
-  return `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
+export function getInitials(prenom?: string, nom?: string) {
+  return `${prenom?.[0] ?? ''}${nom?.[0] ?? ''}`.toUpperCase();
+}
+
+/**
+ * Set/remove a non-httpOnly cookie. Used so `src/proxy.ts` (Node.js runtime)
+ * can read `accessToken` for route protection. Same XSS surface as localStorage,
+ * which the app already uses for client-side auth.
+ */
+export function setCookie(name: string, value: string, maxAgeSeconds: number) {
+  if (typeof document === 'undefined') return;
+  const secure = location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax${secure}`;
+}
+
+export function deleteCookie(name: string) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
 }

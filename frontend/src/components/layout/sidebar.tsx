@@ -9,6 +9,7 @@ import {
   BadgeCheck,
   Headphones,
   BookOpen,
+  Library,
   LogOut,
   ChevronRight,
 } from 'lucide-react';
@@ -16,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import { useLogout } from '@/hooks/use-auth';
 import { getInitials } from '@/lib/utils';
+import { Brand } from '@/components/layout/brand';
 
 interface NavItem {
   href: string;
@@ -27,6 +29,7 @@ interface NavItem {
 const adminNav: NavItem[] = [
   { href: '/admin', icon: LayoutDashboard, label: 'Tableau de bord' },
   { href: '/admin/users', icon: Users, label: 'Utilisateurs' },
+  { href: '/admin/catalogue', icon: Library, label: 'Catalogue' },
   { href: '/admin/organizations', icon: Building2, label: 'Organisations' },
   { href: '/admin/licenses', icon: BadgeCheck, label: 'Licences' },
   { href: '/admin/mdm', icon: Headphones, label: 'Parc VR (MDM)' },
@@ -34,6 +37,7 @@ const adminNav: NavItem[] = [
 
 const learnerNav: NavItem[] = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
+  { href: '/courses', icon: Library, label: 'Catalogue' },
   { href: '/dashboard/courses', icon: BookOpen, label: 'Mes cours' },
   { href: '/dashboard/certificates', icon: BadgeCheck, label: 'Certificats' },
 ];
@@ -47,13 +51,8 @@ export function Sidebar({ variant = 'admin' }: { variant?: 'admin' | 'learner' }
   return (
     <aside className="flex h-full w-64 flex-col border-r border-gray-100 bg-white">
       {/* Brand */}
-      <div className="flex h-16 items-center gap-2 border-b border-gray-100 px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
-          <span className="text-sm font-black text-white">T</span>
-        </div>
-        <span className="font-bold text-navy">
-          Total<span className="text-brand">Innovation</span>
-        </span>
+      <div className="flex h-16 items-center border-b border-gray-100 px-5">
+        <Brand size={36} textClassName="text-navy" />
       </div>
 
       {/* Navigation */}
@@ -87,11 +86,11 @@ export function Sidebar({ variant = 'admin' }: { variant?: 'admin' | 'learner' }
         <div className="border-t border-gray-100 p-4">
           <div className="mb-3 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-sm font-bold text-brand">
-              {getInitials(user.firstName, user.lastName)}
+              {getInitials(user.prenom, user.nom)}
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-gray-900">
-                {user.firstName} {user.lastName}
+                {user.prenom} {user.nom}
               </p>
               <p className="truncate text-xs text-gray-500">{user.email}</p>
             </div>
