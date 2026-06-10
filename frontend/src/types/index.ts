@@ -184,7 +184,48 @@ export interface Payment {
   status: PaymentStatus;
   provider: PaymentProvider;
   method?: PaymentMethod;
+  transactionId: string;
+  providerReference?: string | null;
+  subscriptionId?: string | null;
   createdAt: string;
+  user?: Pick<User, 'id' | 'email' | 'nom' | 'prenom'>;
+}
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  plan: SubscriptionPlan;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface CreatePaymentDto {
+  transactionId: string;
+  amount: number;
+  currency?: string;
+  provider: PaymentProvider;
+  status?: PaymentStatus;
+  paymentMethod?: PaymentMethod;
+  subscriptionId?: string;
+}
+
+export interface InitiatePayinDto {
+  amount: number;
+  currency?: string;
+  description?: string;
+  customerPhone: string;
+  customerFirstname: string;
+  customerLastname: string;
+  customerEmail: string;
+}
+
+export interface LigdiCashInitResponse {
+  transactionId: string;
+  paymentUrl: string;
+  token: string;
+  message: string;
 }
 
 // ─── B2B ─────────────────────────────────────────────────────────────────────
@@ -241,6 +282,23 @@ export interface CreateLicenseDto {
   autoRenew?: boolean;
 }
 
+export interface LearningPath {
+  id: string;
+  organizationId: string;
+  name: string;
+  description?: string | null;
+  courses: Array<{ id: string; title: string; slug: string; order: number }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateLearningPathDto {
+  organizationId: string;
+  name: string;
+  description?: string;
+  courseIds: string[];
+}
+
 // ─── MDM ─────────────────────────────────────────────────────────────────────
 
 export type HeadsetModel = 'META_QUEST_2' | 'META_QUEST_3' | 'PICO_4';
@@ -279,6 +337,54 @@ export interface ChargingStation {
   createdAt: string;
 }
 
+// ─── VR ──────────────────────────────────────────────────────────────────────
+
+export interface VRScene {
+  id: string;
+  moduleId: string;
+  sceneData: Record<string, unknown>;
+  fallbackContentUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  module?: Module;
+}
+
+export interface CreateVRSceneDto {
+  moduleId: string;
+  sceneData: Record<string, unknown>;
+  fallbackContentUrl?: string;
+}
+
+// ─── Instructor ──────────────────────────────────────────────────────────────
+
+export interface InstructorProfile {
+  id: string;
+  userId: string;
+  bio?: string | null;
+  expertiseAreas?: string[] | null;
+  bankAccountInfo?: string | null;
+  taxId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: Pick<User, 'id' | 'email' | 'nom' | 'prenom' | 'avatar'>;
+}
+
+export interface CourseReview {
+  id: string;
+  userId: string;
+  courseId: string;
+  rating: number;
+  comment?: string | null;
+  createdAt: string;
+  user?: Pick<User, 'id' | 'nom' | 'prenom' | 'avatar'>;
+}
+
+export interface CreateReviewDto {
+  courseId: string;
+  rating: number;
+  comment?: string;
+}
+
 // ─── Common ──────────────────────────────────────────────────────────────────
 
 export interface PaginatedResponse<T> {
@@ -296,3 +402,24 @@ export interface ApiError {
 }
 
 export type Lang = 'fr' | 'en';
+
+// ─── Roles & Permissions ─────────────────────────────────────────────────────
+
+export interface Permission {
+  id: string;
+  name: string;
+  description?: string | null;
+  group: string;
+}
+
+export interface RolePermissions {
+  [role: string]: string[];
+}
+
+export interface UserWithPermissions extends User {
+  permissions: string[];
+}
+
+export interface GroupedPermissions {
+  [group: string]: Permission[];
+}

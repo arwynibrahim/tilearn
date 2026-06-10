@@ -1,5 +1,12 @@
 import apiClient from './client';
-import type { CreateLicenseDto, CreateOrganizationDto, License, Organization } from '@/types';
+import type {
+  CreateLicenseDto,
+  CreateLearningPathDto,
+  CreateOrganizationDto,
+  LearningPath,
+  License,
+  Organization,
+} from '@/types';
 
 export const b2bApi = {
   organizations: {
@@ -31,6 +38,17 @@ export const b2bApi = {
     },
     revoke: async (assignmentId: string): Promise<void> => {
       await apiClient.post(`/b2b/licenses/revoke/${assignmentId}`);
+    },
+  },
+
+  learningPaths: {
+    listByOrg: async (orgId: string): Promise<LearningPath[]> => {
+      const { data } = await apiClient.get(`/b2b/organizations/${orgId}/learning-paths`);
+      return data;
+    },
+    create: async (payload: CreateLearningPathDto): Promise<LearningPath> => {
+      const { data } = await apiClient.post('/b2b/learning-paths', payload);
+      return data;
     },
   },
 };
