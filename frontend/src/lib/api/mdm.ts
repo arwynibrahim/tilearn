@@ -30,5 +30,9 @@ export const mdmApi = {
       const { data } = await apiClient.get(`/mdm/organizations/${orgId}/charging-stations`);
       return data;
     },
+    create: async (dto: { organizationId: string; name: string; location?: string; capacity?: number }): Promise<ChargingStation> => {
+      const { data } = await apiClient.post('/mdm/charging-stations', dto);
+      return data;
+    },
   },
 };

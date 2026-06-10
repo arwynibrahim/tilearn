@@ -12,6 +12,9 @@ import {
   Library,
   LogOut,
   ChevronRight,
+  CreditCard,
+  UserCheck,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -32,7 +35,11 @@ const adminNav: NavItem[] = [
   { href: '/admin/catalogue', icon: Library, label: 'Catalogue' },
   { href: '/admin/organizations', icon: Building2, label: 'Organisations' },
   { href: '/admin/licenses', icon: BadgeCheck, label: 'Licences' },
+  { href: '/admin/learning-paths', icon: BookOpen, label: 'Parcours' },
   { href: '/admin/mdm', icon: Headphones, label: 'Parc VR (MDM)' },
+  { href: '/admin/payments', icon: CreditCard, label: 'Paiements' },
+  { href: '/admin/instructors', icon: UserCheck, label: 'Instructeurs' },
+  { href: '/admin/roles', icon: Shield, label: 'Rôles & Permissions' },
 ];
 
 const learnerNav: NavItem[] = [
@@ -40,6 +47,8 @@ const learnerNav: NavItem[] = [
   { href: '/courses', icon: Library, label: 'Catalogue' },
   { href: '/dashboard/courses', icon: BookOpen, label: 'Mes cours' },
   { href: '/dashboard/certificates', icon: BadgeCheck, label: 'Certificats' },
+  { href: '/dashboard/payments', icon: CreditCard, label: 'Mes paiements' },
+  { href: '/dashboard/vr', icon: Headphones, label: 'Mes VR' },
 ];
 
 export function Sidebar({ variant = 'admin' }: { variant?: 'admin' | 'learner' }) {

@@ -93,6 +93,20 @@ export class LearningService {
 
   // ─── Quiz ───────────────────────────────────────────────────
 
+  async getQuiz(quizId: string) {
+    const quiz = await this.prisma.quiz.findUnique({
+      where: { id: quizId },
+      include: {
+        questions: {
+          select: { id: true, text: true, type: true, options: true, points: true },
+          orderBy: { id: 'asc' },
+        },
+      },
+    });
+    if (!quiz) throw new NotFoundException('Quiz non trouvé');
+    return quiz;
+  }
+
   async submitQuiz(dto: SubmitQuizDto, userId: string) {
     const quiz = await this.prisma.quiz.findUnique({
       where: { id: dto.quizId },

@@ -258,6 +258,16 @@ export interface CreateOrganizationDto {
   phone?: string;
 }
 
+export interface LicenseAssignment {
+  id: string;
+  licenseId: string;
+  userId: string;
+  assignedBy: string;
+  assignedAt: string;
+  revokedAt?: string | null;
+  user?: { id: string; email: string; nom: string; prenom: string };
+}
+
 export interface License {
   id: string;
   organizationId: string;
@@ -270,6 +280,7 @@ export interface License {
   autoRenew: boolean;
   createdAt: string;
   organization?: Organization;
+  assignments?: LicenseAssignment[];
 }
 
 export interface CreateLicenseDto {
@@ -285,8 +296,10 @@ export interface CreateLicenseDto {
 export interface LearningPath {
   id: string;
   organizationId: string;
-  name: string;
+  title: string;
   description?: string | null;
+  isMandatory?: boolean;
+  createdBy?: string;
   courses: Array<{ id: string; title: string; slug: string; order: number }>;
   createdAt: string;
   updatedAt: string;
@@ -294,9 +307,11 @@ export interface LearningPath {
 
 export interface CreateLearningPathDto {
   organizationId: string;
-  name: string;
+  title: string;
   description?: string;
-  courseIds: string[];
+  isMandatory?: boolean;
+  createdBy?: string;
+  courses: Array<{ courseId: string }>;
 }
 
 // ─── MDM ─────────────────────────────────────────────────────────────────────

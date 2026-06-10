@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { learningApi } from '@/lib/api/learning';
+import { catalogueApi } from '@/lib/api/catalogue';
 import { formatDate } from '@/lib/utils';
 import type { Enrollment, EnrollmentStatus } from '@/types';
 
@@ -24,14 +25,20 @@ const STATUS_LABELS: Record<EnrollmentStatus, string> = {
 };
 
 function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
-  // Per-course progress (modules completed)
   const { data: progress } = useQuery({
     queryKey: ['progress', enrollment.courseId],
     queryFn: () => learningApi.progress.getByCourse(enrollment.courseId),
     retry: false,
   });
 
+  const { data: modules = [] } = useQuery({
+    queryKey: ['course-modules', enrollment.courseId],
+    queryFn: () => catalogueApi.modules.listByCourse(enrollment.courseId),
+    retry: false,
+  });
+
   const percent = progress?.stats.completionPercent ?? 0;
+  const firstModule = modules[0];
 
   return (
     <Card className="card-hover">
@@ -49,7 +56,6 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
           Inscrit le {formatDate(enrollment.enrolledAt)}
         </p>
 
-        {/* Progress bar */}
         <div className="mb-4">
           <div className="mb-1 flex items-center justify-between text-xs">
             <span className="text-gray-500">Progression</span>
@@ -68,8 +74,8 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
           )}
         </div>
 
-        {enrollment.course?.slug && (
-          <Link href={`/#courses`} className="block">
+        {firstModule && (
+          <Link href={`/learn/${enrollment.courseId}/${firstModule.id}`} className="block">
             <Button variant="outline" size="sm" className="w-full gap-2">
               Continuer <ArrowRight className="size-4" />
             </Button>

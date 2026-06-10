@@ -50,7 +50,7 @@ export default function ProfilePage() {
     onSuccess: (updated) => {
       const stored = localStorage.getItem('refreshToken') ?? '';
       const accessToken = localStorage.getItem('accessToken') ?? '';
-      setAuth({ accessToken, refreshToken: stored }, updated);
+      setAuth(updated, accessToken, stored);
       qc.invalidateQueries({ queryKey: ['admin-users-list'] });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);

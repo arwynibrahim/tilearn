@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Headphones, Battery, Wifi, WifiOff, Zap, Wrench, Eye, HelpCircle,
-  Building2, Plus, X, RefreshCw,
+  Building2, Plus, X, RefreshCw, UserPlus, Search,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { mdmApi } from '@/lib/api/mdm';
 import { b2bApi } from '@/lib/api/b2b';
+import { usersApi } from '@/lib/api/users';
 import { formatDate } from '@/lib/utils';
 import { getApiErrorMessage } from '@/lib/api/client';
 import type { HeadsetStatus, HeadsetModel, VRHeadset } from '@/types';
@@ -112,6 +113,88 @@ function AddHeadsetModal({ orgId, onClose }: { orgId: string; onClose: () => voi
   );
 }
 
+function AssignHeadsetModal({ headset, onClose }: { headset: VRHeadset; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [search, setSearch] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const { data: usersData } = useQuery({
+    queryKey: ['users-assign-headset'],
+    queryFn: () => usersApi.list(1, 50),
+    retry: false,
+  });
+
+  const users = (usersData?.data ?? []).filter((u) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return u.prenom.toLowerCase().includes(q) || u.nom.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+  });
+
+  const assignMut = useMutation({
+    mutationFn: (userId: string) => mdmApi.headsets.assign(headset.id, userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-headsets', headset.organizationId] });
+      onClose();
+    },
+    onError: (err) => setError(getApiErrorMessage(err, "Erreur lors de l'assignation.")),
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b px-6 py-4">
+          <div>
+            <h2 className="font-bold text-gray-900">Assigner le casque</h2>
+            <p className="text-xs text-gray-400 font-mono">{headset.serialNumber}</p>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100"><X className="size-4 text-gray-500" /></button>
+        </div>
+        <div className="p-6 space-y-4">
+          {error && <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>}
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+            <Input
+              placeholder="Rechercher un utilisateur..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+
+          <div className="max-h-64 overflow-y-auto space-y-1">
+            {users.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                disabled={assignMut.isPending}
+                onClick={() => { setError(null); assignMut.mutate(u.id); }}
+                className="w-full flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 text-left text-sm hover:border-brand/30 hover:bg-brand/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
+                  {u.prenom?.[0]}{u.nom?.[0]}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-gray-900 truncate">{u.prenom} {u.nom}</p>
+                  <p className="text-xs text-gray-400 truncate">{u.email}</p>
+                </div>
+                <UserPlus className="size-4 text-gray-300 shrink-0" />
+              </button>
+            ))}
+            {users.length === 0 && (
+              <p className="py-6 text-center text-sm text-gray-400">Aucun utilisateur trouvé.</p>
+            )}
+          </div>
+
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={onClose}>Fermer</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StatusModal({ headset, onClose }: { headset: VRHeadset; onClose: () => void }) {
   const qc = useQueryClient();
   const [status, setStatus] = useState<HeadsetStatus>(headset.status);
@@ -191,6 +274,7 @@ export default function MdmPage() {
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editingHeadset, setEditingHeadset] = useState<VRHeadset | null>(null);
+  const [assigningHeadset, setAssigningHeadset] = useState<VRHeadset | null>(null);
   const qc = useQueryClient();
 
   const { data: orgs = [] } = useQuery({
@@ -215,6 +299,7 @@ export default function MdmPage() {
     <div className="space-y-6">
       {showAdd && orgId && <AddHeadsetModal orgId={orgId} onClose={() => setShowAdd(false)} />}
       {editingHeadset && <StatusModal headset={editingHeadset} onClose={() => setEditingHeadset(null)} />}
+      {assigningHeadset && <AssignHeadsetModal headset={assigningHeadset} onClose={() => setAssigningHeadset(null)} />}
 
       <div className="flex items-center justify-between">
         <div>
@@ -349,7 +434,7 @@ export default function MdmPage() {
                     </p>
                   )}
 
-                  <div className="mt-3 pt-3 border-t border-gray-50">
+                  <div className="mt-3 pt-3 border-t border-gray-50 space-y-2">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -359,6 +444,17 @@ export default function MdmPage() {
                       <RefreshCw className="size-3" />
                       Changer le statut
                     </Button>
+                    {!h.assignedUser && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-2 text-xs"
+                        onClick={() => setAssigningHeadset(h)}
+                      >
+                        <UserPlus className="size-3" />
+                        Assigner à un utilisateur
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

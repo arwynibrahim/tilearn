@@ -2,7 +2,6 @@
 
 import { use, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -13,6 +12,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { CourseThumbnail } from '@/components/course-thumbnail';
 import { catalogueApi } from '@/lib/api/catalogue';
 import { learningApi } from '@/lib/api/learning';
 import { useAuthStore } from '@/stores/auth.store';
@@ -164,15 +164,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
             {/* Enroll card */}
             <div>
               <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
-                {course.thumbnail ? (
-                  <div className="relative h-48">
-                    <Image src={course.thumbnail} alt={course.title} fill className="object-cover" />
-                  </div>
-                ) : (
-                  <div className="h-48 bg-gradient-to-br from-brand/20 to-navy/40 flex items-center justify-center">
-                    <BookOpen className="size-16 text-white/30" />
-                  </div>
-                )}
+                <CourseThumbnail
+                  src={course.thumbnail}
+                  alt={course.title}
+                  className="h-48"
+                />
                 <div className="p-6">
                   {course.price != null && (
                     <p className="mb-4 text-3xl font-black text-gray-900">

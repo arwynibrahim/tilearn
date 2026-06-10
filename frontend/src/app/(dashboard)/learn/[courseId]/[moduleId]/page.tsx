@@ -57,6 +57,18 @@ export default function LearnPage({
     queryFn: () => catalogueApi.modules.listByCourse(courseId),
   });
 
+  // Load course for slug
+  const { data: course } = useQuery({
+    queryKey: ['course-detail', courseId],
+    queryFn: async () => {
+      const { data } = await import('@/lib/api/client').then((m) =>
+        m.default.get(`/courses/${courseId}`)
+      );
+      return data;
+    },
+    retry: false,
+  });
+
   // Load progress
   const { data: progress } = useQuery({
     queryKey: ['progress', courseId],
@@ -214,7 +226,7 @@ export default function LearnPage({
       {/* Top bar */}
       <div className="flex items-center justify-between border-b bg-white px-6 py-3">
         <Link
-          href={`/courses/${courseId}`}
+          href={course?.slug ? `/courses/${course.slug}` : '/courses'}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
         >
           <ChevronLeft className="size-4" />
@@ -353,6 +365,8 @@ interface QuizSectionProps {
 function QuizSection({
   module, quizAnswers, setQuizAnswers, quizResult, onSubmit, submitting, onReset, onNext,
 }: QuizSectionProps) {
+  const [showAttempts, setShowAttempts] = useState(false);
+
   const { data: quiz, isLoading } = useQuery<QuizData>({
     queryKey: ['quiz', module.quizId ?? module.id],
     queryFn: async () => {
@@ -361,6 +375,17 @@ function QuizSection({
       return data;
     },
     enabled: !!(module.quizId ?? module.id),
+    retry: false,
+  });
+
+  const { data: attempts = [], isLoading: loadingAttempts } = useQuery({
+    queryKey: ['quiz-attempts', module.quizId ?? module.id],
+    queryFn: async () => {
+      const { default: apiClient } = await import('@/lib/api/client');
+      const { data } = await apiClient.get(`/quiz/${module.quizId ?? module.id}/attempts`);
+      return data;
+    },
+    enabled: showAttempts && !!(module.quizId ?? module.id),
     retry: false,
   });
 
@@ -484,6 +509,34 @@ function QuizSection({
           <CheckCircle2 className="size-4" />
           Soumettre le quiz
         </Button>
+      </div>
+
+      {/* Quiz attempts history */}
+      <div className="border-t pt-4">
+        <button
+          onClick={() => setShowAttempts(!showAttempts)}
+          className="text-xs font-medium text-gray-500 hover:text-brand transition-colors"
+        >
+          {showAttempts ? 'Masquer' : 'Voir'} mes tentatives ({attempts.length})
+        </button>
+        {showAttempts && (
+          <div className="mt-3 space-y-2">
+            {loadingAttempts ? (
+              <p className="text-xs text-gray-400">Chargement...</p>
+            ) : attempts.length === 0 ? (
+              <p className="text-xs text-gray-400">Aucune tentative précédente.</p>
+            ) : (
+              attempts.map((a: { id: string; score: number; passed: boolean; submittedAt: string }) => (
+                <div key={a.id} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs">
+                  <span className="text-gray-500">{new Date(a.submittedAt).toLocaleDateString('fr-FR')}</span>
+                  <span className={`font-semibold ${a.passed ? 'text-green-600' : 'text-red-500'}`}>
+                    {Math.round(a.score)}% — {a.passed ? 'Réussi' : 'Échoué'}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

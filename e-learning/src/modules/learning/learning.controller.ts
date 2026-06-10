@@ -58,6 +58,13 @@ export class LearningController {
 
   // ─── Quiz ─────────────────────────────────────────────────
 
+  @Get('quiz/:quizId')
+  @RequirePermissions(Permissions.QUIZ_READ)
+  @ApiOperation({ summary: 'Détail d\'un quiz (questions)' })
+  getQuiz(@Param('quizId') quizId: string) {
+    return this.learningService.getQuiz(quizId);
+  }
+
   @Post('quiz/submit')
   @RequirePermissions(Permissions.QUIZ_ATTEMPT)
   @ApiOperation({ summary: 'Soumettre un quiz' })

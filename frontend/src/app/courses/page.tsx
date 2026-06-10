@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Clock, Users, ChevronLeft, ChevronRight, BookOpen, Star } from 'lucide-react';
 import { Header } from '@/components/layout/header';
@@ -10,6 +9,7 @@ import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { CourseThumbnail } from '@/components/course-thumbnail';
 import { catalogueApi } from '@/lib/api/catalogue';
 import type { CourseLevel } from '@/types';
 
@@ -137,31 +137,21 @@ export default function CoursesPage() {
               {filtered.map((course) => (
                 <Link key={course.id} href={`/courses/${course.slug}`}>
                   <article className="group overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-200">
-                    {/* Thumbnail */}
-                    <div className="relative h-44 bg-gradient-to-br from-navy to-brand/80 overflow-hidden">
-                      {course.thumbnail ? (
-                        <Image
-                          src={course.thumbnail}
-                          alt={course.title}
-                          fill
-                          className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <BookOpen className="size-12 text-white/30" />
-                        </div>
-                      )}
-                      <div className="absolute top-3 left-3">
-                        <Badge variant={LEVEL_VARIANT[course.level]}>{LEVEL_LABELS[course.level]}</Badge>
-                      </div>
-                      {course.price != null && (
-                        <div className="absolute top-3 right-3">
-                          <span className="rounded-full bg-white/90 px-2 py-0.5 text-xs font-bold text-gray-800">
-                            {course.price === 0 ? 'Gratuit' : `${course.price.toLocaleString()} FCFA`}
-                          </span>
-                        </div>
-                      )}
+                    <CourseThumbnail
+                      src={course.thumbnail}
+                      alt={course.title}
+                      className="h-44"
+                    />
+                    <div className="absolute top-3 left-3 z-10">
+                      <Badge variant={LEVEL_VARIANT[course.level]}>{LEVEL_LABELS[course.level]}</Badge>
                     </div>
+                    {course.price != null && (
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className="rounded-full bg-white/90 px-2 py-0.5 text-xs font-bold text-gray-800">
+                          {course.price === 0 ? 'Gratuit' : `${course.price.toLocaleString()} FCFA`}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="p-4">
                       {course.domain && (

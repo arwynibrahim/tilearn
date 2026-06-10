@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, AlertCircle, Building2, Plus, X, UserPlus } from 'lucide-react';
+import { BadgeCheck, AlertCircle, Building2, Plus, X, UserPlus, UserMinus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -163,14 +163,24 @@ function AssignModal({ license, onClose }: { license: License; onClose: () => vo
     onError: (err) => setError(getApiErrorMessage(err, "Erreur lors de l'assignation.")),
   });
 
+  const revokeMut = useMutation({
+    mutationFn: (assignmentId: string) => b2bApi.licenses.revoke(assignmentId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-licenses'] });
+      onClose();
+    },
+    onError: (err) => setError(getApiErrorMessage(err, 'Erreur lors de la révocation.')),
+  });
+
   const slotsLeft = license.quantity - license.usedCount;
+  const assignments = license.assignments?.filter((a) => !a.revokedAt) ?? [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b px-6 py-4">
           <div>
-            <h2 className="font-bold text-gray-900">Assigner une licence</h2>
+            <h2 className="font-bold text-gray-900">Gérer la licence</h2>
             <p className="text-xs text-gray-400">{slotsLeft} siège(s) disponible(s)</p>
           </div>
           <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100"><X className="size-4" /></button>
@@ -184,38 +194,73 @@ function AssignModal({ license, onClose }: { license: License; onClose: () => vo
             </div>
           )}
 
-          <div className="relative">
-            <Input
-              placeholder="Rechercher un utilisateur..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pr-4"
-            />
-          </div>
+          {/* Assigned users */}
+          {assignments.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Utilisateurs assignés ({assignments.length})</p>
+              <div className="space-y-1 max-h-40 overflow-y-auto">
+                {assignments.map((a) => (
+                  <div key={a.id} className="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 text-sm">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
+                      {a.user?.prenom?.[0]}{a.user?.nom?.[0]}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-900 truncate">{a.user?.prenom} {a.user?.nom}</p>
+                      <p className="text-xs text-gray-400 truncate">{a.user?.email}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => revokeMut.mutate(a.id)}
+                      loading={revokeMut.isPending}
+                    >
+                      <UserMinus className="size-3" />
+                      Révoquer
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <div className="max-h-64 overflow-y-auto space-y-1">
-            {users.map((u) => (
-              <button
-                key={u.id}
-                type="button"
-                disabled={slotsLeft <= 0 || assignMut.isPending}
-                onClick={() => { setError(null); assignMut.mutate(u.id); }}
-                className="w-full flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 text-left text-sm hover:border-brand/30 hover:bg-brand/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
-                  {u.prenom?.[0]}{u.nom?.[0]}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-gray-900 truncate">{u.prenom} {u.nom}</p>
-                  <p className="text-xs text-gray-400 truncate">{u.email}</p>
-                </div>
-                <UserPlus className="size-4 text-gray-300 shrink-0" />
-              </button>
-            ))}
-            {users.length === 0 && (
-              <p className="py-6 text-center text-sm text-gray-400">Aucun utilisateur trouvé.</p>
-            )}
-          </div>
+          {/* Available users to assign */}
+          {slotsLeft > 0 && (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Assigner un utilisateur</p>
+              <div className="relative mb-2">
+                <Input
+                  placeholder="Rechercher un utilisateur..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pr-4"
+                />
+              </div>
+              <div className="max-h-48 overflow-y-auto space-y-1">
+                {users.map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    disabled={slotsLeft <= 0 || assignMut.isPending}
+                    onClick={() => { setError(null); assignMut.mutate(u.id); }}
+                    className="w-full flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 text-left text-sm hover:border-brand/30 hover:bg-brand/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
+                      {u.prenom?.[0]}{u.nom?.[0]}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-900 truncate">{u.prenom} {u.nom}</p>
+                      <p className="text-xs text-gray-400 truncate">{u.email}</p>
+                    </div>
+                    <UserPlus className="size-4 text-gray-300 shrink-0" />
+                  </button>
+                ))}
+                {users.length === 0 && (
+                  <p className="py-6 text-center text-sm text-gray-400">Aucun utilisateur trouvé.</p>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end">
             <Button variant="outline" onClick={onClose}>Fermer</Button>
