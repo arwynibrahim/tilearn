@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Modal, ModalContent } from '@/components/ui/modal';
+import { LoadingState } from '@/components/ui/status';
+import { useToast } from '@/hooks/use-toast';
 import { rolesApi } from '@/lib/api/roles';
 import { usersApi } from '@/lib/api/users';
 import { getApiErrorMessage } from '@/lib/api/client';
@@ -30,27 +33,22 @@ function PermissionsViewer({ grouped, onClose }: { grouped: GroupedPermissions; 
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl max-h-[80vh] rounded-2xl bg-white shadow-2xl flex flex-col">
-        <div className="flex items-center justify-between border-b px-6 py-4 shrink-0">
-          <h2 className="font-bold text-gray-900">Toutes les permissions</h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100">
-            <span className="text-gray-500">&times;</span>
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-6 space-y-2">
+    <Modal open onOpenChange={(open) => !open && onClose()}>
+      <ModalContent title="Toutes les permissions" className="max-w-2xl">
+        <div className="max-h-[60vh] overflow-y-auto space-y-2">
           {Object.entries(grouped).map(([group, perms]) => (
             <div key={group} className="rounded-xl border border-gray-100 overflow-hidden">
               <button
                 onClick={() => setExpandedGroup(expandedGroup === group ? null : group)}
                 className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                aria-expanded={expandedGroup === group}
               >
                 <div className="flex items-center gap-2">
-                  <Shield className="size-4 text-brand" />
+                  <Shield className="size-4 text-brand" aria-hidden="true" />
                   <span className="font-semibold text-gray-900 text-sm">{group}</span>
                   <Badge variant="secondary" className="text-xs">{perms.length}</Badge>
                 </div>
-                {expandedGroup === group ? <ChevronDown className="size-4 text-gray-400" /> : <ChevronRight className="size-4 text-gray-400" />}
+                {expandedGroup === group ? <ChevronDown className="size-4 text-gray-400" aria-hidden="true" /> : <ChevronRight className="size-4 text-gray-400" aria-hidden="true" />}
               </button>
               {expandedGroup === group && (
                 <div className="border-t border-gray-50 px-4 py-2 space-y-1">
@@ -67,11 +65,11 @@ function PermissionsViewer({ grouped, onClose }: { grouped: GroupedPermissions; 
             </div>
           ))}
         </div>
-        <div className="border-t px-6 py-3 shrink-0">
+        <div className="flex justify-end pt-4">
           <Button variant="outline" onClick={onClose}>Fermer</Button>
         </div>
-      </div>
-    </div>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -83,52 +81,39 @@ function UserPermissionsModal({ userId, onClose }: { userId: string; onClose: ()
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <div>
-            <h2 className="font-bold text-gray-900">Permissions utilisateur</h2>
-            {userPerms && (
-              <p className="text-sm text-gray-500">{userPerms.prenom} {userPerms.nom}</p>
-            )}
-          </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100">
-            <span className="text-gray-500">&times;</span>
-          </button>
-        </div>
-        <div className="p-6">
-          {isLoading ? (
-            <div className="py-6 text-center text-sm text-gray-400">Chargement...</div>
-          ) : userPerms ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">Rôle:</span>
-                <Badge variant={ROLE_VARIANT[userPerms.role as Role] ?? 'secondary'}>
-                  {ROLE_LABELS[userPerms.role as Role] ?? userPerms.role}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Permissions ({userPerms.permissions.length})</p>
-                <div className="flex flex-wrap gap-1 max-h-48 overflow-y-auto">
-                  {userPerms.permissions.length > 0 ? (
-                    userPerms.permissions.map((perm) => (
-                      <Badge key={perm} variant="outline" className="text-xs">{perm}</Badge>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-400">Aucune permission spécifique</p>
-                  )}
-                </div>
+    <Modal open onOpenChange={(open) => !open && onClose()}>
+      <ModalContent title="Permissions utilisateur" description={userPerms ? `${userPerms.prenom} ${userPerms.nom}` : undefined}>
+        {isLoading ? (
+          <LoadingState />
+        ) : userPerms ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Rôle:</span>
+              <Badge variant={ROLE_VARIANT[userPerms.role as Role] ?? 'secondary'}>
+                {ROLE_LABELS[userPerms.role as Role] ?? userPerms.role}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Permissions ({userPerms.permissions.length})</p>
+              <div className="flex flex-wrap gap-1 max-h-48 overflow-y-auto">
+                {userPerms.permissions.length > 0 ? (
+                  userPerms.permissions.map((perm) => (
+                    <Badge key={perm} variant="outline" className="text-xs">{perm}</Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-400">Aucune permission spécifique</p>
+                )}
               </div>
             </div>
-          ) : (
-            <p className="text-sm text-gray-400">Impossible de charger les permissions.</p>
-          )}
-          <div className="flex justify-end mt-4">
-            <Button variant="outline" onClick={onClose}>Fermer</Button>
           </div>
+        ) : (
+          <p className="text-sm text-gray-400">Impossible de charger les permissions.</p>
+        )}
+        <div className="flex justify-end pt-4">
+          <Button variant="outline" onClick={onClose}>Fermer</Button>
         </div>
-      </div>
-    </div>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -137,6 +122,7 @@ export default function RolesPage() {
   const [viewingUser, setViewingUser] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const qc = useQueryClient();
+  const { toast } = useToast();
 
   const { data: grouped, isLoading: loadingPerms } = useQuery({
     queryKey: ['roles-permissions'],
@@ -158,7 +144,13 @@ export default function RolesPage() {
 
   const syncMut = useMutation({
     mutationFn: rolesApi.sync,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['roles-permissions'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['roles-permissions'] });
+      toast({ title: 'Rôles synchronisés', variant: 'success' });
+    },
+    onError: (err) => {
+      toast({ title: 'Erreur', description: getApiErrorMessage(err, 'Sync échouée'), variant: 'destructive' });
+    },
   });
 
   const totalPerms = grouped ? Object.values(grouped).reduce((sum, perms) => sum + perms.length, 0) : 0;
@@ -176,7 +168,7 @@ export default function RolesPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowPermissions(true)}>
-            <Shield className="size-4" />
+            <Shield className="size-4" aria-hidden="true" />
             Voir les permissions
           </Button>
           <Button
@@ -186,7 +178,7 @@ export default function RolesPage() {
             onClick={() => syncMut.mutate()}
             loading={syncMut.isPending}
           >
-            <RefreshCw className="size-4" />
+            <RefreshCw className="size-4" aria-hidden="true" />
             Sync rôles
           </Button>
         </div>
@@ -200,7 +192,7 @@ export default function RolesPage() {
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10">
-                    <Shield className="size-5 text-brand" />
+                    <Shield className="size-5 text-brand" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">{group}</p>
@@ -213,35 +205,36 @@ export default function RolesPage() {
         </div>
       )}
 
-      {loadingPerms && <div className="py-12 text-center text-sm text-gray-400">Chargement des permissions...</div>}
+      {loadingPerms && <LoadingState message="Chargement des permissions..." />}
 
       {/* Users with roles */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Users className="size-4 text-brand" />
+              <Users className="size-4 text-brand" aria-hidden="true" />
               Utilisateurs et rôles
             </CardTitle>
             <div className="relative max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" aria-hidden="true" />
               <Input
                 placeholder="Rechercher..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
+                aria-label="Rechercher un utilisateur"
               />
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm" aria-label="Utilisateurs et rôles">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="px-5 py-3 text-left font-semibold text-gray-500">Utilisateur</th>
-                  <th className="px-5 py-3 text-left font-semibold text-gray-500">Rôle</th>
-                  <th className="px-5 py-3 text-right font-semibold text-gray-500">Actions</th>
+                  <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Utilisateur</th>
+                  <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Rôle</th>
+                  <th scope="col" className="px-5 py-3 text-right font-semibold text-gray-500">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -249,7 +242,7 @@ export default function RolesPage() {
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand" aria-hidden="true">
                           {u.prenom?.[0]}{u.nom?.[0]}
                         </div>
                         <div>
@@ -267,8 +260,9 @@ export default function RolesPage() {
                         size="sm"
                         className="gap-1 text-xs"
                         onClick={() => setViewingUser(u.id)}
+                        aria-label={`Voir les permissions de ${u.prenom} ${u.nom}`}
                       >
-                        <Shield className="size-3" />
+                        <Shield className="size-3" aria-hidden="true" />
                         Permissions
                       </Button>
                     </td>

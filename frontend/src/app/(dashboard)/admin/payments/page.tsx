@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { LoadingState } from '@/components/ui/status';
 import { paymentApi } from '@/lib/api/payment';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import type { PaymentStatus } from '@/types';
@@ -58,36 +59,37 @@ export default function AdminPaymentsPage() {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" aria-hidden="true" />
               <Input
                 placeholder="Rechercher par référence, email, nom..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
+                aria-label="Rechercher un paiement"
               />
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="py-12 text-center text-sm text-gray-400">Chargement...</div>
+            <LoadingState />
           ) : filtered.length === 0 ? (
-            <div className="py-12 text-center">
-              <CreditCard className="mx-auto mb-3 size-12 text-gray-200" />
+            <div role="status" className="py-12 text-center">
+              <CreditCard className="mx-auto mb-3 size-12 text-gray-200" aria-hidden="true" />
               <p className="text-gray-400">Aucun paiement trouvé.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm" aria-label="Historique des paiements">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Utilisateur</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Montant</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Fournisseur</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Méthode</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Référence</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Statut</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Date</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Utilisateur</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Montant</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Fournisseur</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Méthode</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Référence</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Statut</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -98,7 +100,7 @@ export default function AdminPaymentsPage() {
                         <td className="px-5 py-3.5">
                           {p.user ? (
                             <div className="flex items-center gap-3">
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand" aria-hidden="true">
                                 {p.user.prenom?.[0]}{p.user.nom?.[0]}
                               </div>
                               <div>
@@ -118,7 +120,7 @@ export default function AdminPaymentsPage() {
                         <td className="px-5 py-3.5 font-mono text-xs text-gray-400">{p.transactionId?.slice(0, 12)}...</td>
                         <td className="px-5 py-3.5">
                           <Badge variant={cfg.variant} className="gap-1">
-                            <cfg.icon className="size-3" />
+                            <cfg.icon className="size-3" aria-hidden="true" />
                             {cfg.label}
                           </Badge>
                         </td>
@@ -135,11 +137,11 @@ export default function AdminPaymentsPage() {
             <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
               <span className="text-xs text-gray-400">Page {page} / {totalPages}</span>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="size-8" disabled={page === 1} onClick={() => setPage(page - 1)}>
-                  <ChevronLeft className="size-4" />
+                <Button variant="ghost" size="icon" className="size-8" disabled={page === 1} onClick={() => setPage(page - 1)} aria-label="Page précédente">
+                  <ChevronLeft className="size-4" aria-hidden="true" />
                 </Button>
-                <Button variant="ghost" size="icon" className="size-8" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-                  <ChevronRight className="size-4" />
+                <Button variant="ghost" size="icon" className="size-8" disabled={page === totalPages} onClick={() => setPage(page + 1)} aria-label="Page suivante">
+                  <ChevronRight className="size-4" aria-hidden="true" />
                 </Button>
               </div>
             </div>

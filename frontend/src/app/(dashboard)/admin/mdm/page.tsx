@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Headphones, Battery, Wifi, WifiOff, Zap, Wrench, Eye, HelpCircle,
-  Building2, Plus, X, RefreshCw, UserPlus, Search,
+  Building2, Plus, RefreshCw, UserPlus, Search,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Modal, ModalContent } from '@/components/ui/modal';
+import { LoadingState } from '@/components/ui/status';
+import { useToast } from '@/hooks/use-toast';
 import { mdmApi } from '@/lib/api/mdm';
 import { b2bApi } from '@/lib/api/b2b';
 import { usersApi } from '@/lib/api/users';
@@ -47,6 +50,7 @@ type AddForm = z.infer<typeof addSchema>;
 function AddHeadsetModal({ orgId, onClose }: { orgId: string; onClose: () => void }) {
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { register, handleSubmit, formState: { errors } } = useForm<AddForm>({
     resolver: zodResolver(addSchema),
@@ -58,20 +62,17 @@ function AddHeadsetModal({ orgId, onClose }: { orgId: string; onClose: () => voi
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-headsets', orgId] });
       qc.invalidateQueries({ queryKey: ['admin-orgs'] });
+      toast({ title: 'Casque ajouté', variant: 'success' });
       onClose();
     },
     onError: (err) => setError(getApiErrorMessage(err, "Erreur lors de l'ajout.")),
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="font-bold text-gray-900">Ajouter un casque</h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100"><X className="size-4 text-gray-500" /></button>
-        </div>
-        <form onSubmit={handleSubmit((d) => { setError(null); addMut.mutate(d); })} className="p-6 space-y-4">
-          {error && <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>}
+    <Modal open onOpenChange={(open) => !open && onClose()}>
+      <ModalContent title="Ajouter un casque">
+        <form onSubmit={handleSubmit((d) => { setError(null); addMut.mutate(d); })} className="space-y-4">
+          {error && <div role="alert" className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>}
 
           <div className="space-y-1.5">
             <Label htmlFor="serialNumber">Numéro de série</Label>
@@ -108,8 +109,8 @@ function AddHeadsetModal({ orgId, onClose }: { orgId: string; onClose: () => voi
             <Button type="submit" loading={addMut.isPending}>Ajouter</Button>
           </div>
         </form>
-      </div>
-    </div>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -117,6 +118,7 @@ function AssignHeadsetModal({ headset, onClose }: { headset: VRHeadset; onClose:
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { data: usersData } = useQuery({
     queryKey: ['users-assign-headset'],
@@ -134,31 +136,26 @@ function AssignHeadsetModal({ headset, onClose }: { headset: VRHeadset; onClose:
     mutationFn: (userId: string) => mdmApi.headsets.assign(headset.id, userId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-headsets', headset.organizationId] });
+      toast({ title: 'Casque assigné', variant: 'success' });
       onClose();
     },
     onError: (err) => setError(getApiErrorMessage(err, "Erreur lors de l'assignation.")),
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <div>
-            <h2 className="font-bold text-gray-900">Assigner le casque</h2>
-            <p className="text-xs text-gray-400 font-mono">{headset.serialNumber}</p>
-          </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100"><X className="size-4 text-gray-500" /></button>
-        </div>
-        <div className="p-6 space-y-4">
-          {error && <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>}
+    <Modal open onOpenChange={(open) => !open && onClose()}>
+      <ModalContent title="Assigner le casque" description={headset.serialNumber}>
+        <div className="space-y-4">
+          {error && <div role="alert" className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>}
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" aria-hidden="true" />
             <Input
               placeholder="Rechercher un utilisateur..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
+              aria-label="Rechercher un utilisateur"
             />
           </div>
 
@@ -171,18 +168,18 @@ function AssignHeadsetModal({ headset, onClose }: { headset: VRHeadset; onClose:
                 onClick={() => { setError(null); assignMut.mutate(u.id); }}
                 className="w-full flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 text-left text-sm hover:border-brand/30 hover:bg-brand/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand" aria-hidden="true">
                   {u.prenom?.[0]}{u.nom?.[0]}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-gray-900 truncate">{u.prenom} {u.nom}</p>
                   <p className="text-xs text-gray-400 truncate">{u.email}</p>
                 </div>
-                <UserPlus className="size-4 text-gray-300 shrink-0" />
+                <UserPlus className="size-4 text-gray-300 shrink-0" aria-hidden="true" />
               </button>
             ))}
             {users.length === 0 && (
-              <p className="py-6 text-center text-sm text-gray-400">Aucun utilisateur trouvé.</p>
+              <p role="status" className="py-6 text-center text-sm text-gray-400">Aucun utilisateur trouvé.</p>
             )}
           </div>
 
@@ -190,8 +187,8 @@ function AssignHeadsetModal({ headset, onClose }: { headset: VRHeadset; onClose:
             <Button variant="outline" onClick={onClose}>Fermer</Button>
           </div>
         </div>
-      </div>
-    </div>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -200,6 +197,7 @@ function StatusModal({ headset, onClose }: { headset: VRHeadset; onClose: () => 
   const [status, setStatus] = useState<HeadsetStatus>(headset.status);
   const [battery, setBattery] = useState<string>(headset.batteryLevel?.toString() ?? '');
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const updateMut = useMutation({
     mutationFn: () => mdmApi.headsets.updateStatus(
@@ -209,20 +207,17 @@ function StatusModal({ headset, onClose }: { headset: VRHeadset; onClose: () => 
     ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-headsets', headset.organizationId] });
+      toast({ title: 'Statut mis à jour', variant: 'success' });
       onClose();
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Erreur.')),
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="font-bold text-gray-900">Modifier le statut</h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100"><X className="size-4 text-gray-500" /></button>
-        </div>
-        <div className="p-6 space-y-4">
-          {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
+    <Modal open onOpenChange={(open) => !open && onClose()}>
+      <ModalContent title="Modifier le statut">
+        <div className="space-y-4">
+          {error && <div role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
           <p className="text-sm text-gray-500 font-mono">{headset.serialNumber}</p>
 
           <div className="space-y-1.5">
@@ -239,7 +234,7 @@ function StatusModal({ headset, onClose }: { headset: VRHeadset; onClose: () => 
                       status === s ? 'border-brand bg-brand/5 text-brand' : 'border-gray-200 text-gray-600 hover:border-gray-300'
                     }`}
                   >
-                    <cfg.icon className="size-3.5" />
+                    <cfg.icon className="size-3.5" aria-hidden="true" />
                     {cfg.label}
                   </button>
                 );
@@ -265,8 +260,8 @@ function StatusModal({ headset, onClose }: { headset: VRHeadset; onClose: () => 
             <Button onClick={() => updateMut.mutate()} loading={updateMut.isPending}>Enregistrer</Button>
           </div>
         </div>
-      </div>
-    </div>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -313,12 +308,12 @@ export default function MdmPage() {
             className="gap-2"
             onClick={() => qc.invalidateQueries({ queryKey: ['admin-headsets', orgId] })}
           >
-            <RefreshCw className="size-4" />
+            <RefreshCw className="size-4" aria-hidden="true" />
             Actualiser
           </Button>
           {orgId && (
             <Button size="sm" className="gap-2" onClick={() => setShowAdd(true)}>
-              <Plus className="size-4" />
+              <Plus className="size-4" aria-hidden="true" />
               Ajouter un casque
             </Button>
           )}
@@ -338,7 +333,7 @@ export default function MdmPage() {
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              <Building2 className="size-3.5" />
+              <Building2 className="size-3.5" aria-hidden="true" />
               {org.name}
               {org._count?.vrHeadsets != null && (
                 <span className="text-xs opacity-70">({org._count.vrHeadsets})</span>
@@ -349,7 +344,7 @@ export default function MdmPage() {
       ) : (
         <Card>
           <CardContent className="py-16 text-center">
-            <Building2 className="mx-auto mb-3 size-12 text-gray-200" />
+            <Building2 className="mx-auto mb-3 size-12 text-gray-200" aria-hidden="true" />
             <p className="text-gray-400">Aucune organisation. Créez-en une pour gérer ses casques.</p>
           </CardContent>
         </Card>
@@ -363,7 +358,7 @@ export default function MdmPage() {
             return (
               <Card key={s}>
                 <CardContent className="flex items-center gap-2 p-3">
-                  <config.icon className="size-4 text-gray-400 shrink-0" />
+                  <config.icon className="size-4 text-gray-400 shrink-0" aria-hidden="true" />
                   <div className="min-w-0">
                     <p className="truncate text-xs text-gray-500">{config.label}</p>
                     <p className="text-xl font-black text-gray-900">{byStatus(s)}</p>
@@ -377,14 +372,14 @@ export default function MdmPage() {
 
       {/* Headsets grid */}
       {orgId && (isLoading ? (
-        <div className="py-12 text-center text-sm text-gray-400">Chargement...</div>
+        <LoadingState />
       ) : headsets.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <Headphones className="mx-auto mb-3 size-12 text-gray-200" />
+            <Headphones className="mx-auto mb-3 size-12 text-gray-200" aria-hidden="true" />
             <p className="mb-4 text-gray-400">Aucun casque enregistré pour cette organisation.</p>
             <Button size="sm" className="gap-2" onClick={() => setShowAdd(true)}>
-              <Plus className="size-4" /> Ajouter le premier casque
+              <Plus className="size-4" aria-hidden="true" /> Ajouter le premier casque
             </Button>
           </CardContent>
         </Card>
@@ -401,10 +396,10 @@ export default function MdmPage() {
                 <CardContent className="p-4">
                   <div className="mb-3 flex items-start justify-between">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy/10">
-                      <Headphones className="size-5 text-navy" />
+                      <Headphones className="size-5 text-navy" aria-hidden="true" />
                     </div>
                     <Badge variant={config.variant} className="flex items-center gap-1">
-                      <config.icon className="size-3" />
+                      <config.icon className="size-3" aria-hidden="true" />
                       {config.label}
                     </Badge>
                   </div>
@@ -415,13 +410,13 @@ export default function MdmPage() {
                   <div className="mb-3">
                     <div className="mb-1 flex items-center justify-between text-xs">
                       <span className="flex items-center gap-1 text-gray-500">
-                        <Battery className="size-3" /> Batterie
+                        <Battery className="size-3" aria-hidden="true" /> Batterie
                       </span>
                       <span className={`font-semibold ${batteryColor}`}>
                         {h.batteryLevel != null ? `${h.batteryLevel}%` : 'N/A'}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full rounded-full bg-gray-100">
+                    <div className="h-1.5 w-full rounded-full bg-gray-100" role="progressbar" aria-valuenow={battery} aria-valuemin={0} aria-valuemax={100} aria-label={`Batterie ${battery}%`}>
                       <div className={`h-full rounded-full ${batteryBg}`} style={{ width: `${battery}%` }} />
                     </div>
                   </div>
@@ -441,7 +436,7 @@ export default function MdmPage() {
                       className="w-full gap-2 text-xs"
                       onClick={() => setEditingHeadset(h)}
                     >
-                      <RefreshCw className="size-3" />
+                      <RefreshCw className="size-3" aria-hidden="true" />
                       Changer le statut
                     </Button>
                     {!h.assignedUser && (
@@ -451,7 +446,7 @@ export default function MdmPage() {
                         className="w-full gap-2 text-xs"
                         onClick={() => setAssigningHeadset(h)}
                       >
-                        <UserPlus className="size-3" />
+                        <UserPlus className="size-3" aria-hidden="true" />
                         Assigner à un utilisateur
                       </Button>
                     )}

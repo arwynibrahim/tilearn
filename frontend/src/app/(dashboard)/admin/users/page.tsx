@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Trash2, UserCog, ChevronLeft, ChevronRight, X, Save } from 'lucide-react';
+import { Search, Trash2, UserCog, ChevronLeft, ChevronRight, Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,6 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Modal, ModalContent } from '@/components/ui/modal';
+import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogFooter } from '@/components/ui/confirm-dialog';
+import { LoadingState, ErrorBanner } from '@/components/ui/status';
+import { useToast } from '@/hooks/use-toast';
 import { usersApi } from '@/lib/api/users';
 import { formatDate } from '@/lib/utils';
 import { getApiErrorMessage } from '@/lib/api/client';
@@ -42,6 +46,7 @@ type EditForm = z.infer<typeof editSchema>;
 function EditModal({ user, onClose }: { user: User; onClose: () => void }) {
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { register, handleSubmit, formState: { errors } } = useForm<EditForm>({
     resolver: zodResolver(editSchema),
@@ -58,6 +63,7 @@ function EditModal({ user, onClose }: { user: User; onClose: () => void }) {
     mutationFn: (data: Partial<User>) => usersApi.update(user.id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-users-list'] });
+      toast({ title: 'Utilisateur modifié', variant: 'success' });
       onClose();
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Erreur lors de la mise à jour.')),
@@ -69,37 +75,48 @@ function EditModal({ user, onClose }: { user: User; onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="font-bold text-gray-900">Modifier l&apos;utilisateur</h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100">
-            <X className="size-4 text-gray-500" />
-          </button>
-        </div>
+    <Modal open onOpenChange={(open) => !open && onClose()}>
+      <ModalContent title="Modifier l&apos;utilisateur" description={`Modifiez les informations de ${user.prenom} ${user.nom}.`}>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
-          {error && (
-            <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>
-          )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {error && <ErrorBanner message={error} />}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="prenom">Prénom</Label>
-              <Input id="prenom" {...register('prenom')} className={errors.prenom ? 'border-red-400' : ''} />
-              {errors.prenom && <p className="text-xs text-red-500">{errors.prenom.message}</p>}
+              <Input
+                id="prenom"
+                {...register('prenom')}
+                aria-invalid={!!errors.prenom}
+                aria-describedby={errors.prenom ? 'prenom-error' : undefined}
+                className={errors.prenom ? 'border-red-400' : ''}
+              />
+              {errors.prenom && <p id="prenom-error" className="text-xs text-red-500">{errors.prenom.message}</p>}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="nom">Nom</Label>
-              <Input id="nom" {...register('nom')} className={errors.nom ? 'border-red-400' : ''} />
-              {errors.nom && <p className="text-xs text-red-500">{errors.nom.message}</p>}
+              <Input
+                id="nom"
+                {...register('nom')}
+                aria-invalid={!!errors.nom}
+                aria-describedby={errors.nom ? 'nom-error' : undefined}
+                className={errors.nom ? 'border-red-400' : ''}
+              />
+              {errors.nom && <p id="nom-error" className="text-xs text-red-500">{errors.nom.message}</p>}
             </div>
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register('email')} className={errors.email ? 'border-red-400' : ''} />
-            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+            <Input
+              id="email"
+              type="email"
+              {...register('email')}
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? 'email-error' : undefined}
+              className={errors.email ? 'border-red-400' : ''}
+            />
+            {errors.email && <p id="email-error" className="text-xs text-red-500">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-1.5">
@@ -123,13 +140,13 @@ function EditModal({ user, onClose }: { user: User; onClose: () => void }) {
           <div className="flex items-center justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
             <Button type="submit" loading={updateMut.isPending} className="gap-2">
-              <Save className="size-4" />
+              <Save className="size-4" aria-hidden="true" />
               Enregistrer
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -137,7 +154,9 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const qc = useQueryClient();
+  const { toast } = useToast();
   const LIMIT = 15;
 
   const { data, isLoading } = useQuery({
@@ -148,7 +167,14 @@ export default function UsersPage() {
 
   const deleteMut = useMutation({
     mutationFn: usersApi.remove,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users-list'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-users-list'] });
+      toast({ title: 'Utilisateur supprimé', variant: 'success' });
+      setDeletingUser(null);
+    },
+    onError: (err) => {
+      toast({ title: 'Erreur', description: getApiErrorMessage(err, 'Suppression impossible'), variant: 'destructive' });
+    },
   });
 
   const filtered = data?.data?.filter((u) => {
@@ -167,6 +193,24 @@ export default function UsersPage() {
     <div className="space-y-6">
       {editingUser && <EditModal user={editingUser} onClose={() => setEditingUser(null)} />}
 
+      <ConfirmDialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
+        <ConfirmDialogContent
+          title="Supprimer l'utilisateur"
+          description={`Êtes-vous sûr de vouloir supprimer ${deletingUser?.prenom} ${deletingUser?.nom} ? Cette action est irréversible.`}
+        >
+          <ConfirmDialogFooter>
+            <Button variant="outline" onClick={() => setDeletingUser(null)}>Annuler</Button>
+            <Button
+              variant="destructive"
+              loading={deleteMut.isPending}
+              onClick={() => deletingUser && deleteMut.mutate(deletingUser.id)}
+            >
+              Supprimer
+            </Button>
+          </ConfirmDialogFooter>
+        </ConfirmDialogContent>
+      </ConfirmDialog>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black text-gray-900">Utilisateurs</h1>
@@ -178,31 +222,32 @@ export default function UsersPage() {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" aria-hidden="true" />
               <Input
                 placeholder="Rechercher..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
+                aria-label="Rechercher un utilisateur"
               />
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="py-12 text-center text-sm text-gray-400">Chargement...</div>
+            <LoadingState />
           ) : filtered.length === 0 ? (
-            <div className="py-12 text-center text-sm text-gray-400">Aucun utilisateur trouvé.</div>
+            <div role="status" className="py-12 text-center text-sm text-gray-400">Aucun utilisateur trouvé.</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm" aria-label="Liste des utilisateurs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Utilisateur</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Rôle</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Inscrit le</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-500">Statut</th>
-                    <th className="px-5 py-3 text-right font-semibold text-gray-500">Actions</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Utilisateur</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Rôle</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Inscrit le</th>
+                    <th scope="col" className="px-5 py-3 text-left font-semibold text-gray-500">Statut</th>
+                    <th scope="col" className="px-5 py-3 text-right font-semibold text-gray-500">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -210,7 +255,7 @@ export default function UsersPage() {
                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand" aria-hidden="true">
                             {user.prenom?.[0]}{user.nom?.[0]}
                           </div>
                           <div>
@@ -235,21 +280,18 @@ export default function UsersPage() {
                             size="icon"
                             className="size-8 hover:bg-blue-50 hover:text-blue-600"
                             onClick={() => setEditingUser(user)}
-                            title="Modifier"
+                            aria-label={`Modifier ${user.prenom} ${user.nom}`}
                           >
-                            <UserCog className="size-4" />
+                            <UserCog className="size-4" aria-hidden="true" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="size-8 hover:bg-red-50 hover:text-red-600"
-                            onClick={() => {
-                              if (confirm(`Supprimer ${user.prenom} ${user.nom} ?`)) {
-                                deleteMut.mutate(user.id);
-                              }
-                            }}
+                            onClick={() => setDeletingUser(user)}
+                            aria-label={`Supprimer ${user.prenom} ${user.nom}`}
                           >
-                            <Trash2 className="size-4" />
+                            <Trash2 className="size-4" aria-hidden="true" />
                           </Button>
                         </div>
                       </td>
@@ -264,11 +306,11 @@ export default function UsersPage() {
             <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
               <span className="text-xs text-gray-400">Page {page} / {totalPages}</span>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="size-8" disabled={page === 1} onClick={() => setPage(page - 1)}>
-                  <ChevronLeft className="size-4" />
+                <Button variant="ghost" size="icon" className="size-8" disabled={page === 1} onClick={() => setPage(page - 1)} aria-label="Page précédente">
+                  <ChevronLeft className="size-4" aria-hidden="true" />
                 </Button>
-                <Button variant="ghost" size="icon" className="size-8" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-                  <ChevronRight className="size-4" />
+                <Button variant="ghost" size="icon" className="size-8" disabled={page === totalPages} onClick={() => setPage(page + 1)} aria-label="Page suivante">
+                  <ChevronRight className="size-4" aria-hidden="true" />
                 </Button>
               </div>
             </div>

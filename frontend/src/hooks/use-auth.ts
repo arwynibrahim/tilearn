@@ -16,7 +16,9 @@ export function useLogin() {
       setAuth(data.user, data.accessToken, data.refreshToken);
       const dest = data.user.role === 'SUPER_ADMIN' || data.user.role === 'ADMIN_INSTITUTION'
         ? '/admin'
-        : '/dashboard';
+        : data.user.role === 'INSTRUCTOR'
+          ? '/dashboard/instructor'
+          : '/dashboard';
       router.push(dest);
     },
   });

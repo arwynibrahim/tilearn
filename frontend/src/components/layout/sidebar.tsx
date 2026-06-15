@@ -15,18 +15,20 @@ import {
   CreditCard,
   UserCheck,
   Shield,
+  GraduationCap,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import { useLogout } from '@/hooks/use-auth';
 import { getInitials } from '@/lib/utils';
 import { Brand } from '@/components/layout/brand';
+import type { Role } from '@/types';
 
 interface NavItem {
   href: string;
   icon: React.ElementType;
   label: string;
-  adminOnly?: boolean;
 }
 
 const adminNav: NavItem[] = [
@@ -42,6 +44,14 @@ const adminNav: NavItem[] = [
   { href: '/admin/roles', icon: Shield, label: 'Rôles & Permissions' },
 ];
 
+const instructorNav: NavItem[] = [
+  { href: '/dashboard/instructor', icon: GraduationCap, label: 'Mon espace' },
+  { href: '/courses', icon: Library, label: 'Catalogue' },
+  { href: '/dashboard/courses', icon: BookOpen, label: 'Mes cours' },
+  { href: '/dashboard/vr', icon: Headphones, label: 'Mes VR' },
+  { href: '/dashboard/certificates', icon: BadgeCheck, label: 'Certificats' },
+];
+
 const learnerNav: NavItem[] = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
   { href: '/courses', icon: Library, label: 'Catalogue' },
@@ -51,28 +61,40 @@ const learnerNav: NavItem[] = [
   { href: '/dashboard/vr', icon: Headphones, label: 'Mes VR' },
 ];
 
-export function Sidebar({ variant = 'admin' }: { variant?: 'admin' | 'learner' }) {
+function getNavForRole(role: Role): NavItem[] {
+  switch (role) {
+    case 'SUPER_ADMIN':
+    case 'ADMIN_INSTITUTION':
+      return adminNav;
+    case 'INSTRUCTOR':
+      return instructorNav;
+    case 'LEARNER':
+    default:
+      return learnerNav;
+  }
+}
+
+export function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuthStore();
   const logout = useLogout();
-  const items = variant === 'admin' ? adminNav : learnerNav;
+  const items = getNavForRole(user?.role ?? 'LEARNER');
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-gray-100 bg-white">
-      {/* Brand */}
       <div className="flex h-16 items-center border-b border-gray-100 px-5">
         <Brand size={36} textClassName="text-navy" />
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <ul className="space-y-1">
+      <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Navigation latérale">
+        <ul className="space-y-1" role="list">
           {items.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/admin' && item.href !== '/dashboard' && pathname.startsWith(item.href));
+            const isActive = pathname === item.href || (item.href !== '/admin' && item.href !== '/dashboard' && item.href !== '/dashboard/instructor' && pathname.startsWith(item.href));
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
                     'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                     isActive
@@ -80,9 +102,9 @@ export function Sidebar({ variant = 'admin' }: { variant?: 'admin' | 'learner' }
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   )}
                 >
-                  <item.icon className="size-4 shrink-0" />
+                  <item.icon className="size-4 shrink-0" aria-hidden="true" />
                   {item.label}
-                  {isActive && <ChevronRight className="ml-auto size-3" />}
+                  {isActive && <ChevronRight className="ml-auto size-3" aria-hidden="true" />}
                 </Link>
               </li>
             );
@@ -90,11 +112,10 @@ export function Sidebar({ variant = 'admin' }: { variant?: 'admin' | 'learner' }
         </ul>
       </nav>
 
-      {/* User footer */}
       {user && (
         <div className="border-t border-gray-100 p-4">
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-sm font-bold text-brand">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-sm font-bold text-brand" aria-hidden="true">
               {getInitials(user.prenom, user.nom)}
             </div>
             <div className="min-w-0">
@@ -108,7 +129,7 @@ export function Sidebar({ variant = 'admin' }: { variant?: 'admin' | 'learner' }
             onClick={logout}
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
           >
-            <LogOut className="size-4" />
+            <LogOut className="size-4" aria-hidden="true" />
             Déconnexion
           </button>
         </div>

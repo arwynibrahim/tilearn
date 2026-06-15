@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, AlertCircle, Building2, Plus, X, UserPlus, UserMinus } from 'lucide-react';
+import { BadgeCheck, AlertCircle, Building2, Plus, UserPlus, UserMinus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,6 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Modal, ModalContent } from '@/components/ui/modal';
+import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogFooter } from '@/components/ui/confirm-dialog';
+import { LoadingState } from '@/components/ui/status';
+import { useToast } from '@/hooks/use-toast';
 import { b2bApi } from '@/lib/api/b2b';
 import { usersApi } from '@/lib/api/users';
 import { formatDate } from '@/lib/utils';
@@ -46,6 +50,7 @@ type CreateForm = z.infer<typeof createSchema>;
 function CreateLicenseModal({ orgId, onClose }: { orgId: string; onClose: () => void }) {
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { data: orgs = [] } = useQuery({ queryKey: ['admin-orgs'], queryFn: b2bApi.organizations.list, retry: false });
 
@@ -65,20 +70,17 @@ function CreateLicenseModal({ orgId, onClose }: { orgId: string; onClose: () => 
     mutationFn: b2bApi.licenses.create,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-licenses'] });
+      toast({ title: 'Licence créée', variant: 'success' });
       onClose();
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Erreur lors de la création.')),
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="font-bold text-gray-900">Créer une licence</h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100"><X className="size-4" /></button>
-        </div>
-        <form onSubmit={handleSubmit((d) => { setError(null); createMut.mutate(d); })} className="p-6 space-y-4">
-          {error && <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>}
+    <Modal open onOpenChange={(open) => !open && onClose()}>
+      <ModalContent title="Créer une licence">
+        <form onSubmit={handleSubmit((d) => { setError(null); createMut.mutate(d); })} className="space-y-4">
+          {error && <div role="alert" className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>}
 
           <div className="space-y-1.5">
             <Label>Organisation</Label>
@@ -132,8 +134,8 @@ function CreateLicenseModal({ orgId, onClose }: { orgId: string; onClose: () => 
             <Button type="submit" loading={createMut.isPending}>Créer</Button>
           </div>
         </form>
-      </div>
-    </div>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -141,6 +143,8 @@ function AssignModal({ license, onClose }: { license: License; onClose: () => vo
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [revokingAssignment, setRevokingAssignment] = useState<{ id: string; name: string } | null>(null);
+  const { toast } = useToast();
 
   const { data: usersData } = useQuery({
     queryKey: ['users-assign'],
@@ -158,6 +162,7 @@ function AssignModal({ license, onClose }: { license: License; onClose: () => vo
     mutationFn: (userId: string) => b2bApi.licenses.assign(license.id, userId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-licenses'] });
+      toast({ title: 'Utilisateur assigné', variant: 'success' });
       onClose();
     },
     onError: (err) => setError(getApiErrorMessage(err, "Erreur lors de l'assignation.")),
@@ -167,107 +172,120 @@ function AssignModal({ license, onClose }: { license: License; onClose: () => vo
     mutationFn: (assignmentId: string) => b2bApi.licenses.revoke(assignmentId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-licenses'] });
+      toast({ title: 'Licence révoquée', variant: 'success' });
+      setRevokingAssignment(null);
       onClose();
     },
-    onError: (err) => setError(getApiErrorMessage(err, 'Erreur lors de la révocation.')),
+    onError: (err) => {
+      toast({ title: 'Erreur', description: getApiErrorMessage(err, 'Révocation impossible'), variant: 'destructive' });
+      setRevokingAssignment(null);
+    },
   });
 
   const slotsLeft = license.quantity - license.usedCount;
   const assignments = license.assignments?.filter((a) => !a.revokedAt) ?? [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <div>
-            <h2 className="font-bold text-gray-900">Gérer la licence</h2>
-            <p className="text-xs text-gray-400">{slotsLeft} siège(s) disponible(s)</p>
-          </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-gray-100"><X className="size-4" /></button>
-        </div>
-        <div className="p-6 space-y-4">
-          {error && <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>}
-          {slotsLeft <= 0 && (
-            <div className="rounded-lg bg-amber-50 border border-amber-100 p-3 text-sm text-amber-700">
-              <AlertCircle className="inline size-4 mr-1" />
-              Tous les sièges sont utilisés.
-            </div>
-          )}
+    <>
+      <ConfirmDialog open={!!revokingAssignment} onOpenChange={(open) => !open && setRevokingAssignment(null)}>
+        <ConfirmDialogContent
+          title="Révoquer la licence"
+          description={`Révoquer l'accès de ${revokingAssignment?.name} ?`}
+        >
+          <ConfirmDialogFooter>
+            <Button variant="outline" onClick={() => setRevokingAssignment(null)}>Annuler</Button>
+            <Button variant="destructive" loading={revokeMut.isPending} onClick={() => revokingAssignment && revokeMut.mutate(revokingAssignment.id)}>
+              Révoquer
+            </Button>
+          </ConfirmDialogFooter>
+        </ConfirmDialogContent>
+      </ConfirmDialog>
 
-          {/* Assigned users */}
-          {assignments.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Utilisateurs assignés ({assignments.length})</p>
-              <div className="space-y-1 max-h-40 overflow-y-auto">
-                {assignments.map((a) => (
-                  <div key={a.id} className="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 text-sm">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
-                      {a.user?.prenom?.[0]}{a.user?.nom?.[0]}
+      <Modal open onOpenChange={(open) => !open && onClose()}>
+        <ModalContent title="Gérer la licence" description={`${slotsLeft} siège(s) disponible(s)`}>
+          <div className="space-y-4">
+            {error && <div role="alert" className="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-600">{error}</div>}
+            {slotsLeft <= 0 && (
+              <div role="alert" className="rounded-lg bg-amber-50 border border-amber-100 p-3 text-sm text-amber-700">
+                <AlertCircle className="inline size-4 mr-1" aria-hidden="true" />
+                Tous les sièges sont utilisés.
+              </div>
+            )}
+
+            {assignments.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Utilisateurs assignés ({assignments.length})</p>
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {assignments.map((a) => (
+                    <div key={a.id} className="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 text-sm">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand" aria-hidden="true">
+                        {a.user?.prenom?.[0]}{a.user?.nom?.[0]}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-gray-900 truncate">{a.user?.prenom} {a.user?.nom}</p>
+                        <p className="text-xs text-gray-400 truncate">{a.user?.email}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => setRevokingAssignment({ id: a.id, name: `${a.user?.prenom} ${a.user?.nom}` })}
+                        aria-label={`Révoquer ${a.user?.prenom} ${a.user?.nom}`}
+                      >
+                        <UserMinus className="size-3" aria-hidden="true" />
+                        Révoquer
+                      </Button>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-gray-900 truncate">{a.user?.prenom} {a.user?.nom}</p>
-                      <p className="text-xs text-gray-400 truncate">{a.user?.email}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => revokeMut.mutate(a.id)}
-                      loading={revokeMut.isPending}
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {slotsLeft > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Assigner un utilisateur</p>
+                <div className="relative mb-2">
+                  <Input
+                    placeholder="Rechercher un utilisateur..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pr-4"
+                    aria-label="Rechercher un utilisateur à assigner"
+                  />
+                </div>
+                <div className="max-h-48 overflow-y-auto space-y-1">
+                  {users.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      disabled={slotsLeft <= 0 || assignMut.isPending}
+                      onClick={() => { setError(null); assignMut.mutate(u.id); }}
+                      className="w-full flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 text-left text-sm hover:border-brand/30 hover:bg-brand/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <UserMinus className="size-3" />
-                      Révoquer
-                    </Button>
-                  </div>
-                ))}
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand" aria-hidden="true">
+                        {u.prenom?.[0]}{u.nom?.[0]}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-gray-900 truncate">{u.prenom} {u.nom}</p>
+                        <p className="text-xs text-gray-400 truncate">{u.email}</p>
+                      </div>
+                      <UserPlus className="size-4 text-gray-300 shrink-0" aria-hidden="true" />
+                    </button>
+                  ))}
+                  {users.length === 0 && (
+                    <p role="status" className="py-6 text-center text-sm text-gray-400">Aucun utilisateur trouvé.</p>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Available users to assign */}
-          {slotsLeft > 0 && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Assigner un utilisateur</p>
-              <div className="relative mb-2">
-                <Input
-                  placeholder="Rechercher un utilisateur..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pr-4"
-                />
-              </div>
-              <div className="max-h-48 overflow-y-auto space-y-1">
-                {users.map((u) => (
-                  <button
-                    key={u.id}
-                    type="button"
-                    disabled={slotsLeft <= 0 || assignMut.isPending}
-                    onClick={() => { setError(null); assignMut.mutate(u.id); }}
-                    className="w-full flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 text-left text-sm hover:border-brand/30 hover:bg-brand/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
-                      {u.prenom?.[0]}{u.nom?.[0]}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-gray-900 truncate">{u.prenom} {u.nom}</p>
-                      <p className="text-xs text-gray-400 truncate">{u.email}</p>
-                    </div>
-                    <UserPlus className="size-4 text-gray-300 shrink-0" />
-                  </button>
-                ))}
-                {users.length === 0 && (
-                  <p className="py-6 text-center text-sm text-gray-400">Aucun utilisateur trouvé.</p>
-                )}
-              </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={onClose}>Fermer</Button>
             </div>
-          )}
-
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={onClose}>Fermer</Button>
           </div>
-        </div>
-      </div>
-    </div>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }
 
@@ -280,7 +298,7 @@ function LicenseCard({ license, onAssign }: { license: License; onAssign: () => 
       <CardContent className="p-5">
         <div className="mb-3 flex items-start justify-between">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10">
-            <BadgeCheck className="size-5 text-brand" />
+            <BadgeCheck className="size-5 text-brand" aria-hidden="true" />
           </div>
           <div className="flex gap-2">
             <Badge variant={PLAN_VARIANT[license.plan]}>{PLAN_LABELS[license.plan]}</Badge>
@@ -299,15 +317,15 @@ function LicenseCard({ license, onAssign }: { license: License; onAssign: () => 
             <span className="text-gray-600">Sièges utilisés</span>
             <span className="font-semibold text-gray-900">{license.usedCount} / {license.quantity}</span>
           </div>
-          <div className="h-2 w-full rounded-full bg-gray-100">
+          <div className="h-2 w-full rounded-full bg-gray-100" role="progressbar" aria-valuenow={usagePercent} aria-valuemin={0} aria-valuemax={100} aria-label={`${usagePercent}% des sièges utilisés`}>
             <div
               className={`h-full rounded-full transition-all ${usagePercent >= 90 ? 'bg-red-500' : usagePercent >= 70 ? 'bg-amber-500' : 'bg-brand'}`}
               style={{ width: `${Math.min(usagePercent, 100)}%` }}
             />
           </div>
           {usagePercent >= 90 && (
-            <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-              <AlertCircle className="size-3" />
+            <p className="mt-1 flex items-center gap-1 text-xs text-red-500" role="alert">
+              <AlertCircle className="size-3" aria-hidden="true" />
               Capacité presque atteinte
             </p>
           )}
@@ -326,7 +344,7 @@ function LicenseCard({ license, onAssign }: { license: License; onAssign: () => 
             onClick={onAssign}
             disabled={license.usedCount >= license.quantity}
           >
-            <UserPlus className="size-3.5" />
+            <UserPlus className="size-3.5" aria-hidden="true" />
             Assigner un utilisateur
           </Button>
         )}
@@ -370,7 +388,7 @@ export default function LicensesPage() {
         </div>
         {orgId && (
           <Button size="sm" className="gap-2" onClick={() => setShowCreate(true)}>
-            <Plus className="size-4" />
+            <Plus className="size-4" aria-hidden="true" />
             Créer une licence
           </Button>
         )}
@@ -388,7 +406,7 @@ export default function LicensesPage() {
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              <Building2 className="size-3.5" />
+              <Building2 className="size-3.5" aria-hidden="true" />
               {org.name}
             </button>
           ))}
@@ -396,21 +414,21 @@ export default function LicensesPage() {
       ) : (
         <Card>
           <CardContent className="py-16 text-center">
-            <Building2 className="mx-auto mb-3 size-12 text-gray-200" />
+            <Building2 className="mx-auto mb-3 size-12 text-gray-200" aria-hidden="true" />
             <p className="text-gray-400">Aucune organisation. Créez-en une pour gérer ses licences.</p>
           </CardContent>
         </Card>
       )}
 
       {orgId && (isLoading ? (
-        <div className="py-12 text-center text-sm text-gray-400">Chargement...</div>
+        <LoadingState />
       ) : licenses.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <BadgeCheck className="mx-auto mb-3 size-12 text-gray-200" />
+            <BadgeCheck className="mx-auto mb-3 size-12 text-gray-200" aria-hidden="true" />
             <p className="mb-4 text-gray-400">Aucune licence pour cette organisation.</p>
             <Button size="sm" className="gap-2" onClick={() => setShowCreate(true)}>
-              <Plus className="size-4" /> Créer la première licence
+              <Plus className="size-4" aria-hidden="true" /> Créer la première licence
             </Button>
           </CardContent>
         </Card>
