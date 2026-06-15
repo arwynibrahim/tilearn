@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { CreateLicenseDto } from './dto/create-license.dto';
@@ -34,12 +34,59 @@ export class B2bService {
     return org;
   }
 
+  async updateOrganization(id: string, dto: Partial<CreateOrganizationDto>) {
+    const org = await this.prisma.organization.findUnique({ where: { id } });
+    if (!org) throw new NotFoundException('Organisation non trouvée');
+    return this.prisma.organization.update({ where: { id }, data: dto });
+  }
+
+  async removeOrganization(id: string) {
+    const org = await this.prisma.organization.findUnique({
+      where: { id },
+      include: { _count: { select: { licenses: true, learningPaths: true, vrHeadsets: true } } },
+    });
+    if (!org) throw new NotFoundException('Organisation non trouvée');
+    if (org._count.licenses > 0 || org._count.learningPaths > 0 || org._count.vrHeadsets > 0) {
+      throw new ConflictException('Impossible de supprimer une organisation avec des ressources associées');
+    }
+    await this.prisma.organization.delete({ where: { id } });
+    return { message: 'Organisation supprimée' };
+  }
+
   // ─── Licences ───────────────────────────────────────────────
 
   async createLicense(dto: CreateLicenseDto) {
     const org = await this.prisma.organization.findUnique({ where: { id: dto.organizationId } });
     if (!org) throw new NotFoundException('Organisation non trouvée');
-    return this.prisma.license.create({ data: dto });
+    return this.prisma.license.create({
+      data: {
+        ...dto,
+        startDate: new Date(dto.startDate),
+        endDate: new Date(dto.endDate),
+      },
+    });
+  }
+
+  async updateLicense(id: string, dto: Partial<CreateLicenseDto>) {
+    const license = await this.prisma.license.findUnique({ where: { id } });
+    if (!license) throw new NotFoundException('Licence non trouvée');
+    const data: any = { ...dto };
+    if (dto.startDate) data.startDate = new Date(dto.startDate);
+    if (dto.endDate) data.endDate = new Date(dto.endDate);
+    return this.prisma.license.update({ where: { id }, data });
+  }
+
+  async removeLicense(id: string) {
+    const license = await this.prisma.license.findUnique({
+      where: { id },
+      include: { _count: { select: { assignments: true } } },
+    });
+    if (!license) throw new NotFoundException('Licence non trouvée');
+    if (license._count.assignments > 0) {
+      throw new ConflictException('Impossible de supprimer une licence avec des assignations actives');
+    }
+    await this.prisma.license.delete({ where: { id } });
+    return { message: 'Licence supprimée' };
   }
 
   async assignLicense(licenseId: string, userId: string, assignedBy: string) {
@@ -104,5 +151,41 @@ export class B2bService {
       where: { organizationId },
       include: { courses: { include: { course: { select: { id: true, title: true, slug: true } } }, orderBy: { order: 'asc' } } },
     });
+  }
+
+  async updateLearningPath(id: string, dto: Partial<CreateLearningPathDto>) {
+    const path = await this.prisma.learningPath.findUnique({
+      where: { id },
+      include: { courses: true },
+    });
+    if (!path) throw new NotFoundException('Parcours non trouvé');
+
+    // Supprimer les anciens cours et recréer si fournis
+    if (dto.courses) {
+      await this.prisma.learningPathCourse.deleteMany({ where: { pathId: id } });
+    }
+
+    return this.prisma.learningPath.update({
+      where: { id },
+      data: {
+        title: dto.title,
+        description: dto.description,
+        isMandatory: dto.isMandatory,
+        ...(dto.courses && {
+          courses: {
+            create: dto.courses.map((c, i) => ({ courseId: c.courseId, order: i + 1 })),
+          },
+        }),
+      },
+      include: { courses: { include: { course: true } } },
+    });
+  }
+
+  async removeLearningPath(id: string) {
+    const path = await this.prisma.learningPath.findUnique({ where: { id } });
+    if (!path) throw new NotFoundException('Parcours non trouvé');
+    await this.prisma.learningPathCourse.deleteMany({ where: { pathId: id } });
+    await this.prisma.learningPath.delete({ where: { id } });
+    return { message: 'Parcours supprimé' };
   }
 }

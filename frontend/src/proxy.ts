@@ -1,14 +1,14 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 // Next.js 16: `middleware.ts` is replaced by `proxy.ts` (Node.js runtime).
-// Keep this thin — redirects/rewrites only, no heavy DB or JWT verification.
+// Keep this thin - redirects/rewrites only, no heavy DB or JWT verification.
 const PROTECTED_PREFIXES = ['/dashboard', '/admin', '/learn'];
 const AUTH_ONLY_PATHS = ['/login', '/register'];
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Read token from cookie (set on login) — client-side Zustand handles the rest
+  // Read token from cookie (set on login) - client-side Zustand handles the rest
   const token = req.cookies.get('accessToken')?.value;
 
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));

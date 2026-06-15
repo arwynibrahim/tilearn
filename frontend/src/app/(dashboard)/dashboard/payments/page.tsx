@@ -216,7 +216,7 @@ export default function PaymentsPage() {
                       <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-5 py-3.5 text-gray-600">{formatDate(p.createdAt)}</td>
                         <td className="px-5 py-3.5 font-semibold text-gray-900">{formatCurrency(p.amount, p.currency)}</td>
-                        <td className="px-5 py-3.5 text-gray-600">{p.method?.replace('_', ' ') ?? '—'}</td>
+                        <td className="px-5 py-3.5 text-gray-600">{p.method?.replace('_', ' ') ?? '-'}</td>
                         <td className="px-5 py-3.5 font-mono text-xs text-gray-400">{p.transactionId?.slice(0, 16)}...</td>
                         <td className="px-5 py-3.5">
                           <Badge variant={cfg.variant} className="gap-1">

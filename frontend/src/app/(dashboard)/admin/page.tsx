@@ -67,28 +67,28 @@ export default function AdminDashboard() {
         <StatCard
           icon={Users}
           title="Utilisateurs totaux"
-          value={users?.total ?? '—'}
+          value={users?.total ?? '-'}
           sub="apprenants & instructeurs"
           color="bg-brand"
         />
         <StatCard
           icon={Building2}
           title="Organisations"
-          value={orgs?.length ?? '—'}
+          value={orgs?.length ?? '-'}
           sub="institutions partenaires"
           color="bg-blue-500"
         />
         <StatCard
           icon={BadgeCheck}
           title="Licences"
-          value={totalLicenses ?? '—'}
+          value={totalLicenses ?? '-'}
           sub="toutes organisations"
           color="bg-green-500"
         />
         <StatCard
           icon={Headphones}
           title="Casques VR"
-          value={totalHeadsets ?? '—'}
+          value={totalHeadsets ?? '-'}
           sub="parc total"
           color="bg-purple-500"
         />

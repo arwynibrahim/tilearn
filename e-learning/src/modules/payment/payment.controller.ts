@@ -107,4 +107,12 @@ export class PaymentController {
   getAllPayments(@Query('page') page = 1, @Query('limit') limit = 20) {
     return this.paymentService.getAllPayments(+page, +limit);
   }
+
+  @Post('admin/payments/:transactionId/refund')
+  @Roles(Role.SUPER_ADMIN)
+  @RequirePermissions(Permissions.PAYMENT_REFUND)
+  @ApiOperation({ summary: 'Rembourser un paiement (admin)' })
+  refundPayment(@Param('transactionId') transactionId: string) {
+    return this.paymentService.refundPayment(transactionId);
+  }
 }

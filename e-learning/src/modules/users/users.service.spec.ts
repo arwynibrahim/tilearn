@@ -93,14 +93,14 @@ describe('UsersService', () => {
 
   describe('update', () => {
     it('should update a user', async () => {
-      const existingUser = { id: 'user-1', email: 'test@test.com' };
+      const existingUser = { id: 'user-1', email: 'test@test.com', role: 'LEARNER' };
       const updateDto = { nom: 'Updated' };
       const updatedUser = { id: 'user-1', email: 'test@test.com', nom: 'Updated', prenom: 'Jean', role: 'LEARNER', updatedAt: new Date() };
 
       mockPrisma.user.findUnique.mockResolvedValueOnce(existingUser);
       mockPrisma.user.update.mockResolvedValue(updatedUser);
 
-      const result = await service.update('user-1', updateDto);
+      const result = await service.update('user-1', updateDto, 'admin-1');
 
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'user-1' },
@@ -120,17 +120,17 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user to update does not exist', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.update('unknown-id', { nom: 'Test' })).rejects.toThrow(NotFoundException);
+      await expect(service.update('unknown-id', { nom: 'Test' }, 'admin-1')).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('remove', () => {
     it('should soft delete a user', async () => {
-      const existingUser = { id: 'user-1' };
+      const existingUser = { id: 'user-1', role: 'LEARNER' };
       mockPrisma.user.findUnique.mockResolvedValue(existingUser);
       mockPrisma.user.update.mockResolvedValue({ ...existingUser, deletedAt: new Date() });
 
-      const result = await service.remove('user-1');
+      const result = await service.remove('user-1', 'admin-1');
 
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'user-1' },
@@ -149,7 +149,7 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user to delete does not exist', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.remove('unknown-id')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('unknown-id', 'admin-1')).rejects.toThrow(NotFoundException);
     });
   });
 });

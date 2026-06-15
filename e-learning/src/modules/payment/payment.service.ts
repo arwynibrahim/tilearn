@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 
@@ -63,5 +63,17 @@ export class PaymentService {
       this.prisma.payment.count(),
     ]);
     return { payments, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async refundPayment(transactionId: string) {
+    const payment = await this.prisma.payment.findUnique({ where: { transactionId } });
+    if (!payment) throw new NotFoundException('Paiement non trouvé');
+    if (payment.status !== 'SUCCESS') {
+      throw new BadRequestException('Seuls les paiements réussis peuvent être remboursés');
+    }
+    return this.prisma.payment.update({
+      where: { transactionId },
+      data: { status: 'REFUNDED', refundedAt: new Date() },
+    });
   }
 }

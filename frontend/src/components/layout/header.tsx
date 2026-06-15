@@ -36,7 +36,7 @@ export function Header() {
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-gray-300 transition-colors hover:text-white"
+              className="text-sm font-medium text-gray-200 transition-colors hover:text-white"
             >
               {l.label}
             </Link>
@@ -48,7 +48,7 @@ export function Header() {
           {/* Lang toggle */}
           <button
             onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-300 hover:text-white transition-colors"
+            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-200 hover:text-white transition-colors"
             aria-label="Switch language"
           >
             <Globe className="size-3.5" />
@@ -68,14 +68,14 @@ export function Header() {
                   {t('nav.dashboard')}
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white" onClick={logout}>
+              <Button variant="ghost" size="sm" className="text-gray-200 hover:text-white" onClick={logout}>
                 Déconnexion
               </Button>
             </>
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+                <Button variant="ghost" size="sm" className="text-gray-200 hover:text-white">
                   {t('nav.login')}
                 </Button>
               </Link>
@@ -87,7 +87,7 @@ export function Header() {
 
           {/* Mobile menu toggle */}
           <button
-            className="rounded-md p-2 text-gray-300 hover:text-white md:hidden"
+            className="rounded-md p-2 text-gray-200 hover:text-white md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
@@ -106,7 +106,7 @@ export function Header() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-sm font-medium text-gray-300 hover:text-white"
+                className="text-sm font-medium text-gray-200 hover:text-white"
                 onClick={() => setMobileOpen(false)}
               >
                 {l.label}

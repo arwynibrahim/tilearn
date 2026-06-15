@@ -155,7 +155,7 @@ function ModulesDrawer({ course, onClose }: { course: Course; onClose: () => voi
           </button>
         </div>
 
-        {/* Quick-add form — always visible */}
+        {/* Quick-add form - always visible */}
         <div className="border-b bg-gray-50 px-6 py-3">
           <form
             onSubmit={handleSubmit((d) => { setFormError(null); addModule.mutate(d); })}
@@ -302,7 +302,7 @@ function ModulesDrawer({ course, onClose }: { course: Course; onClose: () => voi
         {/* Footer */}
         <div className="border-t px-6 py-3">
           <Button variant="outline" className="w-full" onClick={onClose}>
-            {modules.length > 0 ? 'Terminé' : 'Passer — ajouter plus tard'}
+            {modules.length > 0 ? 'Terminé' : 'Passer - ajouter plus tard'}
           </Button>
         </div>
       </div>
@@ -509,7 +509,7 @@ function CreateCourseModal({ domains, onClose, onCreated }: { domains: { id: str
     mutationFn: catalogueApi.courses.create,
     onSuccess: (course) => {
       qc.invalidateQueries({ queryKey: ['admin-courses'] });
-      toast({ title: 'Cours créé — ajoutez des modules', variant: 'success' });
+      toast({ title: 'Cours créé - ajoutez des modules', variant: 'success' });
       reset({ level: 'BEGINNER', language: 'fr' });
       onCreated(course);
     },
@@ -639,7 +639,7 @@ export default function CataloguePage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-courses'] }),
   });
 
-  const domainName = (id: string) => domains.find((d) => d.id === id)?.name ?? '—';
+  const domainName = (id: string) => domains.find((d) => d.id === id)?.name ?? '-';
 
   return (
     <div className="space-y-6">

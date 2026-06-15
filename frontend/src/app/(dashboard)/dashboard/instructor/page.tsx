@@ -146,7 +146,7 @@ export default function InstructorDashboard() {
           { icon: BookOpen, label: 'Mes cours', value: stats?.totalCourses ?? courses.length, color: 'bg-brand' },
           { icon: Users, label: 'Inscriptions', value: stats?.totalEnrollments ?? 0, color: 'bg-green-500' },
           { icon: Star, label: 'Avis reçus', value: stats?.totalReviews ?? 0, color: 'bg-amber-500' },
-          { icon: TrendingUp, label: 'Note moyenne', value: stats?.averageRating ? stats.averageRating.toFixed(1) : '—', color: 'bg-blue-500' },
+          { icon: TrendingUp, label: 'Note moyenne', value: stats?.averageRating ? stats.averageRating.toFixed(1) : '-', color: 'bg-blue-500' },
         ].map((s) => (
           <Card key={s.label}>
             <CardContent className="flex items-center gap-4 p-6">
@@ -229,7 +229,7 @@ export default function InstructorDashboard() {
                       <td className="px-5 py-3.5">
                         <p className="font-medium text-gray-900">{c.title}</p>
                       </td>
-                      <td className="px-5 py-3.5 text-gray-600">{c.domain?.name ?? '—'}</td>
+                      <td className="px-5 py-3.5 text-gray-600">{c.domain?.name ?? '-'}</td>
                       <td className="px-5 py-3.5 text-gray-600">{c._count?.modules ?? 0}</td>
                       <td className="px-5 py-3.5 text-gray-600">{c._count?.enrollments ?? 0}</td>
                       <td className="px-5 py-3.5">

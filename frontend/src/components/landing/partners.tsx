@@ -8,14 +8,14 @@ const PARTNERS = [
 export function PartnersMarquee() {
   return (
     <section className="bg-gray-50 py-8 overflow-hidden">
-      <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-gray-400">
+      <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-gray-500">
         Ils nous font confiance
       </p>
       <div className="marquee-track gap-12 items-center">
         {PARTNERS.map((p, i) => (
           <span
             key={`${p}-${i}`}
-            className="mx-8 whitespace-nowrap text-sm font-semibold text-gray-400 hover:text-brand transition-colors"
+            className="mx-8 whitespace-nowrap text-sm font-semibold text-gray-500 hover:text-brand transition-colors"
           >
             {p}
           </span>

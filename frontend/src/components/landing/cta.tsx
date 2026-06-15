@@ -11,7 +11,7 @@ export function CtaSection() {
         <h2 className="mb-4 text-3xl font-black text-white sm:text-4xl">
           Prêt à transformer votre carrière ?
         </h2>
-        <p className="mb-8 text-lg text-gray-300">
+        <p className="mb-8 text-lg text-gray-200">
           Rejoignez 5 000+ professionnels qui apprennent par l&apos;immersion VR.
         </p>
         <div className="flex flex-wrap justify-center gap-4">

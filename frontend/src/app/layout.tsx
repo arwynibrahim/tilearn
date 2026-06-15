@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3001'),
   title: {
-    default: 'Total Innovation Learning — VR & IA e-learning',
+    default: 'Total Innovation Learning - VR & IA e-learning',
     template: '%s | Total Innovation Learning',
   },
   description:

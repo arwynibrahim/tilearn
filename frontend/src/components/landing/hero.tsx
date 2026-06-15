@@ -33,7 +33,7 @@ export function HeroSection() {
               <span className="text-brand">{t('hero.title3')}</span>
             </h1>
 
-            <p className="mb-8 max-w-lg text-lg text-gray-300 leading-relaxed">
+            <p className="mb-8 max-w-lg text-lg text-gray-200 leading-relaxed">
               {t('hero.desc')}
             </p>
 
@@ -62,7 +62,7 @@ export function HeroSection() {
               ].map((s) => (
                 <div key={s.label} className="flex flex-col">
                   <span className="text-2xl font-black text-white">{s.value}</span>
-                  <span className="text-xs text-gray-400">{s.label}</span>
+                  <span className="text-xs text-gray-300">{s.label}</span>
                 </div>
               ))}
             </div>
@@ -89,7 +89,7 @@ export function HeroSection() {
 
             {/* Floating cards */}
             <div className="glass absolute -right-6 top-8 rounded-2xl p-4 text-white">
-              <p className="text-xs text-gray-300">Simulation active</p>
+              <p className="text-xs text-gray-200">Simulation active</p>
               <p className="font-bold text-brand">Anatomie cardiaque</p>
               <div className="mt-1 flex items-center gap-1">
                 <div className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
@@ -98,9 +98,9 @@ export function HeroSection() {
             </div>
 
             <div className="glass absolute -left-6 bottom-8 rounded-2xl p-4 text-white">
-              <p className="text-xs text-gray-300">Certificat obtenu</p>
+              <p className="text-xs text-gray-200">Certificat obtenu</p>
               <p className="font-bold text-brand">Dev Fullstack</p>
-              <p className="text-xs text-gray-400">Il y a 2 heures</p>
+              <p className="text-xs text-gray-300">Il y a 2 heures</p>
             </div>
           </div>
         </div>

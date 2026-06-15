@@ -109,14 +109,14 @@ export default function AdminPaymentsPage() {
                               </div>
                             </div>
                           ) : (
-                            <span className="text-gray-400">—</span>
+                            <span className="text-gray-400">-</span>
                           )}
                         </td>
                         <td className="px-5 py-3.5 font-semibold text-gray-900">{formatCurrency(p.amount, p.currency)}</td>
                         <td className="px-5 py-3.5">
                           <Badge variant="secondary">{p.provider}</Badge>
                         </td>
-                        <td className="px-5 py-3.5 text-gray-600">{p.method?.replace('_', ' ') ?? '—'}</td>
+                        <td className="px-5 py-3.5 text-gray-600">{p.method?.replace('_', ' ') ?? '-'}</td>
                         <td className="px-5 py-3.5 font-mono text-xs text-gray-400">{p.transactionId?.slice(0, 12)}...</td>
                         <td className="px-5 py-3.5">
                           <Badge variant={cfg.variant} className="gap-1">

@@ -873,7 +873,7 @@ document.getElementById('btnLock').addEventListener('click', () => {
   const lbl = document.getElementById('btnLockLabel');
   lbl.textContent = cameraLocked ? 'Unlock' : 'Lock';
   document.getElementById('btnLock').style.background = cameraLocked ? 'rgba(232,101,10,0.4)' : '';
-  setInfo(cameraLocked ? '🔒 <strong>Caméra verrouillée</strong> — Déplacez les objets librement.' : '🔓 Caméra déverrouillée.');
+  setInfo(cameraLocked ? '🔒 <strong>Caméra verrouillée</strong> - Déplacez les objets librement.' : '🔓 Caméra déverrouillée.');
   AudioEngine.playClick();
 });
 window.addEventListener('keydown', e => {
@@ -1662,13 +1662,13 @@ function buildMaintenancePc() {
 
   // POST codes: BIOS beep patterns that hint at the faulty component
   const POST_CODES = {
-    cpu:    { beeps: '1 long + 2 short', desc: 'Erreur CPU — Vérifiez le processeur, la pâte thermique, le ventirad.' },
-    ram1:   { beeps: '3 courts', desc: 'Erreur RAM DIMM1 — Barrette mal clipsée ou défectueuse.' },
-    ram2:   { beeps: '3 courts', desc: 'Erreur RAM DIMM2 — Barrette mal clipsée ou défectueuse.' },
-    gpu:    { beeps: '1 long + 3 courts', desc: 'Erreur GPU — Carte graphique non détectée ou alimentation PCIe manquante.' },
-    ssd:    { beeps: '3 longs', desc: 'Erreur stockage — SSD non détecté, câble SATA ou alimentation à vérifier.' },
-    psu:    { beeps: '5 courts', desc: 'Erreur alimentation — Tension hors tolérance sur un rail 12V/5V/3.3V.' },
-    fan:    { beeps: '2 courts répétés', desc: 'Erreur ventilateur — CPU fan error ou obstruction du flux d\'air.' },
+    cpu:    { beeps: '1 long + 2 short', desc: 'Erreur CPU - Vérifiez le processeur, la pâte thermique, le ventirad.' },
+    ram1:   { beeps: '3 courts', desc: 'Erreur RAM DIMM1 - Barrette mal clipsée ou défectueuse.' },
+    ram2:   { beeps: '3 courts', desc: 'Erreur RAM DIMM2 - Barrette mal clipsée ou défectueuse.' },
+    gpu:    { beeps: '1 long + 3 courts', desc: 'Erreur GPU - Carte graphique non détectée ou alimentation PCIe manquante.' },
+    ssd:    { beeps: '3 longs', desc: 'Erreur stockage - SSD non détecté, câble SATA ou alimentation à vérifier.' },
+    psu:    { beeps: '5 courts', desc: 'Erreur alimentation - Tension hors tolérance sur un rail 12V/5V/3.3V.' },
+    fan:    { beeps: '2 courts répétés', desc: 'Erreur ventilateur - CPU fan error ou obstruction du flux d\'air.' },
   };
   const postCode = POST_CODES[faulty.id];
 
@@ -2123,13 +2123,13 @@ function buildDatacenter() {
         data.internals.visible = data.doorOpen;
         if (data.doorOpen) {
           if (data.status === 'fault') {
-            setInfo(`<strong class="text-orange">${data.label}</strong> - <span class="text-red-300">⚠ ${T('sim.dc.fault','DÉFAILLANT')}</span><br/>Porte ouverte — Examinez les composants internes.<br/>${T('sim.dc.faultInfo','Latence : 850ms · Paquets perdus : 42%')}<br/>${T('sim.dc.faultAction',"→ Vérifier l'alimentation et le câble réseau du switch dorsal.")}`);
+            setInfo(`<strong class="text-orange">${data.label}</strong> - <span class="text-red-300">⚠ ${T('sim.dc.fault','DÉFAILLANT')}</span><br/>Porte ouverte - Examinez les composants internes.<br/>${T('sim.dc.faultInfo','Latence : 850ms · Paquets perdus : 42%')}<br/>${T('sim.dc.faultAction',"→ Vérifier l'alimentation et le câble réseau du switch dorsal.")}`);
             if (Scenario.active) Scenario.validate({ action: 'identify', rackId: i });
           } else {
-            setInfo(`<strong class="text-orange">${data.label}</strong> - <span class="text-green-300">✓ ${T('sim.dc.ok','Opérationnel')}</span><br/>Porte ouverte — Serveurs internes visibles.<br/>${T('sim.dc.latency','Latence')} : 12ms · ${T('sim.dc.traffic','Trafic')} : ${(Math.random()*800+200).toFixed(0)} Mbps<br/>${T('sim.dc.cpu','CPU')} : ${(Math.random()*40+20).toFixed(0)}% · ${T('sim.dc.temp','Température')} : 42°C`);
+            setInfo(`<strong class="text-orange">${data.label}</strong> - <span class="text-green-300">✓ ${T('sim.dc.ok','Opérationnel')}</span><br/>Porte ouverte - Serveurs internes visibles.<br/>${T('sim.dc.latency','Latence')} : 12ms · ${T('sim.dc.traffic','Trafic')} : ${(Math.random()*800+200).toFixed(0)} Mbps<br/>${T('sim.dc.cpu','CPU')} : ${(Math.random()*40+20).toFixed(0)}% · ${T('sim.dc.temp','Température')} : 42°C`);
           }
         } else {
-          setInfo(`<strong class="text-orange">${data.label}</strong> — Porte fermée.`);
+          setInfo(`<strong class="text-orange">${data.label}</strong> - Porte fermée.`);
         }
       }
     });

@@ -18,7 +18,7 @@ const LEVEL_VARIANT: Record<CourseLevel, 'success' | 'warning' | 'destructive' |
   EXPERT: 'info',
 };
 
-// Marketing display shape — decoupled from the backend Course model so the
+// Marketing display shape - decoupled from the backend Course model so the
 // landing keeps working with a static fallback when the API is unavailable.
 interface DisplayCourse {
   id: string;
@@ -86,7 +86,7 @@ export function CoursesSection() {
           <h2 className="mb-3 text-3xl font-black text-gray-900 sm:text-4xl">
             {t('courses.title')}
           </h2>
-          <p className="text-lg text-gray-500">{t('courses.subtitle')}</p>
+          <p className="text-lg text-gray-600">{t('courses.subtitle')}</p>
         </div>
 
         {/* Filters */}
@@ -108,7 +108,7 @@ export function CoursesSection() {
 
         {/* Grid */}
         {filtered.length === 0 ? (
-          <p className="py-12 text-center text-gray-400">{t('courses.empty')}</p>
+          <p className="py-12 text-center text-gray-500">{t('courses.empty')}</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((course) => (
@@ -157,9 +157,9 @@ function CourseCard({ course, t }: { course: DisplayCourse; t: (k: string) => st
         <h3 className="mb-2 font-bold text-gray-900 line-clamp-2 group-hover:text-brand transition-colors">
           {course.title}
         </h3>
-        <p className="mb-4 text-sm text-gray-500 line-clamp-2">{course.description}</p>
+        <p className="mb-4 text-sm text-gray-600 line-clamp-2">{course.description}</p>
 
-        <div className="mb-4 flex items-center gap-4 text-xs text-gray-400">
+        <div className="mb-4 flex items-center gap-4 text-xs text-gray-500">
           {course.durationHours != null && (
             <span className="flex items-center gap-1">
               <Clock className="size-3" />

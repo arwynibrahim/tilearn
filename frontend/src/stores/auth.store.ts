@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
 import { setCookie, deleteCookie } from '@/lib/utils';
 
-// Refresh token lifetime (7d) — keep the cookie alive as long as the session can be refreshed
+// Refresh token lifetime (7d) - keep the cookie alive as long as the session can be refreshed
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
 
 interface AuthState {

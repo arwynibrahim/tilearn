@@ -57,9 +57,9 @@ describe('UsersController', () => {
       const updated = { id: 'user-1', nom: 'Updated' };
       mockUsersService.update.mockResolvedValue(updated);
 
-      const result = await controller.update('user-1', dto);
+      const result = await controller.update('user-1', dto, 'admin-1');
 
-      expect(mockUsersService.update).toHaveBeenCalledWith('user-1', dto);
+      expect(mockUsersService.update).toHaveBeenCalledWith('user-1', dto, 'admin-1');
       expect(result).toEqual(updated);
     });
   });
@@ -68,9 +68,9 @@ describe('UsersController', () => {
     it('should remove a user', async () => {
       mockUsersService.remove.mockResolvedValue({ message: 'Utilisateur supprimé' });
 
-      const result = await controller.remove('user-1');
+      const result = await controller.remove('user-1', 'admin-1');
 
-      expect(mockUsersService.remove).toHaveBeenCalledWith('user-1');
+      expect(mockUsersService.remove).toHaveBeenCalledWith('user-1', 'admin-1');
       expect(result).toEqual({ message: 'Utilisateur supprimé' });
     });
   });

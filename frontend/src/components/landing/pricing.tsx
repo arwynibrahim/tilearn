@@ -49,7 +49,7 @@ export function PricingSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h2 className="mb-3 text-3xl font-black text-gray-900 sm:text-4xl">{t('pricing.title')}</h2>
-          <p className="text-lg text-gray-500">{t('pricing.subtitle')}</p>
+          <p className="text-lg text-gray-600">{t('pricing.subtitle')}</p>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -75,18 +75,18 @@ export function PricingSection() {
                 <div className="mt-2 flex items-baseline gap-1">
                   <span className="text-3xl font-black text-gray-900">{plan.price}</span>
                   {plan.key !== 'free' && plan.key !== 'enterprise' && (
-                    <span className="text-sm text-gray-400">{t('pricing.per_month')}</span>
+                    <span className="text-sm text-gray-500">{t('pricing.per_month')}</span>
                   )}
                 </div>
               </div>
 
               <div className="mb-6 flex-1">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
                   {t('pricing.features')}
                 </p>
                 <ul className="space-y-2">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                    <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
                       <Check className="mt-0.5 size-4 shrink-0 text-brand" />
                       {f}
                     </li>

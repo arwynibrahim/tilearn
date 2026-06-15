@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Param, Body, UseGuards,
+  Controller, Get, Post, Patch, Delete, Param, Body, UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -46,12 +46,44 @@ export class B2bController {
     return this.b2bService.findOneOrganization(id);
   }
 
+  @Patch('organizations/:id')
+  @Roles(Role.SUPER_ADMIN)
+  @RequirePermissions(Permissions.ORGANIZATION_UPDATE)
+  @ApiOperation({ summary: 'Modifier une organisation' })
+  updateOrganization(@Param('id') id: string, @Body() dto: Partial<CreateOrganizationDto>) {
+    return this.b2bService.updateOrganization(id, dto);
+  }
+
+  @Delete('organizations/:id')
+  @Roles(Role.SUPER_ADMIN)
+  @RequirePermissions(Permissions.ORGANIZATION_DELETE)
+  @ApiOperation({ summary: 'Supprimer une organisation' })
+  removeOrganization(@Param('id') id: string) {
+    return this.b2bService.removeOrganization(id);
+  }
+
   @Post('licenses')
   @Roles(Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.LICENSE_CREATE)
   @ApiOperation({ summary: 'Créer une licence' })
   createLicense(@Body() dto: CreateLicenseDto) {
     return this.b2bService.createLicense(dto);
+  }
+
+  @Patch('licenses/:id')
+  @Roles(Role.SUPER_ADMIN)
+  @RequirePermissions(Permissions.LICENSE_CREATE)
+  @ApiOperation({ summary: 'Modifier une licence' })
+  updateLicense(@Param('id') id: string, @Body() dto: Partial<CreateLicenseDto>) {
+    return this.b2bService.updateLicense(id, dto);
+  }
+
+  @Delete('licenses/:id')
+  @Roles(Role.SUPER_ADMIN)
+  @RequirePermissions(Permissions.LICENSE_CREATE)
+  @ApiOperation({ summary: 'Supprimer une licence' })
+  removeLicense(@Param('id') id: string) {
+    return this.b2bService.removeLicense(id);
   }
 
   @Post('licenses/:licenseId/assign/:userId')
@@ -96,5 +128,21 @@ export class B2bController {
   @ApiOperation({ summary: 'Parcours d\'apprentissage d\'une organisation' })
   getOrganizationLearningPaths(@Param('orgId') orgId: string) {
     return this.b2bService.getOrganizationLearningPaths(orgId);
+  }
+
+  @Patch('learning-paths/:id')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @RequirePermissions(Permissions.LEARNINGPATH_UPDATE)
+  @ApiOperation({ summary: 'Modifier un parcours d\'apprentissage' })
+  updateLearningPath(@Param('id') id: string, @Body() dto: Partial<CreateLearningPathDto>) {
+    return this.b2bService.updateLearningPath(id, dto);
+  }
+
+  @Delete('learning-paths/:id')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @RequirePermissions(Permissions.LEARNINGPATH_DELETE)
+  @ApiOperation({ summary: 'Supprimer un parcours d\'apprentissage' })
+  removeLearningPath(@Param('id') id: string) {
+    return this.b2bService.removeLearningPath(id);
   }
 }

@@ -298,7 +298,7 @@ export default function MdmPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Parc VR — MDM</h1>
+          <h1 className="text-2xl font-black text-gray-900">Parc VR - MDM</h1>
           <p className="text-sm text-gray-500">Gestion de la flotte de casques VR par organisation</p>
         </div>
         <div className="flex items-center gap-2">

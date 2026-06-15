@@ -33,4 +33,10 @@ export class VrService {
     await this.findOneScene(id);
     return this.prisma.vRScene.update({ where: { id }, data: dto });
   }
+
+  async removeScene(id: string) {
+    await this.findOneScene(id);
+    await this.prisma.vRScene.delete({ where: { id } });
+    return { message: 'Scène VR supprimée' };
+  }
 }

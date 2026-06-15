@@ -27,7 +27,7 @@ export const catalogueApi = {
   },
 
   courses: {
-    // Backend returns { courses, total, page, limit, totalPages } — normalize to { data, ... }
+    // Backend returns { courses, total, page, limit, totalPages } - normalize to { data, ... }
     list: async (params?: {
       domainId?: string;
       level?: string;

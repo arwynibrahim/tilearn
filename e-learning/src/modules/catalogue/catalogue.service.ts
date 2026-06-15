@@ -35,6 +35,29 @@ export class CatalogueService {
     return domain;
   }
 
+  async updateDomain(id: string, dto: Partial<CreateDomainDto>) {
+    const domain = await this.prisma.domain.findUnique({ where: { id } });
+    if (!domain) throw new NotFoundException('Domaine non trouvé');
+    if (dto.slug && dto.slug !== domain.slug) {
+      const existing = await this.prisma.domain.findUnique({ where: { slug: dto.slug } });
+      if (existing) throw new ConflictException('Ce slug de domaine existe déjà');
+    }
+    return this.prisma.domain.update({ where: { id }, data: dto });
+  }
+
+  async removeDomain(id: string) {
+    const domain = await this.prisma.domain.findUnique({
+      where: { id },
+      include: { _count: { select: { courses: true } } },
+    });
+    if (!domain) throw new NotFoundException('Domaine non trouvé');
+    if (domain._count.courses > 0) {
+      throw new ConflictException('Impossible de supprimer un domaine contenant des cours');
+    }
+    await this.prisma.domain.delete({ where: { id } });
+    return { message: 'Domaine supprimé' };
+  }
+
   // ─── Cours ──────────────────────────────────────────────────
 
   async createCourse(dto: CreateCourseDto, userId: string) {
@@ -128,5 +151,12 @@ export class CatalogueService {
     const mod = await this.prisma.module.findUnique({ where: { id } });
     if (!mod) throw new NotFoundException('Module non trouvé');
     return this.prisma.module.update({ where: { id }, data: dto });
+  }
+
+  async removeModule(id: string) {
+    const mod = await this.prisma.module.findUnique({ where: { id } });
+    if (!mod) throw new NotFoundException('Module non trouvé');
+    await this.prisma.module.delete({ where: { id } });
+    return { message: 'Module supprimé' };
   }
 }

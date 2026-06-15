@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Param, Body, UseGuards,
+  Controller, Get, Post, Patch, Delete, Param, Body, UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -47,5 +47,15 @@ export class VrController {
   @ApiOperation({ summary: 'Modifier une scène VR' })
   updateScene(@Param('id') id: string, @Body() dto: Partial<CreateVRSceneDto>) {
     return this.vrService.updateScene(id, dto);
+  }
+
+  @Delete('scenes/:id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @RequirePermissions(Permissions.VR_SCENE_UPDATE)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Supprimer une scène VR' })
+  removeScene(@Param('id') id: string) {
+    return this.vrService.removeScene(id);
   }
 }

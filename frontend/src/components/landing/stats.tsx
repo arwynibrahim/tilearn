@@ -18,7 +18,7 @@ export function StatsSection() {
             <div key={s.label} className="flex flex-col items-center gap-2 text-center">
               <s.icon className={`size-8 ${s.color}`} />
               <span className="text-3xl font-black text-gray-900">{s.value}</span>
-              <span className="text-sm text-gray-500">{s.label}</span>
+              <span className="text-sm text-gray-600">{s.label}</span>
             </div>
           ))}
         </div>

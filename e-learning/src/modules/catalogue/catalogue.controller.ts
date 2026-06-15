@@ -45,6 +45,26 @@ export class CatalogueController {
     return this.catalogueService.findOneDomain(id);
   }
 
+  @Patch('domains/:id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @RequirePermissions(Permissions.DOMAIN_UPDATE)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Modifier un domaine' })
+  updateDomain(@Param('id') id: string, @Body() dto: Partial<CreateDomainDto>) {
+    return this.catalogueService.updateDomain(id, dto);
+  }
+
+  @Delete('domains/:id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @RequirePermissions(Permissions.DOMAIN_DELETE)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Supprimer un domaine' })
+  removeDomain(@Param('id') id: string) {
+    return this.catalogueService.removeDomain(id);
+  }
+
   // ─── Cours ─────────────────────────────────────────────────
 
   @Post('courses')
@@ -120,5 +140,15 @@ export class CatalogueController {
   @ApiOperation({ summary: 'Modifier un module' })
   updateModule(@Param('id') id: string, @Body() dto: Partial<CreateModuleDto>) {
     return this.catalogueService.updateModule(id, dto);
+  }
+
+  @Delete('modules/:id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @RequirePermissions(Permissions.MODULE_DELETE)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Supprimer un module' })
+  removeModule(@Param('id') id: string) {
+    return this.catalogueService.removeModule(id);
   }
 }

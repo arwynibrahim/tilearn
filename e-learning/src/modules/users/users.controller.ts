@@ -8,6 +8,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { Permissions } from '../roles/permissions';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Role } from '../../common/enums/role.enum';
 
 @ApiTags('Users')
@@ -35,15 +36,15 @@ export class UsersController {
   @Roles(Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.USER_UPDATE)
   @ApiOperation({ summary: 'Modifier un utilisateur' })
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.usersService.update(id, dto);
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto, @CurrentUser('id') currentUserId: string) {
+    return this.usersService.update(id, dto, currentUserId);
   }
 
   @Delete(':id')
   @Roles(Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.USER_DELETE)
   @ApiOperation({ summary: 'Supprimer un utilisateur (soft delete)' })
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser('id') currentUserId: string) {
+    return this.usersService.remove(id, currentUserId);
   }
 }

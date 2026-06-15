@@ -38,7 +38,7 @@ export function FaqSection() {
                 />
               </button>
               {open === i && (
-                <div className="px-6 pb-5 text-sm text-gray-600 leading-relaxed border-t border-gray-50 pt-4">
+                <div className="px-6 pb-5 text-sm text-gray-700 leading-relaxed border-t border-gray-50 pt-4">
                   {faq.a}
                 </div>
               )}
