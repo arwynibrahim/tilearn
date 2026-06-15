@@ -36,6 +36,56 @@ export class LearningService {
     });
   }
 
+  // ─── ADMIN: Inscriptions ────────────────────────────────────
+
+  async getAllEnrollments(page: number, limit: number, filters?: { courseId?: string; userId?: string; status?: string }) {
+    const where: any = {};
+    if (filters?.courseId) where.courseId = filters.courseId;
+    if (filters?.userId) where.userId = filters.userId;
+    if (filters?.status) where.status = filters.status;
+
+    const [enrollments, total] = await Promise.all([
+      this.prisma.enrollment.findMany({
+        where,
+        include: {
+          user: { select: { id: true, email: true, nom: true, prenom: true, role: true } },
+          course: { select: { id: true, title: true, slug: true, level: true } },
+        },
+        orderBy: { enrolledAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.enrollment.count({ where }),
+    ]);
+
+    return { data: enrollments, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async getEnrollmentById(id: string) {
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { id },
+      include: {
+        user: { select: { id: true, email: true, nom: true, prenom: true, role: true } },
+        course: { select: { id: true, title: true, slug: true, level: true } },
+      },
+    });
+    if (!enrollment) throw new NotFoundException('Inscription non trouvée');
+    return enrollment;
+  }
+
+  async updateEnrollmentStatus(id: string, status: string) {
+    const enrollment = await this.prisma.enrollment.findUnique({ where: { id } });
+    if (!enrollment) throw new NotFoundException('Inscription non trouvée');
+
+    return this.prisma.enrollment.update({
+      where: { id },
+      data: {
+        status: status as any,
+        completedAt: status === 'COMPLETED' ? new Date() : undefined,
+      },
+    });
+  }
+
   // ─── Progression ────────────────────────────────────────────
 
   async updateProgress(userId: string, moduleId: string, data: { status?: string; score?: number; timeSpentSeconds?: number; lastPosition?: string }) {
@@ -89,6 +139,31 @@ export class LearningService {
       modules: modulesWithProgress,
       stats: { totalModules, completedModules, completionPercent },
     };
+  }
+
+  // ─── ADMIN: Progression ─────────────────────────────────────
+
+  async getAllProgress(page: number, limit: number, filters?: { userId?: string; courseId?: string; status?: string }) {
+    const where: any = {};
+    if (filters?.userId) where.userId = filters.userId;
+    if (filters?.courseId) where.module = { courseId: filters.courseId };
+    if (filters?.status) where.status = filters.status;
+
+    const [progress, total] = await Promise.all([
+      this.prisma.progress.findMany({
+        where,
+        include: {
+          user: { select: { id: true, email: true, nom: true, prenom: true } },
+          module: { select: { id: true, title: true, course: { select: { id: true, title: true } } } },
+        },
+        orderBy: { startedAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.progress.count({ where }),
+    ]);
+
+    return { data: progress, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
   }
 
   // ─── Quiz ───────────────────────────────────────────────────
@@ -193,5 +268,35 @@ export class LearningService {
     });
     if (!cert || cert.revokedAt) throw new NotFoundException('Certificat invalide ou révoqué');
     return { valid: true, ...cert };
+  }
+
+  // ─── ADMIN: Certificats ─────────────────────────────────────
+
+  async revokeCertificate(id: string) {
+    const cert = await this.prisma.certificate.findUnique({ where: { id } });
+    if (!cert) throw new NotFoundException('Certificat non trouvé');
+    if (cert.revokedAt) throw new BadRequestException('Certificat déjà révoqué');
+
+    return this.prisma.certificate.update({
+      where: { id },
+      data: { revokedAt: new Date() },
+    });
+  }
+
+  async getAllCertificates(page: number, limit: number) {
+    const [certificates, total] = await Promise.all([
+      this.prisma.certificate.findMany({
+        include: {
+          user: { select: { id: true, email: true, nom: true, prenom: true } },
+          course: { select: { id: true, title: true } },
+        },
+        orderBy: { issuedAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.certificate.count(),
+    ]);
+
+    return { data: certificates, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
   }
 }

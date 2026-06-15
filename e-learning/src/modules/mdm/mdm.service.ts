@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateVRHeadsetDto } from './dto/create-vrheadset.dto';
 
@@ -35,6 +35,20 @@ export class MdmService {
     });
   }
 
+  async removeHeadset(id: string) {
+    const headset = await this.prisma.vRHeadset.findUnique({
+      where: { id },
+      include: { _count: { select: { assignedUser: true } } },
+    });
+    if (!headset) throw new NotFoundException('Casque VR non trouvé');
+    if (headset.assignedUserId) {
+      throw new ConflictException('Impossible de supprimer un casque assigné à un utilisateur. Désassignez-le d\'abord.');
+    }
+
+    await this.prisma.vRHeadset.delete({ where: { id } });
+    return { message: 'Casque VR supprimé' };
+  }
+
   // ─── Stations de charge ─────────────────────────────────────
 
   async createChargingStation(data: { organizationId: string; model?: string; portsTotal: number; portsAvailable: number; location?: string }) {
@@ -43,5 +57,13 @@ export class MdmService {
 
   async getOrganizationChargingStations(organizationId: string) {
     return this.prisma.chargingStation.findMany({ where: { organizationId } });
+  }
+
+  async removeChargingStation(id: string) {
+    const station = await this.prisma.chargingStation.findUnique({ where: { id } });
+    if (!station) throw new NotFoundException('Station de charge non trouvée');
+
+    await this.prisma.chargingStation.delete({ where: { id } });
+    return { message: 'Station de charge supprimée' };
   }
 }

@@ -16,7 +16,7 @@ import {
   UserCheck,
   Shield,
   GraduationCap,
-  FileText,
+  Compass,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -33,8 +33,9 @@ interface NavItem {
 
 const adminNav: NavItem[] = [
   { href: '/admin', icon: LayoutDashboard, label: 'Tableau de bord' },
+  { href: '/dashboard/catalogue', icon: Compass, label: 'Catalogue' },
+  { href: '/admin/catalogue', icon: Library, label: 'Gestion catalogue' },
   { href: '/admin/users', icon: Users, label: 'Utilisateurs' },
-  { href: '/admin/catalogue', icon: Library, label: 'Catalogue' },
   { href: '/admin/organizations', icon: Building2, label: 'Organisations' },
   { href: '/admin/licenses', icon: BadgeCheck, label: 'Licences' },
   { href: '/admin/learning-paths', icon: BookOpen, label: 'Parcours' },
@@ -46,7 +47,7 @@ const adminNav: NavItem[] = [
 
 const instructorNav: NavItem[] = [
   { href: '/dashboard/instructor', icon: GraduationCap, label: 'Mon espace' },
-  { href: '/courses', icon: Library, label: 'Catalogue' },
+  { href: '/dashboard/catalogue', icon: Compass, label: 'Catalogue' },
   { href: '/dashboard/courses', icon: BookOpen, label: 'Mes cours' },
   { href: '/dashboard/vr', icon: Headphones, label: 'Mes VR' },
   { href: '/dashboard/certificates', icon: BadgeCheck, label: 'Certificats' },
@@ -54,7 +55,7 @@ const instructorNav: NavItem[] = [
 
 const learnerNav: NavItem[] = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
-  { href: '/courses', icon: Library, label: 'Catalogue' },
+  { href: '/dashboard/catalogue', icon: Compass, label: 'Catalogue' },
   { href: '/dashboard/courses', icon: BookOpen, label: 'Mes cours' },
   { href: '/dashboard/certificates', icon: BadgeCheck, label: 'Certificats' },
   { href: '/dashboard/payments', icon: CreditCard, label: 'Mes paiements' },

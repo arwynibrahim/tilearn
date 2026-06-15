@@ -45,6 +45,7 @@ export const Permissions = {
   CERTIFICATE_CREATE: 'certificate:create',
   CERTIFICATE_READ: 'certificate:read',
   CERTIFICATE_VERIFY: 'certificate:verify',
+  CERTIFICATE_DELETE: 'certificate:delete',
 
   // ─── Paiements ────────────────────────────────────────────
   PAYMENT_READ: 'payment:read',
@@ -148,6 +149,7 @@ export const RolePermissions: Record<string, PermissionName[]> = {
     Permissions.CERTIFICATE_READ,
     Permissions.CERTIFICATE_CREATE,
     Permissions.PAYMENT_READ,
+    Permissions.REVIEW_CREATE,
     Permissions.REVIEW_READ,
     Permissions.INSTRUCTOR_READ,
     Permissions.REPORT_READ,
@@ -163,10 +165,12 @@ export const RolePermissions: Record<string, PermissionName[]> = {
     Permissions.COURSE_READ,
     Permissions.COURSE_UPDATE,
     Permissions.COURSE_PUBLISH,
+    Permissions.COURSE_DELETE,
     Permissions.DOMAIN_READ,
     Permissions.MODULE_CREATE,
     Permissions.MODULE_READ,
     Permissions.MODULE_UPDATE,
+    Permissions.MODULE_DELETE,
     Permissions.VR_SCENE_CREATE,
     Permissions.VR_SCENE_READ,
     Permissions.VR_SCENE_UPDATE,

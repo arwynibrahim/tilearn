@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Param, Body, UseGuards,
+  Controller, Get, Post, Patch, Delete, Param, Body, UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -55,6 +55,14 @@ export class MdmController {
     return this.mdmService.assignHeadset(id, userId);
   }
 
+  @Delete('headsets/:id')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @RequirePermissions(Permissions.VRHEADSET_DELETE)
+  @ApiOperation({ summary: 'Supprimer un casque VR' })
+  removeHeadset(@Param('id') id: string) {
+    return this.mdmService.removeHeadset(id);
+  }
+
   @Post('charging-stations')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
   @RequirePermissions(Permissions.VRHEADSET_UPDATE)
@@ -69,5 +77,13 @@ export class MdmController {
   @ApiOperation({ summary: 'Stations de charge d\'une organisation' })
   getOrganizationChargingStations(@Param('orgId') orgId: string) {
     return this.mdmService.getOrganizationChargingStations(orgId);
+  }
+
+  @Delete('charging-stations/:id')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @RequirePermissions(Permissions.VRHEADSET_DELETE)
+  @ApiOperation({ summary: 'Supprimer une station de charge' })
+  removeChargingStation(@Param('id') id: string) {
+    return this.mdmService.removeChargingStation(id);
   }
 }

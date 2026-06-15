@@ -69,7 +69,7 @@ export class CatalogueController {
 
   @Post('courses')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.SUPER_ADMIN)
+  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.COURSE_CREATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Créer un cours' })
@@ -96,7 +96,7 @@ export class CatalogueController {
 
   @Patch('courses/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.SUPER_ADMIN)
+  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.COURSE_UPDATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Modifier un cours' })
@@ -106,7 +106,7 @@ export class CatalogueController {
 
   @Delete('courses/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.COURSE_DELETE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Dépublier un cours' })
@@ -118,7 +118,7 @@ export class CatalogueController {
 
   @Post('modules')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.SUPER_ADMIN)
+  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.MODULE_CREATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Créer un module' })
@@ -134,7 +134,7 @@ export class CatalogueController {
 
   @Patch('modules/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.SUPER_ADMIN)
+  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.MODULE_UPDATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Modifier un module' })
@@ -144,7 +144,7 @@ export class CatalogueController {
 
   @Delete('modules/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.MODULE_DELETE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Supprimer un module' })

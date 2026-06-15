@@ -19,7 +19,7 @@ export class VrController {
 
   @Post('scenes')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.SUPER_ADMIN)
+  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.VR_SCENE_CREATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Créer une scène VR' })
@@ -41,7 +41,7 @@ export class VrController {
 
   @Patch('scenes/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.SUPER_ADMIN)
+  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.VR_SCENE_UPDATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Modifier une scène VR' })
@@ -51,7 +51,7 @@ export class VrController {
 
   @Delete('scenes/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.VR_SCENE_UPDATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Supprimer une scène VR' })

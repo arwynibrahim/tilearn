@@ -107,7 +107,7 @@ export default function MyCoursesPage() {
           <CardContent className="py-16 text-center">
             <BookOpen className="mx-auto mb-3 size-12 text-gray-200" />
             <p className="mb-4 text-gray-400">Vous n&apos;êtes inscrit à aucun cours.</p>
-            <Link href="/#courses">
+            <Link href="/dashboard/catalogue">
               <Button className="gap-2">
                 Explorer le catalogue <ArrowRight className="size-4" />
               </Button>
