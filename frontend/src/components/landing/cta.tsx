@@ -21,7 +21,7 @@ export function CtaSection() {
               <ArrowRight className="size-5" />
             </Button>
           </Link>
-          <Link href="mailto:contact@totalinnovation.bf">
+          <Link href="mailto:contact@total-innovation.net">
             <Button size="xl" variant="white" className="gap-2">
               Nous contacter
             </Button>

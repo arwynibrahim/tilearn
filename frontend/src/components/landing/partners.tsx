@@ -11,7 +11,7 @@ export function PartnersMarquee() {
       <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-gray-500">
         Ils nous font confiance
       </p>
-      <div className="marquee-track gap-12 items-center">
+      <div className="flex w-max animate-marquee items-center gap-12 motion-reduce:animate-none">
         {PARTNERS.map((p, i) => (
           <span
             key={`${p}-${i}`}

@@ -29,16 +29,25 @@ export function FaqSection() {
               className="rounded-2xl border border-gray-100 overflow-hidden"
             >
               <button
+                id={`faq-trigger-${i}`}
                 className="flex w-full items-center justify-between px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-50 transition-colors"
+                aria-expanded={open === i}
+                aria-controls={`faq-panel-${i}`}
                 onClick={() => setOpen(open === i ? null : i)}
               >
                 {faq.q}
                 <ChevronDown
                   className={cn('size-5 text-gray-400 transition-transform shrink-0 ml-4', open === i && 'rotate-180')}
+                  aria-hidden="true"
                 />
               </button>
               {open === i && (
-                <div className="px-6 pb-5 text-sm text-gray-700 leading-relaxed border-t border-gray-50 pt-4">
+                <div
+                  id={`faq-panel-${i}`}
+                  role="region"
+                  aria-labelledby={`faq-trigger-${i}`}
+                  className="px-6 pb-5 text-sm text-gray-700 leading-relaxed border-t border-gray-50 pt-4"
+                >
                   {faq.a}
                 </div>
               )}

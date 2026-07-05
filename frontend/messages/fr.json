@@ -9,17 +9,24 @@
     "dashboard": "Tableau de bord"
   },
   "hero": {
-    "badge": "🚀 Plateforme VR #1 en Afrique francophone",
+    "badge": "Plateforme VR #1 en Afrique francophone",
     "title1": "Apprendre",
     "title2": "par l'immersion",
     "title3": "VR & IA",
     "desc": "La première plateforme e-learning africaine combinant réalité virtuelle, intelligence artificielle et Mobile Money pour former les professionnels de demain.",
     "cta_vr": "Essayer la VR",
     "cta_explore": "Explorer les cours",
+    "search_placeholder": "Rechercher un cours, un domaine...",
+    "search_cta": "Rechercher",
     "stat_users": "Apprenants actifs",
     "stat_courses": "Cours certifiants",
     "stat_vr": "Simulations VR",
     "stat_partners": "Partenaires"
+  },
+  "categories": {
+    "title": "Explorez par domaine",
+    "subtitle": "Choisissez votre domaine et démarrez votre parcours",
+    "all": "Tous les domaines"
   },
   "courses": {
     "title": "Catalogue de cours",
@@ -32,11 +39,26 @@
     "level_beginner": "Débutant",
     "level_intermediate": "Intermédiaire",
     "level_advanced": "Avancé",
+    "level_expert": "Expert",
+    "rail_popular": "Les plus suivis",
+    "rail_new": "Nouveautés",
     "enroll": "S'inscrire",
     "students": "apprenants",
     "hours": "heures",
     "empty": "Aucun cours disponible pour le moment.",
     "view_all": "Voir tout le catalogue"
+  },
+  "organizations": {
+    "title": "Former vos équipes, à grande échelle",
+    "subtitle": "Licences en volume, suivi centralisé et flotte de casques VR gérée pour vos institutions.",
+    "bullet1": "Licences en volume pour vos collaborateurs",
+    "bullet2": "Tableau de bord de suivi de progression par équipe",
+    "bullet3": "Gestion de flotte de casques VR (MDM) incluse",
+    "cta": "Discuter de votre projet"
+  },
+  "testimonials": {
+    "title": "Ils ont transformé leur carrière",
+    "subtitle": "Des apprenants qui ont franchi une étape grâce à TIL"
   },
   "pricing": {
     "title": "Tarifs transparents",

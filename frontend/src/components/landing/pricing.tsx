@@ -58,7 +58,7 @@ export function PricingSection() {
               key={plan.key}
               className={`relative flex flex-col p-6 ${
                 plan.popular
-                  ? 'border-2 border-brand shadow-xl shadow-brand/10 scale-105'
+                  ? 'border-2 border-brand shadow-xl shadow-brand/10 lg:scale-105'
                   : ''
               }`}
             >

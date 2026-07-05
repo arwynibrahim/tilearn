@@ -15,11 +15,11 @@ export function Footer() {
               height={135}
               className="mb-4 rounded-xl"
             />
-            <p className="text-sm text-gray-500">Former l&apos;Afrique de demain par l&apos;immersion VR &amp; IA.</p>
-            <p className="mt-3 text-xs text-gray-600">
+            <p className="text-sm text-gray-300">Former l&apos;Afrique de demain par l&apos;immersion VR &amp; IA.</p>
+            <p className="mt-3 text-xs text-gray-400">
               Ouagadougou, Burkina Faso
               <br />
-              contact@totalinnovation.bf
+              contact@total-innovation.net
             </p>
           </div>
 

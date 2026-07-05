@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Clock, Users, ChevronLeft, ChevronRight, BookOpen, Star } from 'lucide-react';
 import { Header } from '@/components/layout/header';
@@ -28,16 +29,21 @@ const LEVEL_VARIANT: Record<CourseLevel, 'success' | 'info' | 'warning' | 'destr
 
 const LIMIT = 12;
 
-export default function CoursesPage() {
+function CoursesPageContent() {
+  const searchParams = useSearchParams();
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [domainId, setDomainId] = useState<string>('');
+  const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
+  const [domainOverride, setDomainOverride] = useState<string | null>(null);
   const [level, setLevel] = useState<string>('');
 
   const { data: domains = [] } = useQuery({
     queryKey: ['domains'],
     queryFn: catalogueApi.domains.list,
   });
+
+  // Until the user clicks a filter pill, honor the ?domain=<slug> URL param (from landing page links).
+  const domainSlugParam = searchParams.get('domain');
+  const domainId = domainOverride ?? (domainSlugParam ? domains.find((d) => d.slug === domainSlugParam)?.id ?? '' : '');
 
   const { data, isLoading } = useQuery({
     queryKey: ['courses', page, domainId, level],
@@ -86,7 +92,7 @@ export default function CoursesPage() {
           <div className="mb-8 flex flex-wrap items-center gap-3">
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => { setDomainId(''); setPage(1); }}
+                onClick={() => { setDomainOverride(''); setPage(1); }}
                 className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
                   !domainId ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                 }`}
@@ -96,7 +102,7 @@ export default function CoursesPage() {
               {domains.map((d) => (
                 <button
                   key={d.id}
-                  onClick={() => { setDomainId(d.id); setPage(1); }}
+                  onClick={() => { setDomainOverride(d.id); setPage(1); }}
                   className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
                     domainId === d.id ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                   }`}
@@ -221,5 +227,13 @@ export default function CoursesPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function CoursesPage() {
+  return (
+    <Suspense fallback={null}>
+      <CoursesPageContent />
+    </Suspense>
   );
 }

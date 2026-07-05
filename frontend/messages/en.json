@@ -9,17 +9,24 @@
     "dashboard": "Dashboard"
   },
   "hero": {
-    "badge": "🚀 #1 VR Platform in French-speaking Africa",
+    "badge": "#1 VR Platform in French-speaking Africa",
     "title1": "Learn",
     "title2": "through immersion",
     "title3": "VR & AI",
     "desc": "Africa's first e-learning platform combining virtual reality, artificial intelligence and Mobile Money to train tomorrow's professionals.",
     "cta_vr": "Try VR",
     "cta_explore": "Explore courses",
+    "search_placeholder": "Search a course, a field...",
+    "search_cta": "Search",
     "stat_users": "Active learners",
     "stat_courses": "Certified courses",
     "stat_vr": "VR simulations",
     "stat_partners": "Partners"
+  },
+  "categories": {
+    "title": "Browse by field",
+    "subtitle": "Pick a field and start your journey",
+    "all": "All fields"
   },
   "courses": {
     "title": "Course Catalog",
@@ -32,11 +39,26 @@
     "level_beginner": "Beginner",
     "level_intermediate": "Intermediate",
     "level_advanced": "Advanced",
+    "level_expert": "Expert",
+    "rail_popular": "Most popular",
+    "rail_new": "New",
     "enroll": "Enroll",
     "students": "students",
     "hours": "hours",
     "empty": "No courses available at the moment.",
     "view_all": "View full catalog"
+  },
+  "organizations": {
+    "title": "Train your teams, at scale",
+    "subtitle": "Volume licensing, centralized tracking, and a managed VR headset fleet for your institution.",
+    "bullet1": "Volume licenses for your staff",
+    "bullet2": "Team progress tracking dashboard",
+    "bullet3": "VR headset fleet management (MDM) included",
+    "cta": "Talk about your project"
+  },
+  "testimonials": {
+    "title": "They transformed their careers",
+    "subtitle": "Learners who took the next step with TIL"
   },
   "pricing": {
     "title": "Transparent Pricing",
