@@ -9,13 +9,15 @@ model Course {
   duration    Int?
   language    String     @default("fr")
   price       Float?
-  isPublished Boolean   @default(false)
-  createdBy   String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  isPublished    Boolean      @default(false)
+  organizationId String?
+  createdBy      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  domain      Domain     @relation(fields: [domainId], references: [id])
-  creator     User       @relation("CourseCreator", fields: [createdBy], references: [id])
+  domain       Domain        @relation(fields: [domainId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  creator      User          @relation("CourseCreator", fields: [createdBy], references: [id])
   modules     Module[]
   enrollments Enrollment[]
   certificates Certificate[]

@@ -44,4 +44,9 @@ export class CreateCourseDto {
   @ApiPropertyOptional({ default: false })
   @IsOptional()
   isPublished?: boolean;
+
+  @ApiPropertyOptional({ description: 'Organisation propriétaire du cours (null = catalogue global)' })
+  @IsOptional()
+  @IsString()
+  organizationId?: string;
 }

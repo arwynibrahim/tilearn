@@ -135,7 +135,7 @@ describe('CatalogueService', () => {
       const result = await service.findAllCourses(1, 10, { domainId: 'd1', level: 'BEGINNER' });
 
       expect(mockPrisma.course.findMany).toHaveBeenCalledWith({
-        where: { isPublished: true, domainId: 'd1', level: 'BEGINNER' },
+        where: { isPublished: true, organizationId: null, domainId: 'd1', level: 'BEGINNER' },
         skip: 0,
         take: 10,
         include: {
@@ -155,7 +155,7 @@ describe('CatalogueService', () => {
       const result = await service.findAllCourses(1, 20);
 
       expect(mockPrisma.course.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { isPublished: true } }),
+        expect.objectContaining({ where: { isPublished: true, organizationId: null } }),
       );
       expect(result.totalPages).toBe(0);
     });

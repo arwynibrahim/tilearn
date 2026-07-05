@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Search, Clock, Users, ChevronLeft, ChevronRight, BookOpen,
-  Play, CheckCircle2, Loader2,
+  Play, CheckCircle2, Loader2, User2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,6 +82,13 @@ function CourseCard({
         </Link>
         {course.description && (
           <p className="mb-3 line-clamp-2 text-xs text-gray-500">{course.description}</p>
+        )}
+
+        {course.creator && (
+          <p className="mb-2 flex items-center gap-1 text-[10px] text-gray-400">
+            <User2 className="size-3" />
+            {course.creator.prenom} {course.creator.nom}
+          </p>
         )}
 
         <div className="mt-auto flex items-center gap-3 text-[10px] text-gray-400">

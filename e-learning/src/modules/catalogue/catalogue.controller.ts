@@ -77,8 +77,18 @@ export class CatalogueController {
     return this.catalogueService.createCourse(dto, userId);
   }
 
+  @Get('admin/courses')
+  @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER)
+  @RequirePermissions(Permissions.COURSE_READ)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'ADMIN: cours scopés par organisation' })
+  findAdminCourses(@CurrentUser('memberships') memberships: any) {
+    return this.catalogueService.findAdminCourses(memberships);
+  }
+
   @Get('courses')
-  @ApiOperation({ summary: 'Liste des cours publiés' })
+  @ApiOperation({ summary: 'Liste des cours publiés (catalogue global)' })
   findAllCourses(
     @Query('page') page = 1,
     @Query('limit') limit = 20,

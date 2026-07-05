@@ -77,6 +77,7 @@ export interface Course {
   description?: string | null;
   thumbnail?: string | null;
   domainId: string;
+  organizationId?: string | null;
   level: CourseLevel;
   duration?: number | null; // minutes
   language: string;
@@ -86,6 +87,7 @@ export interface Course {
   createdAt: string;
   updatedAt: string;
   domain?: Domain;
+  organization?: { id: string; name: string } | null;
   creator?: Pick<User, 'id' | 'nom' | 'prenom' | 'avatar'>;
   modules?: Module[];
   _count?: { modules: number; enrollments: number };
@@ -109,6 +111,7 @@ export interface CreateCourseDto {
   description?: string;
   thumbnail?: string;
   domainId: string;
+  organizationId?: string;
   level?: CourseLevel;
   duration?: number;
   language?: string;

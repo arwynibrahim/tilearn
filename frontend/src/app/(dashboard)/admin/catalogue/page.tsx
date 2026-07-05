@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Library, BookOpen, Trash2, Eye, EyeOff, Layers, Pencil } from 'lucide-react';
+import { Plus, Library, BookOpen, Trash2, Eye, EyeOff, Layers, Pencil, User2, Building2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,6 +21,8 @@ import {
   CreateCourseModal, EditCourseModal, ModulesDrawer, LEVEL_LABELS,
 } from '@/components/catalogue/course-modals';
 import type { Course } from '@/types';
+import { useAuthStore } from '@/stores/auth.store';
+import { hasPlatformRole } from '@/types';
 
 const ADMIN_COURSES_QUERY_KEY = ['admin-courses'];
 
@@ -87,6 +89,8 @@ function CreateDomainModal({ onClose }: { onClose: () => void }) {
 
 export default function CataloguePage() {
   const qc = useQueryClient();
+  const { user } = useAuthStore();
+  const isSuperAdmin = hasPlatformRole(user ?? null);
   const [showDomainModal, setShowDomainModal] = useState(false);
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -100,12 +104,11 @@ export default function CataloguePage() {
     retry: false,
   });
 
-  const { data: coursesPage, isLoading } = useQuery({
+  const { data: courses = [], isLoading } = useQuery({
     queryKey: ADMIN_COURSES_QUERY_KEY,
-    queryFn: () => catalogueApi.courses.list({ limit: 100 }),
+    queryFn: catalogueApi.courses.adminList,
     retry: false,
   });
-  const courses = coursesPage?.data ?? [];
 
   const deleteCourse = useMutation({
     mutationFn: catalogueApi.courses.remove,
@@ -177,7 +180,9 @@ export default function CataloguePage() {
 
       <div>
         <h1 className="text-2xl font-black text-gray-900">Catalogue</h1>
-        <p className="text-sm text-gray-500">Gestion des domaines et des cours</p>
+        <p className="text-sm text-gray-500">
+          {isSuperAdmin ? 'Toutes les organisations' : 'Catalogue de votre organisation'}
+        </p>
       </div>
 
       {/* Domains */}
@@ -237,6 +242,10 @@ export default function CataloguePage() {
                   <tr className="border-b border-gray-100 text-left text-gray-500">
                     <th scope="col" className="py-2 pr-4 font-semibold">Cours</th>
                     <th scope="col" className="py-2 pr-4 font-semibold">Domaine</th>
+                    <th scope="col" className="py-2 pr-4 font-semibold">Créateur</th>
+                    {isSuperAdmin && (
+                      <th scope="col" className="py-2 pr-4 font-semibold">Organisation</th>
+                    )}
                     <th scope="col" className="py-2 pr-4 font-semibold">Niveau</th>
                     <th scope="col" className="py-2 pr-4 font-semibold">Statut</th>
                     <th scope="col" className="py-2 text-right font-semibold">Actions</th>
@@ -250,6 +259,28 @@ export default function CataloguePage() {
                         <p className="text-xs text-gray-400">{c._count?.modules ?? 0} module(s) · {c._count?.enrollments ?? 0} inscrit(s)</p>
                       </td>
                       <td className="py-3 pr-4 text-gray-500">{c.domain?.name ?? domainName(c.domainId)}</td>
+                      <td className="py-3 pr-4">
+                        {c.creator ? (
+                          <span className="flex items-center gap-1.5 text-xs text-gray-600">
+                            <User2 className="size-3 text-gray-400" aria-hidden="true" />
+                            {c.creator.prenom} {c.creator.nom}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
+                      </td>
+                      {isSuperAdmin && (
+                        <td className="py-3 pr-4">
+                          {c.organization ? (
+                            <span className="flex items-center gap-1.5 text-xs text-gray-600">
+                              <Building2 className="size-3 text-brand" aria-hidden="true" />
+                              {c.organization.name}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400 italic">Global</span>
+                          )}
+                        </td>
+                      )}
                       <td className="py-3 pr-4">
                         <Badge variant="outline">{LEVEL_LABELS[c.level]}</Badge>
                       </td>

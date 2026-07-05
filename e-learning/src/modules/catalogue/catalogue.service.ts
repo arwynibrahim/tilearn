@@ -7,6 +7,7 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { CreateDomainDto } from './dto/create-domain.dto';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { Role } from '../../common/enums/role.enum';
+import { MembershipSlim, isPlatformAdmin, getAdminOrgIds } from '../../common/utils/membership.util';
 
 @Injectable()
 export class CatalogueService {
@@ -75,7 +76,8 @@ export class CatalogueService {
   }
 
   async findAllCourses(page = 1, limit = 20, filters?: { domainId?: string; level?: string }) {
-    const where: any = { isPublished: true };
+    // Public catalogue: only global published courses (no org restriction)
+    const where: any = { isPublished: true, organizationId: null };
     if (filters?.domainId) where.domainId = filters.domainId;
     if (filters?.level) where.level = filters.level;
 
@@ -95,6 +97,28 @@ export class CatalogueService {
       this.prisma.course.count({ where }),
     ]);
     return { courses, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async findAdminCourses(memberships: MembershipSlim[]) {
+    const include = {
+      domain: true,
+      organization: { select: { id: true, name: true } },
+      creator: { select: { id: true, nom: true, prenom: true } },
+      _count: { select: { modules: true, enrollments: true } },
+    };
+
+    if (isPlatformAdmin(memberships)) {
+      return this.prisma.course.findMany({ include, orderBy: { createdAt: 'desc' } });
+    }
+
+    const adminOrgIds = getAdminOrgIds(memberships);
+    if (adminOrgIds.length === 0) return [];
+
+    return this.prisma.course.findMany({
+      where: { organizationId: { in: adminOrgIds } },
+      include,
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findOneCourse(slug: string) {

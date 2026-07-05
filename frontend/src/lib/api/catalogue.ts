@@ -43,6 +43,11 @@ export const catalogueApi = {
         totalPages: data.totalPages,
       };
     },
+    // Admin endpoint: scoped by org membership (super admin = all, org admin = their org)
+    adminList: async (): Promise<Course[]> => {
+      const { data } = await apiClient.get('/admin/courses');
+      return data;
+    },
     get: async (slug: string): Promise<Course> => {
       const { data } = await apiClient.get(`/courses/${slug}`);
       return data;
