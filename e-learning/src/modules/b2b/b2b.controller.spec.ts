@@ -29,15 +29,17 @@ describe('B2bController', () => {
   });
 
   it('createOrganization', async () => {
-    const dto = { name: 'Org', type: OrganizationType.UNIVERSITY };
+    const dto = { name: 'Org', type: OrganizationType.UNIVERSITY, adminEmail: 'admin@org.bf', adminPrenom: 'Jean', adminNom: 'Dupont' };
     mockB2bService.createOrganization.mockResolvedValue({ id: 'o1' });
     expect(await controller.createOrganization(dto)).toEqual({ id: 'o1' });
     expect(mockB2bService.createOrganization).toHaveBeenCalledWith(dto);
   });
 
   it('findAllOrganizations', async () => {
+    const mockUser = { role: 'SUPER_ADMIN', organizationId: null };
     mockB2bService.findAllOrganizations.mockResolvedValue([]);
-    expect(await controller.findAllOrganizations()).toEqual([]);
+    expect(await controller.findAllOrganizations(mockUser)).toEqual([]);
+    expect(mockB2bService.findAllOrganizations).toHaveBeenCalledWith('SUPER_ADMIN', null);
   });
 
   it('findOneOrganization', async () => {

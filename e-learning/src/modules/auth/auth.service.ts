@@ -36,8 +36,9 @@ export class AuthService {
         prenom: dto.prenom,
         telephone: dto.telephone,
         role: dto.role || 'LEARNER',
+        interests: dto.interests || [],
       },
-      select: { id: true, email: true, nom: true, prenom: true, role: true },
+      select: { id: true, email: true, nom: true, prenom: true, role: true, organizationId: true },
     });
 
     const tokens = await this.generateTokens(user);
@@ -47,7 +48,7 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
-      select: { id: true, email: true, passwordHash: true, nom: true, prenom: true, role: true },
+      select: { id: true, email: true, passwordHash: true, nom: true, prenom: true, role: true, organizationId: true },
     });
 
     if (!user) throw new UnauthorizedException('Email ou mot de passe incorrect');
@@ -168,7 +169,7 @@ export class AuthService {
     });
 
     return {
-      user: { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, role: user.role },
+      user: { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, role: user.role, organizationId: user.organizationId },
       ...tokens,
     };
   }
@@ -178,8 +179,8 @@ export class AuthService {
       where: { id: userId },
       select: {
         id: true, email: true, nom: true, prenom: true, telephone: true,
-        avatar: true, role: true, emailVerifiedAt: true, lastLoginAt: true,
-        createdAt: true,
+        avatar: true, role: true, interests: true, emailVerifiedAt: true,
+        lastLoginAt: true, createdAt: true, organizationId: true,
       },
     });
   }

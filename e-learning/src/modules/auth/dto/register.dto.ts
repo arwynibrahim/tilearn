@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsIn } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsIn, IsArray } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RegisterDto {
@@ -29,4 +29,10 @@ export class RegisterDto {
   @IsOptional()
   @IsIn(['LEARNER', 'INSTRUCTOR'])
   role?: 'LEARNER' | 'INSTRUCTOR';
+
+  @ApiPropertyOptional({ example: ['Développement', 'Santé'], description: "Centres d'intérêt pour recommandations de cours" })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  interests?: string[];
 }

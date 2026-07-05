@@ -36,10 +36,7 @@ export class MdmService {
   }
 
   async removeHeadset(id: string) {
-    const headset = await this.prisma.vRHeadset.findUnique({
-      where: { id },
-      include: { _count: { select: { assignedUser: true } } },
-    });
+    const headset = await this.prisma.vRHeadset.findUnique({ where: { id } });
     if (!headset) throw new NotFoundException('Casque VR non trouvé');
     if (headset.assignedUserId) {
       throw new ConflictException('Impossible de supprimer un casque assigné à un utilisateur. Désassignez-le d\'abord.');

@@ -42,6 +42,9 @@ const schema = z.object({
   emailDomain: z.string().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
+  adminEmail: z.string().email('Email invalide'),
+  adminPrenom: z.string().min(2, 'Prénom requis'),
+  adminNom: z.string().min(2, 'Nom requis'),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -109,6 +112,35 @@ function CreateOrgModal({ onClose }: { onClose: () => void }) {
             <div className="space-y-1.5">
               <Label>Adresse</Label>
               <Input placeholder="Ouagadougou" {...register('address')} />
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-brand/20 bg-brand/5 p-4">
+            <h4 className="mb-3 text-sm font-semibold text-brand">Responsable organisation</h4>
+            <p className="mb-3 text-xs text-gray-500">
+              Un email sera envoyé avec les identifiants de connexion au tableau de bord administration.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label>Email du responsable</Label>
+                <Input
+                  type="email"
+                  placeholder="admin@universite.bf"
+                  {...register('adminEmail')}
+                  className={errors.adminEmail ? 'border-red-400' : ''}
+                />
+                {errors.adminEmail && <p className="text-xs text-red-500">{errors.adminEmail.message}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Prénom</Label>
+                <Input placeholder="Jean" {...register('adminPrenom')} />
+                {errors.adminPrenom && <p className="text-xs text-red-500">{errors.adminPrenom.message}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Nom</Label>
+                <Input placeholder="Dupont" {...register('adminNom')} />
+                {errors.adminNom && <p className="text-xs text-red-500">{errors.adminNom.message}</p>}
+              </div>
             </div>
           </div>
 

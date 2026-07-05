@@ -76,7 +76,7 @@ function EditModal({ user, onClose }: { user: User; onClose: () => void }) {
 
   return (
     <Modal open onOpenChange={(open) => !open && onClose()}>
-      <ModalContent title="Modifier l&apos;utilisateur" description={`Modifiez les informations de ${user.prenom} ${user.nom}.`}>
+      <ModalContent title="Modifier l'utilisateur" description={`Modifiez les informations de ${user.prenom} ${user.nom}.`}>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {error && <ErrorBanner message={error} />}

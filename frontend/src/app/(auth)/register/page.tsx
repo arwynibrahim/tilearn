@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { GraduationCap, School } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +13,17 @@ import { useRegister } from '@/hooks/use-auth';
 import { useT } from '@/hooks/use-t';
 import { authApi } from '@/lib/api/auth';
 import { getApiErrorMessage } from '@/lib/api/client';
+
+const INTEREST_KEYS = [
+  'interests_dev',
+  'interests_health',
+  'interests_agro',
+  'interests_business',
+  'interests_creative',
+  'interests_language',
+  'interests_science',
+  'interests_tech',
+] as const;
 
 const schema = z
   .object({
@@ -29,6 +42,8 @@ type FormData = z.infer<typeof schema>;
 export default function RegisterPage() {
   const t = useT();
   const { mutate: register, isPending, error } = useRegister();
+  const [role, setRole] = useState<'LEARNER' | 'INSTRUCTOR'>('LEARNER');
+  const [interests, setInterests] = useState<string[]>([]);
 
   const {
     register: field,
@@ -36,7 +51,14 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const onSubmit = ({ confirmPassword: _, ...data }: FormData) => register(data);
+  const toggleInterest = (key: string) => {
+    setInterests((prev) =>
+      prev.includes(key) ? prev.filter((i) => i !== key) : [...prev, key],
+    );
+  };
+
+  const onSubmit = ({ confirmPassword: _, ...data }: FormData) =>
+    register({ ...data, role, interests });
 
   return (
     <div>
@@ -82,6 +104,36 @@ export default function RegisterPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label>{t('auth.role_label')}</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setRole('LEARNER')}
+              className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all ${
+                role === 'LEARNER'
+                  ? 'border-brand bg-brand/5 text-brand'
+                  : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+              }`}
+            >
+            <GraduationCap size={28} />
+            {t('auth.role_learner')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('INSTRUCTOR')}
+              className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all ${
+                role === 'INSTRUCTOR'
+                  ? 'border-brand bg-brand/5 text-brand'
+                  : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+              }`}
+            >
+              <School size={28} />
+              {t('auth.role_instructor')}
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="prenom">{t('auth.first_name')}</Label>
@@ -141,6 +193,30 @@ export default function RegisterPage() {
           {errors.confirmPassword && (
             <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <Label>{t('auth.interests_label')}</Label>
+          <p className="text-xs text-gray-400">{t('auth.interests_subtitle')}</p>
+          <div className="flex flex-wrap gap-2">
+            {INTEREST_KEYS.map((key) => {
+              const selected = interests.includes(key);
+              return (
+                <button
+                  type="button"
+                  key={key}
+                  onClick={() => toggleInterest(key)}
+                  className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all ${
+                    selected
+                      ? 'border-brand bg-brand text-white'
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                  }`}
+                >
+                  {t(`auth.${key}`)}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <Button type="submit" className="w-full" size="lg" loading={isPending}>

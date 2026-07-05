@@ -146,10 +146,12 @@ model User {
   telephone        String?
   avatar           String?
   emailVerifiedAt  DateTime?
+  interests        String[]
   lastLoginAt      DateTime?
   deletedAt        DateTime?
   resetToken       String?
   resetTokenExpiresAt DateTime?
+  organizationId   String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -164,6 +166,7 @@ model User {
   vrHeadset           VRHeadset[]
   coursesCreated      Course[]             @relation("CourseCreator")
   quizAttempts        QuizAttempt[]
+  organization        Organization?        @relation(fields: [organizationId], references: [id])
 }
 
 model InstructorProfile {
@@ -408,6 +411,7 @@ model Organization {
   learningPaths  LearningPath[]
   vrHeadsets     VRHeadset[]
   chargingStations ChargingStation[]
+  users          User[]
 }
 
 model License {

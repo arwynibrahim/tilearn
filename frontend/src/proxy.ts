@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 // Next.js 16: `middleware.ts` is replaced by `proxy.ts` (Node.js runtime).
 // Keep this thin - redirects/rewrites only, no heavy DB or JWT verification.
-const PROTECTED_PREFIXES = ['/dashboard', '/admin', '/learn'];
+const PROTECTED_PREFIXES = ['/dashboard', '/admin', '/super-admin', '/learn'];
 const AUTH_ONLY_PATHS = ['/login', '/register'];
 
 export function proxy(req: NextRequest) {

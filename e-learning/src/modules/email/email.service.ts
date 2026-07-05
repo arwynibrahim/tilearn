@@ -29,6 +29,47 @@ export class EmailService {
     });
   }
 
+  async sendOrganizationWelcomeEmail(
+    to: string,
+    prenom: string,
+    organizationName: string,
+    loginEmail: string,
+    password: string,
+  ) {
+    await this.sendMail(
+      to,
+      `Bienvenue sur Total Innovation Learning - Accès ${organizationName}`,
+      `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #E8650A 0%, #C45408 100%); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Total Innovation Learning</h1>
+        </div>
+        <div style="padding: 30px; background: #f9f9f9;">
+          <h2>Organisation créée avec succès</h2>
+          <p>Bonjour ${prenom},</p>
+          <p>Votre organisation <strong>${organizationName}</strong> a été créée sur Total Innovation Learning.</p>
+          <p>Voici vos identifiants de connexion :</p>
+          <div style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <p style="margin: 0 0 8px;"><strong>Email :</strong> ${loginEmail}</p>
+            <p style="margin: 0;"><strong>Mot de passe :</strong> ${password}</p>
+          </div>
+          <p style="color: #999; font-size: 13px;">Nous vous recommandons de changer ce mot de passe lors de votre première connexion.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${this.configService.get<string>('FRONTEND_URL', 'http://localhost:3001')}/login"
+               style="background: #E8650A; color: white; padding: 14px 28px; text-decoration: none;
+                      border-radius: 5px; font-size: 16px; display: inline-block;">
+              Accéder à mon tableau de bord
+            </a>
+          </div>
+        </div>
+        <div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">
+          &copy; ${new Date().getFullYear()} Total Innovation Learning
+        </div>
+      </div>
+      `,
+    );
+  }
+
   async sendPasswordResetEmail(to: string, token: string, frontendUrl: string) {
     const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
 

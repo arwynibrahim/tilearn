@@ -12,9 +12,11 @@ export interface User {
   prenom: string;
   telephone?: string | null;
   role: Role;
+  interests?: string[];
   avatar?: string | null;
   emailVerifiedAt?: string | null;
   lastLoginAt?: string | null;
+  organizationId?: string | null;
   createdAt: string;
   updatedAt?: string;
   deletedAt?: string | null;
@@ -40,6 +42,8 @@ export interface RegisterDto {
   email: string;
   password: string;
   telephone?: string;
+  role?: 'LEARNER' | 'INSTRUCTOR';
+  interests?: string[];
 }
 
 export interface ResetPasswordDto {
@@ -256,6 +260,9 @@ export interface CreateOrganizationDto {
   address?: string;
   country?: string;
   phone?: string;
+  adminEmail: string;
+  adminPrenom: string;
+  adminNom: string;
 }
 
 export interface LicenseAssignment {

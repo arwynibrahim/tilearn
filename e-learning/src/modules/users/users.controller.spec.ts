@@ -23,19 +23,21 @@ describe('UsersController', () => {
   });
 
   describe('findAll', () => {
+    const mockUser = { role: 'SUPER_ADMIN', organizationId: null };
+
     it('should return paginated users with default params', async () => {
       const expected = { users: [], total: 0, page: 1, limit: 20, totalPages: 0 };
       mockUsersService.findAll.mockResolvedValue(expected);
 
-      const result = await controller.findAll(1, 20);
+      const result = await controller.findAll(1, 20, mockUser);
 
-      expect(mockUsersService.findAll).toHaveBeenCalledWith(1, 20);
+      expect(mockUsersService.findAll).toHaveBeenCalledWith(1, 20, 'SUPER_ADMIN', null);
       expect(result).toEqual(expected);
     });
 
     it('should convert query params to numbers', async () => {
-      await controller.findAll('2' as any, '10' as any);
-      expect(mockUsersService.findAll).toHaveBeenCalledWith(2, 10);
+      await controller.findAll('2' as any, '10' as any, mockUser);
+      expect(mockUsersService.findAll).toHaveBeenCalledWith(2, 10, 'SUPER_ADMIN', null);
     });
   });
 

@@ -1,7 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { setCookie, deleteCookie } from '@/lib/utils';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3002';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
 
 export const apiClient = axios.create({

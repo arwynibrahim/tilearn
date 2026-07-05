@@ -17,6 +17,7 @@ model Organization {
   learningPaths  LearningPath[]
   vrHeadsets     VRHeadset[]
   chargingStations ChargingStation[]
+  users          User[]
 }
 
 model License {

@@ -34,8 +34,8 @@ export class B2bController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
   @RequirePermissions(Permissions.ORGANIZATION_READ)
   @ApiOperation({ summary: 'Liste des organisations' })
-  findAllOrganizations() {
-    return this.b2bService.findAllOrganizations();
+  findAllOrganizations(@CurrentUser() user: any) {
+    return this.b2bService.findAllOrganizations(user.role, user.organizationId);
   }
 
   @Get('organizations/:id')

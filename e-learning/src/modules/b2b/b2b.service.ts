@@ -1,21 +1,66 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { hash } from 'bcryptjs';
+import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { CreateLicenseDto } from './dto/create-license.dto';
 import { CreateLearningPathDto } from './dto/create-learningpath.dto';
 
 @Injectable()
 export class B2bService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
 
   // ─── Organizations ──────────────────────────────────────────
 
   async createOrganization(dto: CreateOrganizationDto) {
-    return this.prisma.organization.create({ data: dto });
+    const { adminEmail, adminPrenom, adminNom, ...orgData } = dto;
+
+    const existing = await this.prisma.user.findUnique({ where: { email: adminEmail } });
+    if (existing) {
+      throw new ConflictException('Un compte existe déjà avec cet email administratif');
+    }
+
+    const rawPassword = crypto.randomBytes(4).toString('hex');
+    const passwordHash = await hash(rawPassword, 12);
+
+    const [org] = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.organization.create({ data: orgData });
+      await tx.user.create({
+        data: {
+          email: adminEmail,
+          passwordHash,
+          nom: adminNom,
+          prenom: adminPrenom,
+          role: 'ADMIN_INSTITUTION',
+          organizationId: created.id,
+        },
+      });
+      return [created];
+    });
+
+    try {
+      await this.emailService.sendOrganizationWelcomeEmail(
+        adminEmail,
+        adminPrenom,
+        org.name,
+        adminEmail,
+        rawPassword,
+      );
+    } catch {
+      // L'email n'a pas pu être envoyé, mais l'organisation est créée
+    }
+
+    return org;
   }
 
-  async findAllOrganizations() {
+  async findAllOrganizations(userRole?: string, userOrgId?: string) {
+    const where = userRole === 'ADMIN_INSTITUTION' && userOrgId ? { id: userOrgId } : {};
     return this.prisma.organization.findMany({
+      where,
       include: { _count: { select: { licenses: true, learningPaths: true, vrHeadsets: true } } },
       orderBy: { name: 'asc' },
     });

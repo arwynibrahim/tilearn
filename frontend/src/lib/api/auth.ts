@@ -35,8 +35,8 @@ export const authApi = {
   },
 
   googleAuthUrl: () =>
-    `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'}/api/v1/auth/google`,
+    `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3002'}/api/v1/auth/google`,
 
   linkedinAuthUrl: () =>
-    `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'}/api/v1/auth/linkedin`,
+    `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3002'}/api/v1/auth/linkedin`,
 };

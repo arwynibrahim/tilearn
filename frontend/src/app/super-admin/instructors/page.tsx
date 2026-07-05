@@ -36,7 +36,7 @@ function InstructorCard({ user }: { user: User }) {
   );
 }
 
-export default function AdminInstructorsPage() {
+export default function InstructorsPage() {
   const [search, setSearch] = useState('');
 
   const { data: usersData, isLoading } = useQuery({

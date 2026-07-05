@@ -66,6 +66,7 @@ describe('AuthService', () => {
       prenom: 'Jean',
       telephone: '+33612345678',
       role: 'LEARNER' as const,
+      interests: ['Développement', 'Santé'],
     };
 
     it('should register a new user successfully', async () => {
@@ -94,8 +95,9 @@ describe('AuthService', () => {
           prenom: 'Jean',
           telephone: '+33612345678',
           role: 'LEARNER',
+          interests: ['Développement', 'Santé'],
         },
-        select: { id: true, email: true, nom: true, prenom: true, role: true },
+        select: { id: true, email: true, nom: true, prenom: true, role: true, organizationId: true },
       });
       expect(result).toEqual({
         user: { id: 'user-1', email: 'test@test.com', nom: 'Dupont', prenom: 'Jean', role: 'LEARNER' },
@@ -132,7 +134,7 @@ describe('AuthService', () => {
 
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { email: 'test@test.com' },
-        select: { id: true, email: true, passwordHash: true, nom: true, prenom: true, role: true },
+        select: { id: true, email: true, passwordHash: true, nom: true, prenom: true, role: true, organizationId: true },
       });
       expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashed-password');
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
@@ -330,7 +332,7 @@ describe('AuthService', () => {
       const profile = {
         id: 'user-1', email: 'test@test.com', nom: 'Dupont', prenom: 'Jean',
         telephone: '+33612345678', avatar: null, role: 'LEARNER',
-        emailVerifiedAt: null, lastLoginAt: null, createdAt: new Date(),
+        interests: [], emailVerifiedAt: null, lastLoginAt: null, createdAt: new Date(),
       };
       mockPrisma.user.findUnique.mockResolvedValue(profile);
 
@@ -340,8 +342,8 @@ describe('AuthService', () => {
         where: { id: 'user-1' },
         select: {
           id: true, email: true, nom: true, prenom: true, telephone: true,
-          avatar: true, role: true, emailVerifiedAt: true, lastLoginAt: true,
-          createdAt: true,
+          avatar: true, role: true, interests: true, emailVerifiedAt: true,
+          lastLoginAt: true, createdAt: true, organizationId: true,
         },
       });
       expect(result).toEqual(profile);

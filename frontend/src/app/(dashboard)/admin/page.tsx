@@ -7,20 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { usersApi } from '@/lib/api/users';
 import { b2bApi } from '@/lib/api/b2b';
+import { useAuthStore } from '@/stores/auth.store';
 import { formatDate } from '@/lib/utils';
 
 function StatCard({
-  icon: Icon,
-  title,
-  value,
-  sub,
-  color,
+  icon: Icon, title, value, sub, color,
 }: {
-  icon: React.ElementType;
-  title: string;
-  value: string | number;
-  sub?: string;
-  color: string;
+  icon: React.ElementType; title: string; value: string | number; sub?: string; color: string;
 }) {
   return (
     <Card>
@@ -39,6 +32,9 @@ function StatCard({
 }
 
 export default function AdminDashboard() {
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+
   const { data: users } = useQuery({
     queryKey: ['admin-users'],
     queryFn: () => usersApi.list(1, 5),
@@ -51,7 +47,6 @@ export default function AdminDashboard() {
     retry: false,
   });
 
-  // Aggregate counts from organization _count (no global endpoints needed)
   const totalHeadsets = orgs?.reduce((sum, o) => sum + (o._count?.vrHeadsets ?? 0), 0);
   const totalLicenses = orgs?.reduce((sum, o) => sum + (o._count?.licenses ?? 0), 0);
 
@@ -59,48 +54,48 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-black text-gray-900">Tableau de bord</h1>
-        <p className="text-sm text-gray-500">Vue d&apos;ensemble de la plateforme</p>
+        <p className="text-sm text-gray-500">
+          {isSuperAdmin ? "Vue d'ensemble de la plateforme" : (orgs?.[0]?.name ?? 'Mon organisation')}
+        </p>
       </div>
 
-      {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={Users}
-          title="Utilisateurs totaux"
+          title={isSuperAdmin ? 'Utilisateurs totaux' : 'Utilisateurs'}
           value={users?.total ?? '-'}
-          sub="apprenants & instructeurs"
+          sub={isSuperAdmin ? 'apprenants & instructeurs' : 'de votre organisation'}
           color="bg-brand"
         />
         <StatCard
           icon={Building2}
-          title="Organisations"
-          value={orgs?.length ?? '-'}
-          sub="institutions partenaires"
+          title={isSuperAdmin ? 'Organisations' : 'Organisation'}
+          value={isSuperAdmin ? (orgs?.length ?? '-') : (orgs?.[0]?.name ?? '-')}
+          sub={isSuperAdmin ? 'institutions partenaires' : (orgs?.[0]?.type ?? '')}
           color="bg-blue-500"
         />
         <StatCard
           icon={BadgeCheck}
           title="Licences"
           value={totalLicenses ?? '-'}
-          sub="toutes organisations"
+          sub={isSuperAdmin ? 'toutes organisations' : 'de votre organisation'}
           color="bg-green-500"
         />
         <StatCard
           icon={Headphones}
           title="Casques VR"
           value={totalHeadsets ?? '-'}
-          sub="parc total"
+          sub={isSuperAdmin ? 'parc total' : 'de votre organisation'}
           color="bg-purple-500"
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Recent users */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Activity className="size-4 text-brand" />
-              Utilisateurs récents
+              {isSuperAdmin ? 'Utilisateurs récents' : 'Utilisateurs de l\'organisation'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -134,12 +129,11 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Organizations overview */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Building2 className="size-4 text-brand" />
-              Organisations
+              {isSuperAdmin ? 'Organisations' : 'Mon organisation'}
             </CardTitle>
           </CardHeader>
           <CardContent>

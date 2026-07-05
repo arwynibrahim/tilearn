@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, BookOpen, Star, TrendingUp, Save, Edit3, Users, MessageSquare } from 'lucide-react';
+import { User, BookOpen, Star, TrendingUp, Save, Edit3, Users, MessageSquare, Plus, Pencil, Layers } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,9 +12,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { instructorApi } from '@/lib/api/instructor';
+import { catalogueApi } from '@/lib/api/catalogue';
 import { formatDate } from '@/lib/utils';
 import { getApiErrorMessage } from '@/lib/api/client';
-import type { InstructorProfile, CourseReview } from '@/types';
+import { CreateCourseModal, EditCourseModal, ModulesDrawer } from '@/components/catalogue/course-modals';
+import type { InstructorProfile, CourseReview, Course } from '@/types';
+
+const INSTRUCTOR_COURSES_QUERY_KEY = ['instructor-courses'];
 
 const profileSchema = z.object({
   bio: z.string().optional(),
@@ -104,6 +108,9 @@ function ProfileEditor({ profile, onClose }: { profile: InstructorProfile | null
 
 export default function InstructorDashboard() {
   const [editing, setEditing] = useState(false);
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [managingCourse, setManagingCourse] = useState<Course | null>(null);
 
   const { data: profile, isLoading: loadingProfile } = useQuery({
     queryKey: ['instructor-profile'],
@@ -111,8 +118,14 @@ export default function InstructorDashboard() {
     retry: false,
   });
 
+  const { data: domains = [] } = useQuery({
+    queryKey: ['domains'],
+    queryFn: catalogueApi.domains.list,
+    retry: false,
+  });
+
   const { data: courses = [], isLoading: loadingCourses } = useQuery({
-    queryKey: ['instructor-courses'],
+    queryKey: INSTRUCTOR_COURSES_QUERY_KEY,
     queryFn: instructorApi.courses.listMine,
     retry: false,
   });
@@ -128,6 +141,32 @@ export default function InstructorDashboard() {
   return (
     <div className="space-y-6">
       {editing && <ProfileEditor profile={profile ?? null} onClose={() => setEditing(false)} />}
+      {showCourseModal && (
+        <CreateCourseModal
+          domains={domains}
+          onClose={() => setShowCourseModal(false)}
+          onCreated={(course) => {
+            setShowCourseModal(false);
+            setManagingCourse(course);
+          }}
+          coursesQueryKey={INSTRUCTOR_COURSES_QUERY_KEY}
+        />
+      )}
+      {editingCourse && (
+        <EditCourseModal
+          course={editingCourse}
+          domains={domains}
+          onClose={() => setEditingCourse(null)}
+          coursesQueryKey={INSTRUCTOR_COURSES_QUERY_KEY}
+        />
+      )}
+      {managingCourse && (
+        <ModulesDrawer
+          course={managingCourse}
+          onClose={() => setManagingCourse(null)}
+          coursesQueryKey={INSTRUCTOR_COURSES_QUERY_KEY}
+        />
+      )}
 
       <div className="flex items-center justify-between">
         <div>
@@ -196,11 +235,20 @@ export default function InstructorDashboard() {
 
       {/* My courses */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
           <CardTitle className="flex items-center gap-2 text-base">
             <BookOpen className="size-4 text-brand" />
             Mes cours
           </CardTitle>
+          <Button
+            size="sm"
+            className="gap-1"
+            onClick={() => setShowCourseModal(true)}
+            disabled={domains.length === 0}
+          >
+            <Plus className="size-3.5" />
+            Créer un cours
+          </Button>
         </CardHeader>
         <CardContent className="p-0">
           {loadingCourses ? (
@@ -221,6 +269,7 @@ export default function InstructorDashboard() {
                     <th className="px-5 py-3 text-left font-semibold text-gray-500">Inscriptions</th>
                     <th className="px-5 py-3 text-left font-semibold text-gray-500">Statut</th>
                     <th className="px-5 py-3 text-left font-semibold text-gray-500">Créé le</th>
+                    <th className="px-5 py-3 text-right font-semibold text-gray-500">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -238,6 +287,28 @@ export default function InstructorDashboard() {
                         </Badge>
                       </td>
                       <td className="px-5 py-3.5 text-gray-500">{formatDate(c.createdAt)}</td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 hover:bg-blue-50 hover:text-blue-600"
+                            onClick={() => setEditingCourse(c)}
+                            aria-label={`Modifier ${c.title}`}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 hover:bg-purple-50 hover:text-purple-600"
+                            onClick={() => setManagingCourse(c)}
+                            aria-label={`Gérer les modules de ${c.title}`}
+                          >
+                            <Layers className="size-4" />
+                          </Button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

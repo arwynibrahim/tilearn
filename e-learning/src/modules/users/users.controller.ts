@@ -22,8 +22,8 @@ export class UsersController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
   @RequirePermissions(Permissions.USER_READ)
   @ApiOperation({ summary: 'Liste des utilisateurs (admin)' })
-  findAll(@Query('page') page = 1, @Query('limit') limit = 20) {
-    return this.usersService.findAll(+page, +limit);
+  findAll(@Query('page') page = 1, @Query('limit') limit = 20, @CurrentUser() user: any) {
+    return this.usersService.findAll(+page, +limit, user.role, user.organizationId);
   }
 
   @Get(':id')

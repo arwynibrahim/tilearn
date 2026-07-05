@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { InstructorProfile, CourseReview, CreateReviewDto } from '@/types';
+import type { Course, InstructorProfile, CourseReview, CreateReviewDto } from '@/types';
 
 export const instructorApi = {
   profile: {
@@ -19,15 +19,7 @@ export const instructorApi = {
   },
 
   courses: {
-    listMine: async (): Promise<Array<{
-      id: string;
-      title: string;
-      slug: string;
-      isPublished: boolean;
-      domain: { id: string; name: string; slug: string };
-      _count: { modules: number; enrollments: number; reviews: number };
-      createdAt: string;
-    }>> => {
+    listMine: async (): Promise<Array<Course & { _count: { modules: number; enrollments: number; reviews: number } }>> => {
       const { data } = await apiClient.get('/instructor/courses');
       return data;
     },

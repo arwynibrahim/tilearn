@@ -6,16 +6,18 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(page = 1, limit = 20) {
+  async findAll(page = 1, limit = 20, userRole?: string, userOrgId?: string) {
     const skip = (page - 1) * limit;
+    const where = userRole === 'ADMIN_INSTITUTION' && userOrgId ? { organizationId: userOrgId } : {};
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
         skip,
         take: limit,
-        select: { id: true, email: true, nom: true, prenom: true, role: true, createdAt: true },
+        where,
+        select: { id: true, email: true, nom: true, prenom: true, role: true, createdAt: true, organizationId: true },
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.user.count(),
+      this.prisma.user.count({ where }),
     ]);
     return { users, total, page, limit, totalPages: Math.ceil(total / limit) };
   }

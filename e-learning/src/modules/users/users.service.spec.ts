@@ -40,10 +40,11 @@ describe('UsersService', () => {
       expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
         skip: 0,
         take: 20,
-        select: { id: true, email: true, nom: true, prenom: true, role: true, createdAt: true },
+        where: {},
+        select: { id: true, email: true, nom: true, prenom: true, role: true, createdAt: true, organizationId: true },
         orderBy: { createdAt: 'desc' },
       });
-      expect(mockPrisma.user.count).toHaveBeenCalled();
+      expect(mockPrisma.user.count).toHaveBeenCalledWith({ where: {} });
       expect(result).toEqual({
         users,
         total: 1,

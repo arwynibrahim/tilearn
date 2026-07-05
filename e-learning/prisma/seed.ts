@@ -1,4 +1,4 @@
-import { PrismaClient, Role, CourseLevel } from '@prisma/client';
+import { PrismaClient, Role, CourseLevel, OrganizationType, LicensePlan } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -186,6 +186,46 @@ async function main() {
     },
   });
   console.log('  ✓ Learner created');
+
+  const orgPassword = await hash('Admin@2026!', 12);
+  const org = await prisma.organization.upsert({
+    where: { id: 'org-universite-ouaga' },
+    update: {},
+    create: {
+      id: 'org-universite-ouaga',
+      name: "Université de Ouagadougou",
+      type: OrganizationType.UNIVERSITY,
+      emailDomain: 'univ-ouaga.bf',
+      country: 'Burkina Faso',
+      address: 'Ouagadougou, Burkina Faso',
+      phone: '+226 70 00 00 01',
+      isActive: true,
+    },
+  });
+  await prisma.user.upsert({
+    where: { email: 'admin@universite.bf' },
+    update: {},
+    create: {
+      email: 'admin@universite.bf', passwordHash: orgPassword,
+      nom: 'Dupont', prenom: 'Jean', role: Role.ADMIN_INSTITUTION, emailVerifiedAt: new Date(),
+      organizationId: org.id,
+    },
+  });
+  await prisma.license.upsert({
+    where: { id: 'lic-uni-ouaga-001' },
+    update: {},
+    create: {
+      id: 'lic-uni-ouaga-001',
+      organizationId: org.id,
+      plan: LicensePlan.ENTERPRISE_100,
+      quantity: 100,
+      usedCount: 0,
+      startDate: new Date('2025-01-01'),
+      endDate: new Date('2025-12-31'),
+      autoRenew: true,
+    },
+  });
+  console.log('  ✓ Organization "Université de Ouagadougou" created with ADMIN_INSTITUTION user and license');
 
   const domains = [
     { name: 'Développement Informatique', slug: 'developpement-informatique', icon: '💻', description: 'Programmation, Cloud, Cybersécurité, DevOps' },
@@ -439,9 +479,10 @@ async function main() {
 
   console.log('\n✅ Seed completed successfully!');
   console.log('\n📧 Test accounts:');
-  console.log('  Super Admin : admin@tilearning.net / Admin@2026!');
-  console.log('  Instructor  : instructor@tilearning.net / Instructor@2026!');
-  console.log('  Learner     : learner@tilearning.net / Learner@2026!');
+  console.log('  Super Admin         : admin@tilearning.net / Admin@2026!');
+  console.log('  Instructor          : instructor@tilearning.net / Instructor@2026!');
+  console.log('  Learner             : learner@tilearning.net / Learner@2026!');
+  console.log('  Admin Institution   : admin@universite.bf / Admin@2026!');
   console.log(`\n📚 ${courses.length} courses available in the catalogue`);
 }
 

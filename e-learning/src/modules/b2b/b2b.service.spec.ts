@@ -1,15 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ConflictException } from '@nestjs/common';
 import { OrganizationType, LicensePlan } from '@prisma/client';
 import { B2bService } from './b2b.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
+
+jest.mock('bcryptjs', () => ({ hash: jest.fn().mockResolvedValue('hashed-password') }));
+jest.mock('crypto', () => ({ randomBytes: jest.fn().mockReturnValue({ toString: () => 'a1b2c3d4' }) }));
 
 const mockPrisma = {
+  $transaction: jest.fn(),
   organization: { create: jest.fn(), findMany: jest.fn(), findUnique: jest.fn() },
   license: { create: jest.fn(), findUnique: jest.fn(), findMany: jest.fn(), update: jest.fn() },
   licenseAssignment: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
   learningPath: { create: jest.fn(), findMany: jest.fn() },
+  user: { findUnique: jest.fn(), create: jest.fn() },
 };
+
+const mockEmailService = { sendOrganizationWelcomeEmail: jest.fn() };
 
 describe('B2bService', () => {
   let service: B2bService;
@@ -19,6 +27,7 @@ describe('B2bService', () => {
       providers: [
         B2bService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: EmailService, useValue: mockEmailService },
       ],
     }).compile();
 
@@ -27,14 +36,50 @@ describe('B2bService', () => {
   });
 
   describe('createOrganization', () => {
-    it('should create an organization', async () => {
-      const dto = { name: 'Org', type: OrganizationType.UNIVERSITY };
-      mockPrisma.organization.create.mockResolvedValue({ id: 'org-1', ...dto });
+    it('should create organization + admin user + send email', async () => {
+      const dto = {
+        name: 'Université de Ouagadougou',
+        type: OrganizationType.UNIVERSITY,
+        adminEmail: 'admin@univ-ouaga.bf',
+        adminPrenom: 'Jean',
+        adminNom: 'Dupont',
+      };
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.$transaction.mockImplementation((cb: any) => {
+        return cb({
+          organization: { create: mockPrisma.organization.create },
+          user: { create: mockPrisma.user.create },
+        });
+      });
+      mockPrisma.organization.create.mockResolvedValue({ id: 'org-1', name: dto.name, type: dto.type });
+      mockPrisma.user.create.mockResolvedValue({ id: 'user-1', email: dto.adminEmail, role: 'ADMIN_INSTITUTION' });
+      mockEmailService.sendOrganizationWelcomeEmail.mockResolvedValue(undefined);
 
       const result = await service.createOrganization(dto);
 
-      expect(mockPrisma.organization.create).toHaveBeenCalledWith({ data: dto });
-      expect(result).toEqual({ id: 'org-1', ...dto });
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { email: dto.adminEmail } });
+      expect(mockPrisma.organization.create).toHaveBeenCalledWith({ data: { name: dto.name, type: dto.type } });
+      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+        data: {
+          email: dto.adminEmail,
+          passwordHash: 'hashed-password',
+          nom: dto.adminNom,
+          prenom: dto.adminPrenom,
+          role: 'ADMIN_INSTITUTION',
+          organizationId: 'org-1',
+        },
+      });
+      expect(mockEmailService.sendOrganizationWelcomeEmail).toHaveBeenCalledWith(
+        dto.adminEmail, dto.adminPrenom, dto.name, dto.adminEmail, 'a1b2c3d4',
+      );
+      expect(result).toEqual({ id: 'org-1', name: dto.name, type: dto.type });
+    });
+
+    it('should throw ConflictException if admin email already exists', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'existing' });
+      const dto = { name: 'Org', type: OrganizationType.UNIVERSITY, adminEmail: 'exists@test.com', adminPrenom: 'A', adminNom: 'B' };
+
+      await expect(service.createOrganization(dto)).rejects.toThrow(ConflictException);
     });
   });
 
@@ -46,6 +91,7 @@ describe('B2bService', () => {
       const result = await service.findAllOrganizations();
 
       expect(mockPrisma.organization.findMany).toHaveBeenCalledWith({
+        where: {},
         include: { _count: { select: { licenses: true, learningPaths: true, vrHeadsets: true } } },
         orderBy: { name: 'asc' },
       });
@@ -81,13 +127,15 @@ describe('B2bService', () => {
     it('should create a license for existing org', async () => {
       const dto = { organizationId: 'org-1', plan: LicensePlan.ENTERPRISE_100, quantity: 10, startDate: '2025-01-01', endDate: '2025-12-31' };
       mockPrisma.organization.findUnique.mockResolvedValue({ id: 'org-1' });
-      mockPrisma.license.create.mockResolvedValue({ id: 'lic-1', ...dto });
+      mockPrisma.license.create.mockResolvedValue({ id: 'lic-1', ...dto, startDate: new Date(dto.startDate), endDate: new Date(dto.endDate) });
 
       const result = await service.createLicense(dto);
 
       expect(mockPrisma.organization.findUnique).toHaveBeenCalledWith({ where: { id: 'org-1' } });
-      expect(mockPrisma.license.create).toHaveBeenCalledWith({ data: dto });
-      expect(result).toEqual({ id: 'lic-1', ...dto });
+      expect(mockPrisma.license.create).toHaveBeenCalledWith({
+        data: { ...dto, startDate: new Date(dto.startDate), endDate: new Date(dto.endDate) },
+      });
+      expect(result).toEqual({ id: 'lic-1', ...dto, startDate: new Date(dto.startDate), endDate: new Date(dto.endDate) });
     });
 
     it('should throw NotFoundException if org not found', async () => {
