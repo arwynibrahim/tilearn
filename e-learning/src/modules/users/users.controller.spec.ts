@@ -27,16 +27,17 @@ describe('UsersController', () => {
       const expected = { users: [], total: 0, page: 1, limit: 20, totalPages: 0 };
       mockUsersService.findAll.mockResolvedValue(expected);
 
-      const result = await controller.findAll(1, 20, undefined);
+      const result = await controller.findAll(1, 20, []);
 
-      expect(mockUsersService.findAll).toHaveBeenCalledWith(1, 20, undefined);
+      expect(mockUsersService.findAll).toHaveBeenCalledWith(1, 20, []);
       expect(result).toEqual(expected);
     });
 
-    it('should pass orgId query param to service', async () => {
+    it('should pass org-scoped memberships to service', async () => {
       mockUsersService.findAll.mockResolvedValue({ users: [], total: 0, page: 2, limit: 10, totalPages: 0 });
-      await controller.findAll('2' as any, '10' as any, 'org-1');
-      expect(mockUsersService.findAll).toHaveBeenCalledWith(2, 10, 'org-1');
+      const memberships = [{ contextType: 'ORGANIZATION', contextId: 'org-1', role: 'ADMIN' }];
+      await controller.findAll('2' as any, '10' as any, memberships);
+      expect(mockUsersService.findAll).toHaveBeenCalledWith(2, 10, memberships);
     });
   });
 

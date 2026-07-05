@@ -32,6 +32,8 @@ describe('UsersService', () => {
   });
 
   describe('findAll', () => {
+    const platformAdmin = [{ contextType: 'PLATFORM', contextId: null, role: 'SUPER_ADMIN' }];
+
     it('should return paginated users', async () => {
       const users = [
         { id: '1', email: 'a@test.com', nom: 'A', prenom: 'B', createdAt: new Date(), memberships: [] },
@@ -39,7 +41,7 @@ describe('UsersService', () => {
       mockPrisma.user.findMany.mockResolvedValue(users);
       mockPrisma.user.count.mockResolvedValue(1);
 
-      const result = await service.findAll(1, 20);
+      const result = await service.findAll(1, 20, platformAdmin);
 
       expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
         skip: 0,
@@ -65,7 +67,7 @@ describe('UsersService', () => {
       mockPrisma.user.findMany.mockResolvedValue([]);
       mockPrisma.user.count.mockResolvedValue(25);
 
-      const result = await service.findAll(1, 10);
+      const result = await service.findAll(1, 10, platformAdmin);
 
       expect(result.totalPages).toBe(3);
     });

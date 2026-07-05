@@ -10,6 +10,7 @@ import { RequirePermissions } from '../../common/decorators/permissions.decorato
 import { Permissions } from '../roles/permissions';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Role } from '../../common/enums/role.enum';
+import type { MembershipSlim } from '../../common/utils/membership.util';
 
 @ApiTags('Users')
 @Controller('users')
@@ -21,13 +22,13 @@ export class UsersController {
   @Get()
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.USER_READ)
-  @ApiOperation({ summary: 'Liste des utilisateurs (admin)' })
+  @ApiOperation({ summary: 'Liste des utilisateurs scopée par organisation (auto)' })
   findAll(
     @Query('page') page = 1,
     @Query('limit') limit = 20,
-    @Query('orgId') orgId?: string,
+    @CurrentUser('memberships') memberships: MembershipSlim[],
   ) {
-    return this.usersService.findAll(+page, +limit, orgId);
+    return this.usersService.findAll(+page, +limit, memberships);
   }
 
   @Get(':id')

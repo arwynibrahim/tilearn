@@ -248,6 +248,59 @@ async function main() {
   });
   console.log('  ✓ Organization "Université de Ouagadougou" created with ADMIN user and license');
 
+  // ── 2e organisation : TechCorp Burkina ──────────────────────
+  const org2 = await prisma.organization.upsert({
+    where: { id: 'org-techcorp-bf' },
+    update: {},
+    create: {
+      id: 'org-techcorp-bf',
+      name: 'TechCorp Burkina',
+      type: OrganizationType.COMPANY,
+      emailDomain: 'techcorp.bf',
+      country: 'Burkina Faso',
+      address: 'Ouagadougou, Zone du Bois, Burkina Faso',
+      phone: '+226 70 00 00 02',
+      isActive: true,
+    },
+  });
+  const org2Admin = await prisma.user.upsert({
+    where: { email: 'admin@techcorp.bf' },
+    update: {},
+    create: {
+      email: 'admin@techcorp.bf', passwordHash: orgPassword,
+      nom: 'Kaboré', prenom: 'Alice', emailVerifiedAt: new Date(),
+    },
+  });
+  await ensureMembership(org2Admin.id, 'INDIVIDUAL', null, 'LEARNER');
+  await ensureMembership(org2Admin.id, 'ORGANIZATION', org2.id, 'ADMIN');
+
+  const org2Manager = await prisma.user.upsert({
+    where: { email: 'manager@techcorp.bf' },
+    update: {},
+    create: {
+      email: 'manager@techcorp.bf', passwordHash: orgPassword,
+      nom: 'Ouédraogo', prenom: 'Moussa', emailVerifiedAt: new Date(),
+    },
+  });
+  await ensureMembership(org2Manager.id, 'INDIVIDUAL', null, 'LEARNER');
+  await ensureMembership(org2Manager.id, 'ORGANIZATION', org2.id, 'MANAGER');
+
+  await prisma.license.upsert({
+    where: { id: 'lic-techcorp-001' },
+    update: {},
+    create: {
+      id: 'lic-techcorp-001',
+      organizationId: org2.id,
+      plan: LicensePlan.PRO_30,
+      quantity: 30,
+      usedCount: 0,
+      startDate: new Date('2026-01-01'),
+      endDate: new Date('2026-12-31'),
+      autoRenew: false,
+    },
+  });
+  console.log('  ✓ Organization "TechCorp Burkina" created with ADMIN, MANAGER users and license');
+
   const domains = [
     { name: 'Développement Informatique', slug: 'developpement-informatique', icon: '💻', description: 'Programmation, Cloud, Cybersécurité, DevOps' },
     { name: 'Médecine & Santé', slug: 'medecine-sante', icon: '🏥', description: 'Gestes infirmiers, Urgences, Anatomie 3D' },
@@ -503,7 +556,9 @@ async function main() {
   console.log('  Super Admin         : superadmin@tilearning.net / Admin@2026!');
   console.log('  Instructor          : instructor@tilearning.net / Instructor@2026!');
   console.log('  Learner             : learner@tilearning.net / Learner@2026!');
-  console.log('  Admin Institution   : admin@universite.bf / Admin@2026!');
+  console.log('  Admin Univ Ouaga    : admin@universite.bf / Admin@2026!');
+  console.log('  Admin TechCorp      : admin@techcorp.bf / Admin@2026!');
+  console.log('  Manager TechCorp    : manager@techcorp.bf / Admin@2026!');
   console.log(`\n📚 ${courses.length} courses available in the catalogue`);
 }
 

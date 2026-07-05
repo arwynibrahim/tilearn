@@ -85,7 +85,7 @@ describe('AuthController', () => {
 
   describe('refresh', () => {
     it('should call authService.refreshToken with user', async () => {
-      const user = { id: 'user-1', email: 'test@test.com', role: 'LEARNER' };
+      const user = { id: 'user-1', email: 'test@test.com' };
       mockAuthService.refreshToken.mockResolvedValue({ accessToken: 'at', refreshToken: 'rt' });
 
       const result = await controller.refresh(user);

@@ -44,8 +44,8 @@ describe('B2bController', () => {
 
   it('findOneOrganization', async () => {
     mockB2bService.findOneOrganization.mockResolvedValue({ id: 'o1' });
-    expect(await controller.findOneOrganization('o1')).toEqual({ id: 'o1' });
-    expect(mockB2bService.findOneOrganization).toHaveBeenCalledWith('o1');
+    expect(await controller.findOneOrganization('o1', undefined)).toEqual({ id: 'o1' });
+    expect(mockB2bService.findOneOrganization).toHaveBeenCalledWith('o1', undefined);
   });
 
   it('createLicense', async () => {
@@ -57,14 +57,14 @@ describe('B2bController', () => {
 
   it('assignLicense', async () => {
     mockB2bService.assignLicense.mockResolvedValue({ id: 'a1' });
-    expect(await controller.assignLicense('lic-1', 'user-1', 'admin-1')).toEqual({ id: 'a1' });
-    expect(mockB2bService.assignLicense).toHaveBeenCalledWith('lic-1', 'user-1', 'admin-1');
+    expect(await controller.assignLicense('lic-1', 'user-1', 'admin-1', undefined)).toEqual({ id: 'a1' });
+    expect(mockB2bService.assignLicense).toHaveBeenCalledWith('lic-1', 'user-1', 'admin-1', undefined);
   });
 
   it('revokeLicense', async () => {
     mockB2bService.revokeLicense.mockResolvedValue({ id: 'a1', revokedAt: new Date() });
-    const result = await controller.revokeLicense('assign-1');
-    expect(mockB2bService.revokeLicense).toHaveBeenCalledWith('assign-1');
+    const result = await controller.revokeLicense('assign-1', undefined);
+    expect(mockB2bService.revokeLicense).toHaveBeenCalledWith('assign-1', undefined);
     expect(result.revokedAt).toBeDefined();
   });
 

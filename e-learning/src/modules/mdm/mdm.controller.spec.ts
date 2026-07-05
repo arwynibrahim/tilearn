@@ -7,8 +7,10 @@ const mockMdmService = {
   getOrganizationHeadsets: jest.fn(),
   updateHeadsetStatus: jest.fn(),
   assignHeadset: jest.fn(),
+  removeHeadset: jest.fn(),
   createChargingStation: jest.fn(),
   getOrganizationChargingStations: jest.fn(),
+  removeChargingStation: jest.fn(),
 };
 
 describe('MdmController', () => {
@@ -27,8 +29,8 @@ describe('MdmController', () => {
   it('createHeadset', async () => {
     const dto = { organizationId: 'o1', serialNumber: 'SN-001', model: 'META_QUEST_3' as const };
     mockMdmService.createHeadset.mockResolvedValue({ id: 'h1' });
-    expect(await controller.createHeadset(dto)).toEqual({ id: 'h1' });
-    expect(mockMdmService.createHeadset).toHaveBeenCalledWith(dto);
+    expect(await controller.createHeadset(dto, undefined)).toEqual({ id: 'h1' });
+    expect(mockMdmService.createHeadset).toHaveBeenCalledWith(dto, undefined);
   });
 
   it('getOrganizationHeadsets', async () => {
@@ -39,22 +41,22 @@ describe('MdmController', () => {
 
   it('updateHeadsetStatus', async () => {
     mockMdmService.updateHeadsetStatus.mockResolvedValue({ id: 'h1', status: 'IN_USE' });
-    const result = await controller.updateHeadsetStatus('h1', 'IN_USE', 80);
-    expect(mockMdmService.updateHeadsetStatus).toHaveBeenCalledWith('h1', 'IN_USE', 80);
+    const result = await controller.updateHeadsetStatus('h1', 'IN_USE', 80, undefined);
+    expect(mockMdmService.updateHeadsetStatus).toHaveBeenCalledWith('h1', 'IN_USE', 80, undefined);
     expect(result).toEqual({ id: 'h1', status: 'IN_USE' });
   });
 
   it('assignHeadset', async () => {
     mockMdmService.assignHeadset.mockResolvedValue({ id: 'h1', assignedUserId: 'u1' });
-    expect(await controller.assignHeadset('h1', 'u1')).toEqual({ id: 'h1', assignedUserId: 'u1' });
-    expect(mockMdmService.assignHeadset).toHaveBeenCalledWith('h1', 'u1');
+    expect(await controller.assignHeadset('h1', 'u1', undefined)).toEqual({ id: 'h1', assignedUserId: 'u1' });
+    expect(mockMdmService.assignHeadset).toHaveBeenCalledWith('h1', 'u1', undefined);
   });
 
   it('createChargingStation', async () => {
     const data = { organizationId: 'o1', portsTotal: 10, portsAvailable: 10 };
     mockMdmService.createChargingStation.mockResolvedValue({ id: 'cs1' });
-    expect(await controller.createChargingStation(data)).toEqual({ id: 'cs1' });
-    expect(mockMdmService.createChargingStation).toHaveBeenCalledWith(data);
+    expect(await controller.createChargingStation(data, undefined)).toEqual({ id: 'cs1' });
+    expect(mockMdmService.createChargingStation).toHaveBeenCalledWith(data, undefined);
   });
 
   it('getOrganizationChargingStations', async () => {

@@ -10,6 +10,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator';
 import { Permissions } from '../roles/permissions';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Role } from '../../common/enums/role.enum';
 
 @ApiTags('MDM')
@@ -23,8 +24,11 @@ export class MdmController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_CREATE)
   @ApiOperation({ summary: 'Ajouter un casque VR' })
-  createHeadset(@Body() dto: CreateVRHeadsetDto) {
-    return this.mdmService.createHeadset(dto);
+  createHeadset(
+    @Body() dto: CreateVRHeadsetDto,
+    @CurrentUser('memberships') memberships: any,
+  ) {
+    return this.mdmService.createHeadset(dto, memberships);
   }
 
   @Get('organizations/:orgId/headsets')
@@ -42,33 +46,44 @@ export class MdmController {
   updateHeadsetStatus(
     @Param('id') id: string,
     @Body('status') status: string,
-    @Body('batteryLevel') batteryLevel?: number,
+    @Body('batteryLevel') batteryLevel: number | undefined,
+    @CurrentUser('memberships') memberships: any,
   ) {
-    return this.mdmService.updateHeadsetStatus(id, status, batteryLevel);
+    return this.mdmService.updateHeadsetStatus(id, status, batteryLevel, memberships);
   }
 
   @Post('headsets/:id/assign/:userId')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_UPDATE)
   @ApiOperation({ summary: 'Assigner un casque à un utilisateur' })
-  assignHeadset(@Param('id') id: string, @Param('userId') userId: string) {
-    return this.mdmService.assignHeadset(id, userId);
+  assignHeadset(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @CurrentUser('memberships') memberships: any,
+  ) {
+    return this.mdmService.assignHeadset(id, userId, memberships);
   }
 
   @Delete('headsets/:id')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_DELETE)
   @ApiOperation({ summary: 'Supprimer un casque VR' })
-  removeHeadset(@Param('id') id: string) {
-    return this.mdmService.removeHeadset(id);
+  removeHeadset(
+    @Param('id') id: string,
+    @CurrentUser('memberships') memberships: any,
+  ) {
+    return this.mdmService.removeHeadset(id, memberships);
   }
 
   @Post('charging-stations')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_UPDATE)
   @ApiOperation({ summary: 'Créer une station de charge' })
-  createChargingStation(@Body() data: any) {
-    return this.mdmService.createChargingStation(data);
+  createChargingStation(
+    @Body() data: any,
+    @CurrentUser('memberships') memberships: any,
+  ) {
+    return this.mdmService.createChargingStation(data, memberships);
   }
 
   @Get('organizations/:orgId/charging-stations')
@@ -83,7 +98,10 @@ export class MdmController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_DELETE)
   @ApiOperation({ summary: 'Supprimer une station de charge' })
-  removeChargingStation(@Param('id') id: string) {
-    return this.mdmService.removeChargingStation(id);
+  removeChargingStation(
+    @Param('id') id: string,
+    @CurrentUser('memberships') memberships: any,
+  ) {
+    return this.mdmService.removeChargingStation(id, memberships);
   }
 }

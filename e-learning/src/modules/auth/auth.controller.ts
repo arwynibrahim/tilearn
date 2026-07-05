@@ -41,7 +41,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Rafraîchir le token' })
-  refresh(@CurrentUser() user: { id: string; email: string; role: string }) {
+  refresh(@CurrentUser() user: { id: string; email: string }) {
     return this.authService.refreshToken(user);
   }
 

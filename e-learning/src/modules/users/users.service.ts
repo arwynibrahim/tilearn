@@ -1,17 +1,28 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { MembershipSlim, isPlatformAdmin, getAdminOrgIds } from '../../common/utils/membership.util';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(page = 1, limit = 20, orgId?: string) {
+  async findAll(page = 1, limit = 20, memberships: MembershipSlim[] = []) {
     const skip = (page - 1) * limit;
-    // If orgId is provided, scope to users who have a membership in that org
-    const where = orgId
-      ? { memberships: { some: { contextType: 'ORGANIZATION' as const, contextId: orgId } } }
-      : {};
+
+    let where: any = {};
+
+    if (!isPlatformAdmin(memberships)) {
+      const adminOrgIds = getAdminOrgIds(memberships);
+      if (adminOrgIds.length === 0) {
+        return { users: [], total: 0, page, limit, totalPages: 0 };
+      }
+      where = {
+        memberships: {
+          some: { contextType: 'ORGANIZATION', contextId: { in: adminOrgIds } },
+        },
+      };
+    }
 
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
@@ -58,7 +69,6 @@ export class UsersService {
 
     await this.findOne(id);
 
-    // Prevent deleting users who hold PLATFORM SUPER_ADMIN if they're the last one
     const platformSuperAdminCount = await this.prisma.membership.count({
       where: { contextType: 'PLATFORM', role: 'SUPER_ADMIN' },
     });

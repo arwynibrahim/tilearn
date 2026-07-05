@@ -74,10 +74,12 @@ describe('MdmService', () => {
 
   describe('assignHeadset', () => {
     it('should assign headset to user', async () => {
+      mockPrisma.vRHeadset.findUnique.mockResolvedValue({ id: 'h1', organizationId: 'org-1' });
       mockPrisma.vRHeadset.update.mockResolvedValue({ id: 'h1', assignedUserId: 'u1', status: 'IN_USE' });
 
       const result = await service.assignHeadset('h1', 'u1');
 
+      expect(mockPrisma.vRHeadset.findUnique).toHaveBeenCalledWith({ where: { id: 'h1' } });
       expect(mockPrisma.vRHeadset.update).toHaveBeenCalledWith({
         where: { id: 'h1' },
         data: { assignedUserId: 'u1', status: 'IN_USE' },

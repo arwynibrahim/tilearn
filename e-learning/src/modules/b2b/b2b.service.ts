@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -6,6 +6,7 @@ import { EmailService } from '../email/email.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { CreateLicenseDto } from './dto/create-license.dto';
 import { CreateLearningPathDto } from './dto/create-learningpath.dto';
+import { MembershipSlim, assertOrgAccess } from '../../common/utils/membership.util';
 
 @Injectable()
 export class B2bService {
@@ -66,7 +67,7 @@ export class B2bService {
   async findAllOrganizations(memberships?: Array<{ contextType: string; contextId: string | null; role: string }>) {
     // ADMIN org memberships restrict the view to their specific org(s)
     const adminOrgIds = (memberships ?? [])
-      .filter((m) => m.contextType === 'ORGANIZATION' && m.role === 'ADMIN' && m.contextId)
+      .filter((m) => m.contextType === 'ORGANIZATION' && (m.role === 'ADMIN' || m.role === 'MANAGER') && m.contextId)
       .map((m) => m.contextId as string);
 
     const where = adminOrgIds.length > 0 ? { id: { in: adminOrgIds } } : {};
@@ -77,7 +78,8 @@ export class B2bService {
     });
   }
 
-  async findOneOrganization(id: string) {
+  async findOneOrganization(id: string, memberships?: MembershipSlim[]) {
+    if (memberships) assertOrgAccess(memberships, id);
     const org = await this.prisma.organization.findUnique({
       where: { id },
       include: {
@@ -145,9 +147,10 @@ export class B2bService {
     return { message: 'Licence supprimée' };
   }
 
-  async assignLicense(licenseId: string, userId: string, assignedBy: string) {
+  async assignLicense(licenseId: string, userId: string, assignedBy: string, memberships?: MembershipSlim[]) {
     const license = await this.prisma.license.findUnique({ where: { id: licenseId } });
     if (!license) throw new NotFoundException('Licence non trouvée');
+    if (memberships) assertOrgAccess(memberships, license.organizationId);
     if (license.usedCount >= license.quantity) throw new Error('Licence épuisée');
 
     const assignment = await this.prisma.licenseAssignment.create({
@@ -162,9 +165,13 @@ export class B2bService {
     return assignment;
   }
 
-  async revokeLicense(assignmentId: string) {
-    const assignment = await this.prisma.licenseAssignment.findUnique({ where: { id: assignmentId } });
+  async revokeLicense(assignmentId: string, memberships?: MembershipSlim[]) {
+    const assignment = await this.prisma.licenseAssignment.findUnique({
+      where: { id: assignmentId },
+      include: { license: { select: { organizationId: true } } },
+    });
     if (!assignment) throw new NotFoundException('Assignation non trouvée');
+    if (memberships) assertOrgAccess(memberships, (assignment as any).license.organizationId);
 
     await this.prisma.license.update({
       where: { id: assignment.licenseId },

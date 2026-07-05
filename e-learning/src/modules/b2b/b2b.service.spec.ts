@@ -184,13 +184,18 @@ describe('B2bService', () => {
 
   describe('revokeLicense', () => {
     it('should revoke assignment and decrement usedCount', async () => {
-      mockPrisma.licenseAssignment.findUnique.mockResolvedValue({ id: 'assign-1', licenseId: 'lic-1' });
+      mockPrisma.licenseAssignment.findUnique.mockResolvedValue({
+        id: 'assign-1', licenseId: 'lic-1', license: { organizationId: 'org-1' },
+      });
       mockPrisma.license.update.mockResolvedValue({});
       mockPrisma.licenseAssignment.update.mockResolvedValue({ id: 'assign-1', revokedAt: new Date() });
 
       const result = await service.revokeLicense('assign-1');
 
-      expect(mockPrisma.licenseAssignment.findUnique).toHaveBeenCalledWith({ where: { id: 'assign-1' } });
+      expect(mockPrisma.licenseAssignment.findUnique).toHaveBeenCalledWith({
+        where: { id: 'assign-1' },
+        include: { license: { select: { organizationId: true } } },
+      });
       expect(mockPrisma.license.update).toHaveBeenCalledWith({
         where: { id: 'lic-1' },
         data: { usedCount: { decrement: 1 } },
