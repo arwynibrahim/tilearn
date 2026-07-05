@@ -5,7 +5,6 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
-import { RolePermissions } from '../roles/permissions';
 
 jest.mock('bcryptjs', () => ({
   hash: jest.fn(),
@@ -25,6 +24,10 @@ const mockPrisma = {
     findFirst: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+  },
+  membership: {
+    create: jest.fn(),
+    findMany: jest.fn(),
   },
 };
 
@@ -65,11 +68,10 @@ describe('AuthService', () => {
       nom: 'Dupont',
       prenom: 'Jean',
       telephone: '+33612345678',
-      role: 'LEARNER' as const,
       interests: ['Développement', 'Santé'],
     };
 
-    it('should register a new user successfully', async () => {
+    it('should register a new user and create INDIVIDUAL LEARNER membership', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
       mockPrisma.user.create.mockResolvedValue({
@@ -77,15 +79,13 @@ describe('AuthService', () => {
         email: 'test@test.com',
         nom: 'Dupont',
         prenom: 'Jean',
-        role: 'LEARNER',
       });
+      mockPrisma.membership.create.mockResolvedValue({});
       mockJwtService.signAsync.mockResolvedValue('token');
 
       const result = await service.register(dto);
 
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'test@test.com' },
-      });
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { email: 'test@test.com' } });
       expect(bcrypt.hash).toHaveBeenCalledWith('password123', 12);
       expect(mockPrisma.user.create).toHaveBeenCalledWith({
         data: {
@@ -94,16 +94,18 @@ describe('AuthService', () => {
           nom: 'Dupont',
           prenom: 'Jean',
           telephone: '+33612345678',
-          role: 'LEARNER',
           interests: ['Développement', 'Santé'],
         },
-        select: { id: true, email: true, nom: true, prenom: true, role: true, organizationId: true },
+        select: { id: true, email: true, nom: true, prenom: true },
       });
-      expect(result).toEqual({
-        user: { id: 'user-1', email: 'test@test.com', nom: 'Dupont', prenom: 'Jean', role: 'LEARNER' },
-        accessToken: 'token',
-        refreshToken: 'token',
+      expect(mockPrisma.membership.create).toHaveBeenCalledWith({
+        data: { userId: 'user-1', contextType: 'INDIVIDUAL', role: 'LEARNER' },
       });
+      expect(result.user).toEqual({
+        id: 'user-1', email: 'test@test.com', nom: 'Dupont', prenom: 'Jean',
+        memberships: [{ contextType: 'INDIVIDUAL', contextId: null, role: 'LEARNER' }],
+      });
+      expect(result.accessToken).toBe('token');
     });
 
     it('should throw ConflictException if email already exists', async () => {
@@ -115,16 +117,17 @@ describe('AuthService', () => {
 
   describe('login', () => {
     const dto = { email: 'test@test.com', password: 'password123' };
+    const memberships = [{ contextType: 'INDIVIDUAL', contextId: null, role: 'LEARNER' }];
     const user = {
       id: 'user-1',
       email: 'test@test.com',
       passwordHash: 'hashed-password',
       nom: 'Dupont',
       prenom: 'Jean',
-      role: 'LEARNER',
+      memberships,
     };
 
-    it('should login successfully', async () => {
+    it('should login successfully and include memberships', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       mockPrisma.user.update.mockResolvedValue(user);
@@ -134,7 +137,10 @@ describe('AuthService', () => {
 
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { email: 'test@test.com' },
-        select: { id: true, email: true, passwordHash: true, nom: true, prenom: true, role: true, organizationId: true },
+        select: {
+          id: true, email: true, passwordHash: true, nom: true, prenom: true,
+          memberships: { select: { contextType: true, contextId: true, role: true } },
+        },
       });
       expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashed-password');
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
@@ -142,7 +148,7 @@ describe('AuthService', () => {
         data: { lastLoginAt: expect.any(Date) },
       });
       expect(result.user).toEqual({
-        id: 'user-1', email: 'test@test.com', nom: 'Dupont', prenom: 'Jean', role: 'LEARNER',
+        id: 'user-1', email: 'test@test.com', nom: 'Dupont', prenom: 'Jean', memberships,
       });
     });
 
@@ -227,20 +233,15 @@ describe('AuthService', () => {
   });
 
   describe('generateTokens', () => {
-    it('should generate access and refresh tokens', async () => {
+    it('should generate access and refresh tokens with only sub and email', async () => {
       mockJwtService.signAsync
         .mockResolvedValueOnce('access-token')
         .mockResolvedValueOnce('refresh-token');
 
-      const user = { id: 'user-1', email: 'test@test.com', role: 'LEARNER' };
+      const user = { id: 'user-1', email: 'test@test.com' };
       const result = await service.generateTokens(user);
 
-      const expectedPayload = {
-        sub: 'user-1',
-        email: 'test@test.com',
-        role: 'LEARNER',
-        permissions: RolePermissions['LEARNER'],
-      };
+      const expectedPayload = { sub: 'user-1', email: 'test@test.com' };
 
       expect(mockJwtService.signAsync).toHaveBeenNthCalledWith(1, expectedPayload, { expiresIn: '15m' });
       expect(mockJwtService.signAsync).toHaveBeenNthCalledWith(2, expectedPayload, { expiresIn: '7d' });
@@ -254,7 +255,7 @@ describe('AuthService', () => {
         .mockResolvedValueOnce('new-access')
         .mockResolvedValueOnce('new-refresh');
 
-      const user = { id: 'user-1', email: 'test@test.com', role: 'LEARNER' };
+      const user = { id: 'user-1', email: 'test@test.com' };
       const result = await service.refreshToken(user);
 
       expect(result).toEqual({ accessToken: 'new-access', refreshToken: 'new-refresh' });
@@ -274,10 +275,12 @@ describe('AuthService', () => {
     it('should login existing OAuth user', async () => {
       const existingUser = {
         id: 'user-1', email: 'oauth@test.com', nom: 'Smith', prenom: 'John',
-        role: 'LEARNER', avatar: null, passwordHash: '',
+        avatar: null, passwordHash: '',
       };
+      const memberships = [{ contextType: 'INDIVIDUAL', contextId: null, role: 'LEARNER' }];
       mockPrisma.user.findUnique.mockResolvedValue(existingUser);
       mockPrisma.user.update.mockResolvedValue(existingUser);
+      mockPrisma.membership.findMany.mockResolvedValue(memberships);
       mockJwtService.signAsync
         .mockResolvedValueOnce('access-token')
         .mockResolvedValueOnce('refresh-token');
@@ -291,15 +294,19 @@ describe('AuthService', () => {
         data: { lastLoginAt: expect.any(Date), avatar: 'http://avatar.com/pic.jpg' },
       });
       expect(result.accessToken).toBe('access-token');
+      expect(result.user.memberships).toEqual(memberships);
     });
 
-    it('should create new user if not exists', async () => {
+    it('should create new user with INDIVIDUAL LEARNER membership if not exists', async () => {
       const newUser = {
         id: 'user-2', email: 'oauth@test.com', nom: 'Smith', prenom: 'John',
-        role: 'LEARNER', avatar: 'http://avatar.com/pic.jpg', passwordHash: '',
+        avatar: 'http://avatar.com/pic.jpg', passwordHash: '',
       };
+      const memberships = [{ contextType: 'INDIVIDUAL', contextId: null, role: 'LEARNER' }];
       mockPrisma.user.findUnique.mockResolvedValue(null);
       mockPrisma.user.create.mockResolvedValue(newUser);
+      mockPrisma.membership.create.mockResolvedValue({});
+      mockPrisma.membership.findMany.mockResolvedValue(memberships);
       mockPrisma.user.update.mockResolvedValue(newUser);
       mockJwtService.signAsync
         .mockResolvedValueOnce('access-token')
@@ -317,6 +324,9 @@ describe('AuthService', () => {
           emailVerifiedAt: expect.any(Date),
         },
       });
+      expect(mockPrisma.membership.create).toHaveBeenCalledWith({
+        data: { userId: 'user-2', contextType: 'INDIVIDUAL', role: 'LEARNER' },
+      });
       expect(result.accessToken).toBe('access-token');
     });
 
@@ -328,11 +338,12 @@ describe('AuthService', () => {
   });
 
   describe('getProfile', () => {
-    it('should return user profile', async () => {
+    it('should return user profile with memberships', async () => {
       const profile = {
         id: 'user-1', email: 'test@test.com', nom: 'Dupont', prenom: 'Jean',
-        telephone: '+33612345678', avatar: null, role: 'LEARNER',
+        telephone: '+33612345678', avatar: null,
         interests: [], emailVerifiedAt: null, lastLoginAt: null, createdAt: new Date(),
+        memberships: [{ contextType: 'INDIVIDUAL', contextId: null, role: 'LEARNER' }],
       };
       mockPrisma.user.findUnique.mockResolvedValue(profile);
 
@@ -342,8 +353,9 @@ describe('AuthService', () => {
         where: { id: 'user-1' },
         select: {
           id: true, email: true, nom: true, prenom: true, telephone: true,
-          avatar: true, role: true, interests: true, emailVerifiedAt: true,
-          lastLoginAt: true, createdAt: true, organizationId: true,
+          avatar: true, interests: true, emailVerifiedAt: true,
+          lastLoginAt: true, createdAt: true,
+          memberships: { select: { contextType: true, contextId: true, role: true } },
         },
       });
       expect(result).toEqual(profile);

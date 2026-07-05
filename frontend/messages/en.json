@@ -113,9 +113,7 @@
     "linkedin": "LinkedIn",
     "logging_in": "Signing in...",
     "registering": "Registering...",
-    "role_label": "I am",
-    "role_learner": "Student / Learner",
-    "role_instructor": "Teacher / Instructor",
+    "register_as_learner_info": "You start as a learner. The creator role is granted by an administrator.",
     "interests_label": "Interests",
     "interests_subtitle": "Select your interests to get personalized course recommendations",
     "interests_dev": "Development",
@@ -151,8 +149,9 @@
     "confirm_delete": "Confirm deletion",
     "roles": {
       "LEARNER": "Learner",
-      "INSTRUCTOR": "Instructor",
-      "ADMIN_INSTITUTION": "Institution Admin",
+      "CREATOR": "Creator",
+      "MANAGER": "Manager",
+      "ADMIN": "Institution Admin",
       "SUPER_ADMIN": "Super Admin"
     },
     "headset_status": {

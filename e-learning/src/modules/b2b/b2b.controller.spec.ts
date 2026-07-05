@@ -36,10 +36,10 @@ describe('B2bController', () => {
   });
 
   it('findAllOrganizations', async () => {
-    const mockUser = { role: 'SUPER_ADMIN', organizationId: null };
+    const memberships = [{ contextType: 'PLATFORM', contextId: null, role: 'SUPER_ADMIN' }];
     mockB2bService.findAllOrganizations.mockResolvedValue([]);
-    expect(await controller.findAllOrganizations(mockUser)).toEqual([]);
-    expect(mockB2bService.findAllOrganizations).toHaveBeenCalledWith('SUPER_ADMIN', null);
+    expect(await controller.findAllOrganizations(memberships)).toEqual([]);
+    expect(mockB2bService.findAllOrganizations).toHaveBeenCalledWith(memberships);
   });
 
   it('findOneOrganization', async () => {

@@ -8,7 +8,6 @@ import { RolePermissions } from '../../modules/roles/permissions';
 interface JwtPayload {
   sub: string;
   email: string;
-  role: string;
 }
 
 @Injectable()
@@ -28,20 +27,31 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: JwtPayload) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { id: true, email: true, role: true, nom: true, prenom: true, organizationId: true },
+      select: { id: true, email: true, nom: true, prenom: true },
     });
     if (!user) throw new UnauthorizedException();
 
-    const dbPerms = await this.prisma.rolePermission.findMany({
-      where: { role: user.role },
-      include: { permission: { select: { name: true } } },
+    const memberships = await this.prisma.membership.findMany({
+      where: { userId: user.id },
+      select: { contextType: true, contextId: true, role: true },
     });
 
-    // DB is source of truth; fall back to static map if seed hasn't run yet
-    const permissions = dbPerms.length > 0
-      ? dbPerms.map((rp) => rp.permission.name)
-      : (RolePermissions[user.role] ?? []);
+    // Union of all permissions across all memberships
+    const allRoles = [...new Set(memberships.map((m) => m.role))];
+    const permissionsSet = new Set<string>();
+    for (const role of allRoles) {
+      const rolePerms = await this.prisma.rolePermission.findMany({
+        where: { role },
+        include: { permission: { select: { name: true } } },
+      });
+      if (rolePerms.length > 0) {
+        rolePerms.forEach((rp) => permissionsSet.add(rp.permission.name));
+      } else {
+        // Fallback to static map if DB not seeded yet
+        (RolePermissions[role] ?? []).forEach((p) => permissionsSet.add(p));
+      }
+    }
 
-    return { ...user, permissions };
+    return { ...user, memberships, permissions: [...permissionsSet] };
   }
 }

@@ -107,13 +107,14 @@ describe('CatalogueController', () => {
   });
 
   describe('updateCourse', () => {
-    it('should update a course', async () => {
+    it('should update a course with ADMIN effective role for admin memberships', async () => {
       const dto = { title: 'Updated' };
+      const memberships = [{ role: 'ADMIN' as any }];
       mockCatalogueService.updateCourse.mockResolvedValue({ id: 'c1', title: 'Updated' });
 
-      const result = await controller.updateCourse('c1', dto, 'user-1', 'SUPER_ADMIN' as any);
+      const result = await controller.updateCourse('c1', dto, 'user-1', memberships);
 
-      expect(mockCatalogueService.updateCourse).toHaveBeenCalledWith('c1', dto, 'user-1', 'SUPER_ADMIN');
+      expect(mockCatalogueService.updateCourse).toHaveBeenCalledWith('c1', dto, 'user-1', 'ADMIN');
       expect(result).toEqual({ id: 'c1', title: 'Updated' });
     });
   });
@@ -130,13 +131,14 @@ describe('CatalogueController', () => {
   });
 
   describe('createModule', () => {
-    it('should create a module', async () => {
+    it('should create a module with CREATOR effective role for non-admin memberships', async () => {
       const dto = { title: 'Module 1', type: 'VIDEO' as const, courseId: 'c1' };
+      const memberships = [{ role: 'CREATOR' as any }];
       mockCatalogueService.createModule.mockResolvedValue({ id: 'm1', ...dto });
 
-      const result = await controller.createModule(dto, 'user-1', 'SUPER_ADMIN' as any);
+      const result = await controller.createModule(dto, 'user-1', memberships);
 
-      expect(mockCatalogueService.createModule).toHaveBeenCalledWith(dto, 'user-1', 'SUPER_ADMIN');
+      expect(mockCatalogueService.createModule).toHaveBeenCalledWith(dto, 'user-1', 'CREATOR');
       expect(result).toEqual({ id: 'm1', ...dto });
     });
   });
@@ -154,13 +156,14 @@ describe('CatalogueController', () => {
   });
 
   describe('updateModule', () => {
-    it('should update a module', async () => {
+    it('should update a module with ADMIN effective role for admin memberships', async () => {
       const dto = { title: 'Updated' };
+      const memberships = [{ role: 'ADMIN' as any }];
       mockCatalogueService.updateModule.mockResolvedValue({ id: 'm1', title: 'Updated' });
 
-      const result = await controller.updateModule('m1', dto, 'user-1', 'SUPER_ADMIN' as any);
+      const result = await controller.updateModule('m1', dto, 'user-1', memberships);
 
-      expect(mockCatalogueService.updateModule).toHaveBeenCalledWith('m1', dto, 'user-1', 'SUPER_ADMIN');
+      expect(mockCatalogueService.updateModule).toHaveBeenCalledWith('m1', dto, 'user-1', 'ADMIN');
       expect(result).toEqual({ id: 'm1', title: 'Updated' });
     });
   });

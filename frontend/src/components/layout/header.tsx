@@ -10,6 +10,7 @@ import { useT } from '@/hooks/use-t';
 import { useLogout } from '@/hooks/use-auth';
 import { Brand } from '@/components/layout/brand';
 import { cn } from '@/lib/utils';
+import { getDashboardHref } from '@/types';
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -57,13 +58,7 @@ export function Header() {
 
           {isAuthenticated ? (
             <>
-              <Link
-                href={
-                  user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN_INSTITUTION'
-                    ? '/admin'
-                    : '/dashboard'
-                }
-              >
+              <Link href={getDashboardHref(user ?? null)}>
                 <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
                   {t('nav.dashboard')}
                 </Button>

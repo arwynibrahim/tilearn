@@ -29,15 +29,21 @@ export class B2bService {
 
     const [org] = await this.prisma.$transaction(async (tx) => {
       const created = await tx.organization.create({ data: orgData });
-      await tx.user.create({
+      const adminUser = await tx.user.create({
         data: {
           email: adminEmail,
           passwordHash,
           nom: adminNom,
           prenom: adminPrenom,
-          role: 'ADMIN_INSTITUTION',
-          organizationId: created.id,
         },
+      });
+      // INDIVIDUAL LEARNER as default personal context
+      await tx.membership.create({
+        data: { userId: adminUser.id, contextType: 'INDIVIDUAL', role: 'LEARNER' },
+      });
+      // ORGANIZATION ADMIN in this org
+      await tx.membership.create({
+        data: { userId: adminUser.id, contextType: 'ORGANIZATION', contextId: created.id, role: 'ADMIN' },
       });
       return [created];
     });
@@ -57,8 +63,13 @@ export class B2bService {
     return org;
   }
 
-  async findAllOrganizations(userRole?: string, userOrgId?: string) {
-    const where = userRole === 'ADMIN_INSTITUTION' && userOrgId ? { id: userOrgId } : {};
+  async findAllOrganizations(memberships?: Array<{ contextType: string; contextId: string | null; role: string }>) {
+    // ADMIN org memberships restrict the view to their specific org(s)
+    const adminOrgIds = (memberships ?? [])
+      .filter((m) => m.contextType === 'ORGANIZATION' && m.role === 'ADMIN' && m.contextId)
+      .map((m) => m.contextId as string);
+
+    const where = adminOrgIds.length > 0 ? { id: { in: adminOrgIds } } : {};
     return this.prisma.organization.findMany({
       where,
       include: { _count: { select: { licenses: true, learningPaths: true, vrHeadsets: true } } },

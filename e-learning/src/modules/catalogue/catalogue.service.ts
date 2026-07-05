@@ -114,7 +114,7 @@ export class CatalogueService {
   async updateCourse(id: string, dto: UpdateCourseDto, userId: string, role: Role) {
     const course = await this.prisma.course.findUnique({ where: { id } });
     if (!course) throw new NotFoundException('Cours non trouvé');
-    if (role === Role.INSTRUCTOR && course.createdBy !== userId) {
+    if (role === Role.CREATOR && course.createdBy !== userId) {
       throw new ForbiddenException('Vous ne pouvez modifier que vos propres cours');
     }
     return this.prisma.course.update({ where: { id }, data: dto, include: { domain: true } });
@@ -130,7 +130,7 @@ export class CatalogueService {
   async createModule(dto: CreateModuleDto, userId: string, role: Role) {
     const course = await this.prisma.course.findUnique({ where: { id: dto.courseId } });
     if (!course) throw new NotFoundException('Cours non trouvé');
-    if (role === Role.INSTRUCTOR && course.createdBy !== userId) {
+    if (role === Role.CREATOR && course.createdBy !== userId) {
       throw new ForbiddenException('Vous ne pouvez ajouter des modules qu\'à vos propres cours');
     }
 
@@ -160,7 +160,7 @@ export class CatalogueService {
       include: { course: { select: { createdBy: true } } },
     });
     if (!mod) throw new NotFoundException('Module non trouvé');
-    if (role === Role.INSTRUCTOR && mod.course.createdBy !== userId) {
+    if (role === Role.CREATOR && mod.course.createdBy !== userId) {
       throw new ForbiddenException('Vous ne pouvez modifier que les modules de vos propres cours');
     }
     return this.prisma.module.update({ where: { id }, data: dto });

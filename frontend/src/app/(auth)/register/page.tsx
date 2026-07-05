@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { GraduationCap, School } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,7 +42,6 @@ type FormData = z.infer<typeof schema>;
 export default function RegisterPage() {
   const t = useT();
   const { mutate: register, isPending, error } = useRegister();
-  const [role, setRole] = useState<'LEARNER' | 'INSTRUCTOR'>('LEARNER');
   const [interests, setInterests] = useState<string[]>([]);
 
   const {
@@ -58,7 +57,7 @@ export default function RegisterPage() {
   };
 
   const onSubmit = ({ confirmPassword: _, ...data }: FormData) =>
-    register({ ...data, role, interests });
+    register({ ...data, interests });
 
   return (
     <div>
@@ -104,34 +103,9 @@ export default function RegisterPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-1.5">
-          <Label>{t('auth.role_label')}</Label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setRole('LEARNER')}
-              className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all ${
-                role === 'LEARNER'
-                  ? 'border-brand bg-brand/5 text-brand'
-                  : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-              }`}
-            >
-            <GraduationCap size={28} />
-            {t('auth.role_learner')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('INSTRUCTOR')}
-              className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all ${
-                role === 'INSTRUCTOR'
-                  ? 'border-brand bg-brand/5 text-brand'
-                  : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-              }`}
-            >
-              <School size={28} />
-              {t('auth.role_instructor')}
-            </button>
-          </div>
+        <div className="flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-brand">
+          <Sparkles size={16} className="shrink-0" />
+          <span>{t('auth.register_as_learner_info')}</span>
         </div>
 
         <div className="grid grid-cols-2 gap-3">

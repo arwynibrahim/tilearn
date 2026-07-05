@@ -24,7 +24,8 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useLogout } from '@/hooks/use-auth';
 import { getInitials } from '@/lib/utils';
 import { Brand } from '@/components/layout/brand';
-import type { Role } from '@/types';
+import type { Membership } from '@/types';
+import { hasPlatformRole, hasOrgAdminRole, hasRole } from '@/types';
 
 interface NavItem {
   href: string;
@@ -74,26 +75,20 @@ const learnerNav: NavItem[] = [
   { href: '/dashboard/vr', icon: Headphones, label: 'Mes VR' },
 ];
 
-function getNavForRole(role: Role): NavItem[] {
-  switch (role) {
-    case 'SUPER_ADMIN':
-      return superAdminNav;
-    case 'ADMIN_INSTITUTION':
-      return institutionAdminNav;
-    case 'INSTRUCTOR':
-      return instructorNav;
-    case 'LEARNER':
-    default:
-      return learnerNav;
-  }
+function getNavForMemberships(memberships: Membership[] | undefined): NavItem[] {
+  if (!memberships?.length) return learnerNav;
+  if (memberships.some((m) => m.contextType === 'PLATFORM')) return superAdminNav;
+  if (memberships.some((m) => m.contextType === 'ORGANIZATION' && m.role === 'ADMIN')) return institutionAdminNav;
+  if (memberships.some((m) => m.role === 'CREATOR')) return instructorNav;
+  return learnerNav;
 }
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuthStore();
   const logout = useLogout();
-  const items = getNavForRole(user?.role ?? 'LEARNER');
-  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+  const items = getNavForMemberships(user?.memberships);
+  const isSuperAdmin = hasPlatformRole(user);
 
   return (
     <aside className={cn('flex h-full w-64 flex-col border-r', isSuperAdmin ? 'border-navy-800 bg-navy-900' : 'border-gray-100 bg-white')}>

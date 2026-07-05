@@ -8,16 +8,30 @@ export class RolesService {
   constructor(private prisma: PrismaService) {}
 
   async getPermissionsForRole(role: Role): Promise<string[]> {
-    return RolePermissions[role] || [];
+    const dbPerms = await this.prisma.rolePermission.findMany({
+      where: { role },
+      include: { permission: { select: { name: true } } },
+    });
+    return dbPerms.length > 0
+      ? dbPerms.map((rp) => rp.permission.name)
+      : (RolePermissions[role] ?? []);
   }
 
-  async getUserPermissions(userId: string): Promise<string[]> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
+  async getUserPermissions(userId: string): Promise<{ memberships: any[]; permissions: string[] }> {
+    const memberships = await this.prisma.membership.findMany({
+      where: { userId },
+      select: { contextType: true, contextId: true, role: true },
     });
-    if (!user) throw new NotFoundException('Utilisateur non trouvé');
-    return this.getPermissionsForRole(user.role);
+    if (!memberships.length) throw new NotFoundException('Aucun membership trouvé');
+
+    const allRoles = [...new Set(memberships.map((m) => m.role))];
+    const permissionsSet = new Set<string>();
+    for (const role of allRoles) {
+      const perms = await this.getPermissionsForRole(role);
+      perms.forEach((p) => permissionsSet.add(p));
+    }
+
+    return { memberships, permissions: [...permissionsSet] };
   }
 
   async getAllPermissions() {
@@ -45,11 +59,7 @@ export class RolesService {
       await this.prisma.permission.upsert({
         where: { name: perm.name },
         update: { group: perm.group },
-        create: {
-          name: perm.name,
-          description: `Permission ${perm.name}`,
-          group: perm.group,
-        },
+        create: { name: perm.name, description: `Permission ${perm.name}`, group: perm.group },
       });
     }
 
@@ -60,9 +70,9 @@ export class RolesService {
         const perm = await this.prisma.permission.findUnique({ where: { name: permName } });
         if (perm) {
           await this.prisma.rolePermission.upsert({
-            where: { role_permissionId: { role: role as Role, permissionId: perm.id } },
+            where: { role_permissionId: { role, permissionId: perm.id } },
             update: {},
-            create: { role: role as Role, permissionId: perm.id },
+            create: { role, permissionId: perm.id },
           });
         }
       }
@@ -74,11 +84,20 @@ export class RolesService {
   async getUserWithPermissions(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, nom: true, prenom: true, role: true },
+      select: {
+        id: true, email: true, nom: true, prenom: true,
+        memberships: { select: { contextType: true, contextId: true, role: true } },
+      },
     });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
 
-    const permissions = await this.getPermissionsForRole(user.role);
-    return { ...user, permissions };
+    const allRoles = [...new Set(user.memberships.map((m) => m.role))];
+    const permissionsSet = new Set<string>();
+    for (const role of allRoles) {
+      const perms = await this.getPermissionsForRole(role);
+      perms.forEach((p) => permissionsSet.add(p));
+    }
+
+    return { ...user, permissions: [...permissionsSet] };
   }
 }

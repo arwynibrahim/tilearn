@@ -20,7 +20,7 @@ export class MdmController {
   constructor(private mdmService: MdmService) {}
 
   @Post('headsets')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_CREATE)
   @ApiOperation({ summary: 'Ajouter un casque VR' })
   createHeadset(@Body() dto: CreateVRHeadsetDto) {
@@ -28,7 +28,7 @@ export class MdmController {
   }
 
   @Get('organizations/:orgId/headsets')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_READ)
   @ApiOperation({ summary: 'Casques VR d\'une organisation' })
   getOrganizationHeadsets(@Param('orgId') orgId: string) {
@@ -36,7 +36,7 @@ export class MdmController {
   }
 
   @Patch('headsets/:id/status')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_UPDATE)
   @ApiOperation({ summary: 'Mettre à jour le statut d\'un casque' })
   updateHeadsetStatus(
@@ -48,7 +48,7 @@ export class MdmController {
   }
 
   @Post('headsets/:id/assign/:userId')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_UPDATE)
   @ApiOperation({ summary: 'Assigner un casque à un utilisateur' })
   assignHeadset(@Param('id') id: string, @Param('userId') userId: string) {
@@ -56,7 +56,7 @@ export class MdmController {
   }
 
   @Delete('headsets/:id')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_DELETE)
   @ApiOperation({ summary: 'Supprimer un casque VR' })
   removeHeadset(@Param('id') id: string) {
@@ -64,7 +64,7 @@ export class MdmController {
   }
 
   @Post('charging-stations')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_UPDATE)
   @ApiOperation({ summary: 'Créer une station de charge' })
   createChargingStation(@Body() data: any) {
@@ -72,7 +72,7 @@ export class MdmController {
   }
 
   @Get('organizations/:orgId/charging-stations')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_READ)
   @ApiOperation({ summary: 'Stations de charge d\'une organisation' })
   getOrganizationChargingStations(@Param('orgId') orgId: string) {
@@ -80,7 +80,7 @@ export class MdmController {
   }
 
   @Delete('charging-stations/:id')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.VRHEADSET_DELETE)
   @ApiOperation({ summary: 'Supprimer une station de charge' })
   removeChargingStation(@Param('id') id: string) {

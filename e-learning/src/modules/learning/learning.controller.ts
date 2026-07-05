@@ -41,7 +41,7 @@ export class LearningController {
   // ─── ADMIN: Inscriptions ──────────────────────────────────
 
   @Get('admin/enrollments')
-  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.ENROLLMENT_READ)
   @ApiOperation({ summary: 'ADMIN: Toutes les inscriptions' })
   getAllEnrollments(
@@ -55,7 +55,7 @@ export class LearningController {
   }
 
   @Get('admin/enrollments/:id')
-  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.ENROLLMENT_READ)
   @ApiOperation({ summary: 'ADMIN: Détail d\'une inscription' })
   getEnrollmentById(@Param('id') id: string) {
@@ -63,7 +63,7 @@ export class LearningController {
   }
 
   @Patch('admin/enrollments/:id/status')
-  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.ENROLLMENT_UPDATE)
   @ApiOperation({ summary: 'ADMIN: Modifier le statut d\'une inscription' })
   updateEnrollmentStatus(@Param('id') id: string, @Body('status') status: string) {
@@ -93,7 +93,7 @@ export class LearningController {
   // ─── ADMIN: Progression ───────────────────────────────────
 
   @Get('admin/progress')
-  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.PROGRESS_READ)
   @ApiOperation({ summary: 'ADMIN: Toutes les progressions' })
   getAllProgress(
@@ -154,7 +154,7 @@ export class LearningController {
   // ─── ADMIN: Certificats ───────────────────────────────────
 
   @Get('admin/certificates')
-  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.CERTIFICATE_READ)
   @ApiOperation({ summary: 'ADMIN: Tous les certificats' })
   getAllCertificates(

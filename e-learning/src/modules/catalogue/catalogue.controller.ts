@@ -40,7 +40,7 @@ export class CatalogueController {
   }
 
   @Get('domains/:id')
-  @ApiOperation({ summary: 'Détail d\'un domaine avec ses cours' })
+  @ApiOperation({ summary: "Détail d'un domaine avec ses cours" })
   findOneDomain(@Param('id') id: string) {
     return this.catalogueService.findOneDomain(id);
   }
@@ -69,7 +69,7 @@ export class CatalogueController {
 
   @Post('courses')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.CREATOR, Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.COURSE_CREATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Créer un cours' })
@@ -89,14 +89,14 @@ export class CatalogueController {
   }
 
   @Get('courses/:slug')
-  @ApiOperation({ summary: 'Détail d\'un cours par slug' })
+  @ApiOperation({ summary: "Détail d'un cours par slug" })
   findOneCourse(@Param('slug') slug: string) {
     return this.catalogueService.findOneCourse(slug);
   }
 
   @Patch('courses/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.CREATOR, Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.COURSE_UPDATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Modifier un cours' })
@@ -104,14 +104,16 @@ export class CatalogueController {
     @Param('id') id: string,
     @Body() dto: UpdateCourseDto,
     @CurrentUser('id') userId: string,
-    @CurrentUser('role') role: Role,
+    @CurrentUser('memberships') memberships: Array<{ role: Role }>,
   ) {
-    return this.catalogueService.updateCourse(id, dto, userId, role);
+    const isAdmin = memberships?.some((m) => m.role === Role.ADMIN || m.role === Role.SUPER_ADMIN);
+    const effectiveRole = isAdmin ? Role.ADMIN : Role.CREATOR;
+    return this.catalogueService.updateCourse(id, dto, userId, effectiveRole);
   }
 
   @Delete('courses/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.COURSE_DELETE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Dépublier un cours' })
@@ -123,27 +125,29 @@ export class CatalogueController {
 
   @Post('modules')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.CREATOR, Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.MODULE_CREATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Créer un module' })
   createModule(
     @Body() dto: CreateModuleDto,
     @CurrentUser('id') userId: string,
-    @CurrentUser('role') role: Role,
+    @CurrentUser('memberships') memberships: Array<{ role: Role }>,
   ) {
-    return this.catalogueService.createModule(dto, userId, role);
+    const isAdmin = memberships?.some((m) => m.role === Role.ADMIN || m.role === Role.SUPER_ADMIN);
+    const effectiveRole = isAdmin ? Role.ADMIN : Role.CREATOR;
+    return this.catalogueService.createModule(dto, userId, effectiveRole);
   }
 
   @Get('courses/:courseId/modules')
-  @ApiOperation({ summary: 'Modules d\'un cours' })
+  @ApiOperation({ summary: "Modules d'un cours" })
   findModulesByCourse(@Param('courseId') courseId: string) {
     return this.catalogueService.findModulesByCourse(courseId);
   }
 
   @Patch('modules/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.INSTRUCTOR, Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.CREATOR, Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.MODULE_UPDATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Modifier un module' })
@@ -151,14 +155,16 @@ export class CatalogueController {
     @Param('id') id: string,
     @Body() dto: Partial<CreateModuleDto>,
     @CurrentUser('id') userId: string,
-    @CurrentUser('role') role: Role,
+    @CurrentUser('memberships') memberships: Array<{ role: Role }>,
   ) {
-    return this.catalogueService.updateModule(id, dto, userId, role);
+    const isAdmin = memberships?.some((m) => m.role === Role.ADMIN || m.role === Role.SUPER_ADMIN);
+    const effectiveRole = isAdmin ? Role.ADMIN : Role.CREATOR;
+    return this.catalogueService.updateModule(id, dto, userId, effectiveRole);
   }
 
   @Delete('modules/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
-  @Roles(Role.ADMIN_INSTITUTION, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.MODULE_DELETE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Supprimer un module' })

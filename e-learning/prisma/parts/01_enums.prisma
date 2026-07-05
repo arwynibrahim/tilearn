@@ -1,8 +1,15 @@
 enum Role {
   LEARNER
-  INSTRUCTOR
-  ADMIN_INSTITUTION
+  CREATOR
+  MANAGER
+  ADMIN
   SUPER_ADMIN
+}
+
+enum ContextType {
+  INDIVIDUAL
+  ORGANIZATION
+  PLATFORM
 }
 
 enum EnrollmentStatus {

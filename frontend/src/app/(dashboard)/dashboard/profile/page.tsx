@@ -15,11 +15,13 @@ import { usersApi } from '@/lib/api/users';
 import { useAuthStore } from '@/stores/auth.store';
 import { getApiErrorMessage } from '@/lib/api/client';
 import { getInitials } from '@/lib/utils';
+import { getPrimaryRole } from '@/types';
 
 const ROLE_LABELS: Record<string, string> = {
   LEARNER: 'Apprenant',
-  INSTRUCTOR: 'Instructeur',
-  ADMIN_INSTITUTION: 'Admin Institution',
+  CREATOR: 'Formateur',
+  MANAGER: 'Manager',
+  ADMIN: 'Admin Institution',
   SUPER_ADMIN: 'Super Admin',
 };
 
@@ -83,7 +85,7 @@ export default function ProfilePage() {
             <p className="text-xl font-black text-gray-900">{user.prenom} {user.nom}</p>
             <p className="text-sm text-gray-500">{user.email}</p>
             <div className="mt-2 flex items-center gap-2">
-              <Badge variant="secondary">{ROLE_LABELS[user.role] ?? user.role}</Badge>
+              <Badge variant="secondary">{(() => { const r = getPrimaryRole(user); return r ? (ROLE_LABELS[r] ?? r) : '—'; })()}</Badge>
               {user.emailVerifiedAt && (
                 <span className="flex items-center gap-1 text-xs text-green-600">
                   <CheckCircle2 className="size-3" /> Email vérifié
@@ -149,7 +151,7 @@ export default function ProfilePage() {
                 <Shield className="size-3.5 text-gray-400" />
                 Rôle
               </Label>
-              <Input value={ROLE_LABELS[user.role] ?? user.role} disabled className="bg-gray-50 text-gray-500 cursor-not-allowed" />
+              <Input value={(() => { const r = getPrimaryRole(user); return r ? (ROLE_LABELS[r] ?? r) : '—'; })()} disabled className="bg-gray-50 text-gray-500 cursor-not-allowed" />
             </div>
 
             <div className="flex items-center justify-end pt-2">

@@ -48,7 +48,7 @@ export class LearningService {
       this.prisma.enrollment.findMany({
         where,
         include: {
-          user: { select: { id: true, email: true, nom: true, prenom: true, role: true } },
+          user: { select: { id: true, email: true, nom: true, prenom: true } },
           course: { select: { id: true, title: true, slug: true, level: true } },
         },
         orderBy: { enrolledAt: 'desc' },
@@ -65,7 +65,7 @@ export class LearningService {
     const enrollment = await this.prisma.enrollment.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, email: true, nom: true, prenom: true, role: true } },
+        user: { select: { id: true, email: true, nom: true, prenom: true } },
         course: { select: { id: true, title: true, slug: true, level: true } },
       },
     });

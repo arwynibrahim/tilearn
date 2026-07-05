@@ -113,9 +113,7 @@
     "linkedin": "LinkedIn",
     "logging_in": "Connexion...",
     "registering": "Inscription...",
-    "role_label": "Je suis",
-    "role_learner": "Élève / Apprenant",
-    "role_instructor": "Professeur / Formateur",
+    "register_as_learner_info": "Vous démarrez en tant qu'apprenant. Le rôle formateur est accordé par un administrateur.",
     "interests_label": "Centres d'intérêt",
     "interests_subtitle": "Sélectionnez vos centres d'intérêt pour recevoir des cours personnalisés",
     "interests_dev": "Développement",
@@ -151,8 +149,9 @@
     "confirm_delete": "Confirmer la suppression",
     "roles": {
       "LEARNER": "Apprenant",
-      "INSTRUCTOR": "Instructeur",
-      "ADMIN_INSTITUTION": "Admin Institution",
+      "CREATOR": "Formateur",
+      "MANAGER": "Manager",
+      "ADMIN": "Admin Institution",
       "SUPER_ADMIN": "Super Admin"
     },
     "headset_status": {

@@ -8,6 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { usersApi } from '@/lib/api/users';
 import { b2bApi } from '@/lib/api/b2b';
 import { formatDate } from '@/lib/utils';
+import { getPrimaryRole } from '@/types';
+
+const ROLE_VARIANT = {
+  LEARNER: 'default', CREATOR: 'info', MANAGER: 'warning', ADMIN: 'warning', SUPER_ADMIN: 'secondary',
+} as const;
+const ROLE_LABELS = {
+  LEARNER: 'Apprenant', CREATOR: 'Formateur', MANAGER: 'Manager', ADMIN: 'Admin', SUPER_ADMIN: 'Super Admin',
+} as const;
 
 function StatCard({
   icon: Icon, title, value, sub, color,
@@ -164,9 +172,7 @@ export default function SuperAdminDashboard() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <Badge variant={u.role === 'SUPER_ADMIN' ? 'secondary' : u.role === 'INSTRUCTOR' ? 'info' : 'default'}>
-                        {u.role}
-                      </Badge>
+                      {(() => { const r = getPrimaryRole(u); return r ? <Badge variant={ROLE_VARIANT[r]}>{ROLE_LABELS[r]}</Badge> : <Badge variant="default">—</Badge>; })()}
                       <span className="text-xs text-gray-400">{formatDate(u.createdAt)}</span>
                     </div>
                   </div>

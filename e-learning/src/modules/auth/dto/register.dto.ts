@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsIn, IsArray } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsArray } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RegisterDto {
@@ -23,12 +23,6 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   telephone?: string;
-
-  /** Seul LEARNER et INSTRUCTOR sont autorisés à l'inscription publique */
-  @ApiPropertyOptional({ enum: ['LEARNER', 'INSTRUCTOR'], default: 'LEARNER' })
-  @IsOptional()
-  @IsIn(['LEARNER', 'INSTRUCTOR'])
-  role?: 'LEARNER' | 'INSTRUCTOR';
 
   @ApiPropertyOptional({ example: ['Développement', 'Santé'], description: "Centres d'intérêt pour recommandations de cours" })
   @IsOptional()

@@ -31,15 +31,15 @@ export class B2bController {
   }
 
   @Get('organizations')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.ORGANIZATION_READ)
   @ApiOperation({ summary: 'Liste des organisations' })
-  findAllOrganizations(@CurrentUser() user: any) {
-    return this.b2bService.findAllOrganizations(user.role, user.organizationId);
+  findAllOrganizations(@CurrentUser('memberships') memberships: any) {
+    return this.b2bService.findAllOrganizations(memberships);
   }
 
   @Get('organizations/:id')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.ORGANIZATION_READ)
   @ApiOperation({ summary: 'Détail d\'une organisation' })
   findOneOrganization(@Param('id') id: string) {
@@ -87,7 +87,7 @@ export class B2bController {
   }
 
   @Post('licenses/:licenseId/assign/:userId')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.LICENSE_ASSIGN)
   @ApiOperation({ summary: 'Assigner une licence à un utilisateur' })
   assignLicense(
@@ -99,7 +99,7 @@ export class B2bController {
   }
 
   @Post('licenses/revoke/:assignmentId')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.LICENSE_REVOKE)
   @ApiOperation({ summary: 'Révoquer une assignation de licence' })
   revokeLicense(@Param('assignmentId') assignmentId: string) {
@@ -107,7 +107,7 @@ export class B2bController {
   }
 
   @Get('organizations/:orgId/licenses')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.LICENSE_READ)
   @ApiOperation({ summary: 'Licences d\'une organisation' })
   getOrganizationLicenses(@Param('orgId') orgId: string) {
@@ -115,7 +115,7 @@ export class B2bController {
   }
 
   @Post('learning-paths')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.LEARNINGPATH_CREATE)
   @ApiOperation({ summary: 'Créer un parcours d\'apprentissage' })
   createLearningPath(@Body() dto: CreateLearningPathDto) {
@@ -123,7 +123,7 @@ export class B2bController {
   }
 
   @Get('organizations/:orgId/learning-paths')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.LEARNINGPATH_READ)
   @ApiOperation({ summary: 'Parcours d\'apprentissage d\'une organisation' })
   getOrganizationLearningPaths(@Param('orgId') orgId: string) {
@@ -131,7 +131,7 @@ export class B2bController {
   }
 
   @Patch('learning-paths/:id')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.LEARNINGPATH_UPDATE)
   @ApiOperation({ summary: 'Modifier un parcours d\'apprentissage' })
   updateLearningPath(@Param('id') id: string, @Body() dto: Partial<CreateLearningPathDto>) {
@@ -139,7 +139,7 @@ export class B2bController {
   }
 
   @Delete('learning-paths/:id')
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.LEARNINGPATH_DELETE)
   @ApiOperation({ summary: 'Supprimer un parcours d\'apprentissage' })
   removeLearningPath(@Param('id') id: string) {

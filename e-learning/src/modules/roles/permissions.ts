@@ -124,7 +124,8 @@ export const RolePermissions: Record<string, PermissionName[]> = {
     Permissions.MODULE_READ,
   ],
 
-  INSTRUCTOR: [
+  // ex-INSTRUCTOR
+  CREATOR: [
     Permissions.USER_READ,
     Permissions.USER_UPDATE,
     Permissions.COURSE_CREATE,
@@ -158,7 +159,33 @@ export const RolePermissions: Record<string, PermissionName[]> = {
     Permissions.REPORT_EXPORT,
   ],
 
-  ADMIN_INSTITUTION: [
+  // Gestion d'équipe dans une org (sous-ensemble de ADMIN)
+  MANAGER: [
+    Permissions.USER_READ,
+    Permissions.USER_UPDATE,
+    Permissions.COURSE_READ,
+    Permissions.MODULE_READ,
+    Permissions.ENROLLMENT_CREATE,
+    Permissions.ENROLLMENT_READ,
+    Permissions.ENROLLMENT_UPDATE,
+    Permissions.PROGRESS_READ,
+    Permissions.ORGANIZATION_READ,
+    Permissions.LICENSE_READ,
+    Permissions.LICENSE_ASSIGN,
+    Permissions.LICENSE_REVOKE,
+    Permissions.LEARNINGPATH_CREATE,
+    Permissions.LEARNINGPATH_READ,
+    Permissions.LEARNINGPATH_UPDATE,
+    Permissions.LEARNINGPATH_DELETE,
+    Permissions.VRHEADSET_READ,
+    Permissions.VRHEADSET_UPDATE,
+    Permissions.REVIEW_READ,
+    Permissions.REPORT_READ,
+    Permissions.SUBSCRIPTION_READ,
+  ],
+
+  // ex-ADMIN_INSTITUTION
+  ADMIN: [
     Permissions.USER_CREATE,
     Permissions.USER_READ,
     Permissions.USER_UPDATE,

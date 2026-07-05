@@ -6,8 +6,9 @@ import { RolePermissions, Permissions } from './permissions';
 
 const mockPrisma = {
   user: { findUnique: jest.fn() },
+  membership: { findMany: jest.fn() },
   permission: { findMany: jest.fn(), findUnique: jest.fn(), upsert: jest.fn() },
-  rolePermission: { upsert: jest.fn() },
+  rolePermission: { findMany: jest.fn(), upsert: jest.fn() },
 };
 
 describe('RolesService', () => {
@@ -26,32 +27,38 @@ describe('RolesService', () => {
   });
 
   describe('getPermissionsForRole', () => {
-    it('should return permissions for a role', async () => {
+    it('should return permissions for a role from static fallback', async () => {
+      mockPrisma.rolePermission.findMany.mockResolvedValue([]);
       const result = await service.getPermissionsForRole('LEARNER' as any);
       expect(result).toEqual(RolePermissions['LEARNER']);
     });
 
     it('should return empty array for unknown role', async () => {
+      mockPrisma.rolePermission.findMany.mockResolvedValue([]);
       const result = await service.getPermissionsForRole('UNKNOWN' as any);
       expect(result).toEqual([]);
     });
   });
 
   describe('getUserPermissions', () => {
-    it('should return permissions for user role', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({ role: 'INSTRUCTOR' });
+    it('should return permissions for user memberships', async () => {
+      mockPrisma.membership.findMany.mockResolvedValue([
+        { contextType: 'INDIVIDUAL', contextId: null, role: 'CREATOR' },
+      ]);
+      mockPrisma.rolePermission.findMany.mockResolvedValue([]);
 
       const result = await service.getUserPermissions('user-1');
 
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { id: 'user-1' },
-        select: { role: true },
+      expect(mockPrisma.membership.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        select: { contextType: true, contextId: true, role: true },
       });
-      expect(result).toEqual(RolePermissions['INSTRUCTOR']);
+      expect(result.memberships).toHaveLength(1);
+      expect(result.permissions).toEqual(expect.arrayContaining(RolePermissions['CREATOR']));
     });
 
-    it('should throw NotFoundException if user not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+    it('should throw NotFoundException if no memberships found', async () => {
+      mockPrisma.membership.findMany.mockResolvedValue([]);
 
       await expect(service.getUserPermissions('bad-id')).rejects.toThrow(NotFoundException);
     });
@@ -93,17 +100,24 @@ describe('RolesService', () => {
   });
 
   describe('getUserWithPermissions', () => {
-    it('should return user with permissions', async () => {
-      const user = { id: 'u1', email: 'test@test.com', nom: 'D', prenom: 'J', role: 'LEARNER' };
+    it('should return user with permissions derived from memberships', async () => {
+      const user = {
+        id: 'u1', email: 'test@test.com', nom: 'D', prenom: 'J',
+        memberships: [{ contextType: 'INDIVIDUAL', contextId: null, role: 'LEARNER' }],
+      };
       mockPrisma.user.findUnique.mockResolvedValue(user);
+      mockPrisma.rolePermission.findMany.mockResolvedValue([]);
 
       const result = await service.getUserWithPermissions('u1');
 
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'u1' },
-        select: { id: true, email: true, nom: true, prenom: true, role: true },
+        select: {
+          id: true, email: true, nom: true, prenom: true,
+          memberships: { select: { contextType: true, contextId: true, role: true } },
+        },
       });
-      expect(result).toEqual({ ...user, permissions: RolePermissions['LEARNER'] });
+      expect(result.permissions).toEqual(expect.arrayContaining(RolePermissions['LEARNER']));
     });
 
     it('should throw NotFoundException if user not found', async () => {

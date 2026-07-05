@@ -7,7 +7,6 @@ import { hash, compare } from 'bcryptjs';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
-import { RolePermissions } from '../roles/permissions';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -35,20 +34,30 @@ export class AuthService {
         nom: dto.nom,
         prenom: dto.prenom,
         telephone: dto.telephone,
-        role: dto.role || 'LEARNER',
         interests: dto.interests || [],
       },
-      select: { id: true, email: true, nom: true, prenom: true, role: true, organizationId: true },
+      select: { id: true, email: true, nom: true, prenom: true },
+    });
+
+    // New users always start as INDIVIDUAL LEARNER
+    await this.prisma.membership.create({
+      data: { userId: user.id, contextType: 'INDIVIDUAL', role: 'LEARNER' },
     });
 
     const tokens = await this.generateTokens(user);
-    return { user, ...tokens };
+    return {
+      user: { ...user, memberships: [{ contextType: 'INDIVIDUAL' as const, contextId: null, role: 'LEARNER' as const }] },
+      ...tokens,
+    };
   }
 
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
-      select: { id: true, email: true, passwordHash: true, nom: true, prenom: true, role: true, organizationId: true },
+      select: {
+        id: true, email: true, passwordHash: true, nom: true, prenom: true,
+        memberships: { select: { contextType: true, contextId: true, role: true } },
+      },
     });
 
     if (!user) throw new UnauthorizedException('Email ou mot de passe incorrect');
@@ -82,7 +91,6 @@ export class AuthService {
     });
 
     const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3001');
-
     await this.emailService.sendPasswordResetEmail(user.email, resetToken, frontendUrl);
 
     return { message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' };
@@ -96,27 +104,20 @@ export class AuthService {
       },
     });
 
-    if (!user) {
-      throw new BadRequestException('Token invalide ou expiré');
-    }
+    if (!user) throw new BadRequestException('Token invalide ou expiré');
 
     const passwordHash = await hash(dto.password, 12);
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: {
-        passwordHash,
-        resetToken: null,
-        resetTokenExpiresAt: null,
-      },
+      data: { passwordHash, resetToken: null, resetTokenExpiresAt: null },
     });
 
     return { message: 'Mot de passe réinitialisé avec succès' };
   }
 
-  async generateTokens(user: { id: string; email: string; role: string }) {
-    const permissions = RolePermissions[user.role] || [];
-    const payload = { sub: user.id, email: user.email, role: user.role, permissions };
+  async generateTokens(user: { id: string; email: string }) {
+    const payload = { sub: user.id, email: user.email };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, { expiresIn: '15m' }),
@@ -126,7 +127,7 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async refreshToken(user: { id: string; email: string; role: string }) {
+  async refreshToken(user: { id: string; email: string }) {
     return this.generateTokens(user);
   }
 
@@ -155,6 +156,10 @@ export class AuthService {
           emailVerifiedAt: new Date(),
         },
       });
+
+      await this.prisma.membership.create({
+        data: { userId: user.id, contextType: 'INDIVIDUAL', role: 'LEARNER' },
+      });
     }
 
     await this.prisma.user.update({
@@ -162,14 +167,15 @@ export class AuthService {
       data: { lastLoginAt: new Date(), avatar: oauthUser.avatar || user.avatar },
     });
 
-    const tokens = await this.generateTokens({
-      id: user.id,
-      email: user.email,
-      role: user.role,
+    const tokens = await this.generateTokens({ id: user.id, email: user.email });
+
+    const memberships = await this.prisma.membership.findMany({
+      where: { userId: user.id },
+      select: { contextType: true, contextId: true, role: true },
     });
 
     return {
-      user: { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, role: user.role, organizationId: user.organizationId },
+      user: { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom, memberships },
       ...tokens,
     };
   }
@@ -179,8 +185,9 @@ export class AuthService {
       where: { id: userId },
       select: {
         id: true, email: true, nom: true, prenom: true, telephone: true,
-        avatar: true, role: true, interests: true, emailVerifiedAt: true,
-        lastLoginAt: true, createdAt: true, organizationId: true,
+        avatar: true, interests: true, emailVerifiedAt: true,
+        lastLoginAt: true, createdAt: true,
+        memberships: { select: { contextType: true, contextId: true, role: true } },
       },
     });
   }

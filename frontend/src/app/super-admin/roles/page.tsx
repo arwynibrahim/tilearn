@@ -14,18 +14,21 @@ import { rolesApi } from '@/lib/api/roles';
 import { usersApi } from '@/lib/api/users';
 import { getApiErrorMessage } from '@/lib/api/client';
 import type { GroupedPermissions, UserWithPermissions, Role } from '@/types';
+import { getPrimaryRole } from '@/types';
 
 const ROLE_LABELS: Record<Role, string> = {
   LEARNER: 'Apprenant',
-  INSTRUCTOR: 'Instructeur',
-  ADMIN_INSTITUTION: 'Admin Institution',
+  CREATOR: 'Formateur',
+  MANAGER: 'Manager',
+  ADMIN: 'Admin Institution',
   SUPER_ADMIN: 'Super Admin',
 };
 
 const ROLE_VARIANT: Record<Role, 'default' | 'secondary' | 'info' | 'warning'> = {
   LEARNER: 'default',
-  INSTRUCTOR: 'info',
-  ADMIN_INSTITUTION: 'warning',
+  CREATOR: 'info',
+  MANAGER: 'warning',
+  ADMIN: 'warning',
   SUPER_ADMIN: 'secondary',
 };
 
@@ -89,9 +92,7 @@ function UserPermissionsModal({ userId, onClose }: { userId: string; onClose: ()
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500">Rôle:</span>
-              <Badge variant={ROLE_VARIANT[userPerms.role as Role] ?? 'secondary'}>
-                {ROLE_LABELS[userPerms.role as Role] ?? userPerms.role}
-              </Badge>
+              {(() => { const r = getPrimaryRole(userPerms); return r ? <Badge variant={ROLE_VARIANT[r]}>{ROLE_LABELS[r]}</Badge> : <Badge variant="default">—</Badge>; })()}
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Permissions ({userPerms.permissions.length})</p>
@@ -250,7 +251,7 @@ export default function RolesPage() {
                       </div>
                     </td>
                     <td className="px-5 py-3.5">
-                      <Badge variant={ROLE_VARIANT[u.role]}>{ROLE_LABELS[u.role]}</Badge>
+                      {(() => { const r = getPrimaryRole(u); return r ? <Badge variant={ROLE_VARIANT[r]}>{ROLE_LABELS[r]}</Badge> : <Badge variant="default">—</Badge>; })()}
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       <Button

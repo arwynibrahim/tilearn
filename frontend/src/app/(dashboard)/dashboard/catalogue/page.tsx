@@ -16,6 +16,7 @@ import { learningApi } from '@/lib/api/learning';
 import { useAuthStore } from '@/stores/auth.store';
 import { getApiErrorMessage } from '@/lib/api/client';
 import type { CourseLevel, Course } from '@/types';
+import { hasPlatformRole } from '@/types';
 
 const LEVEL_LABELS: Record<CourseLevel, string> = {
   BEGINNER: 'Debutant',
@@ -160,7 +161,7 @@ export default function DashboardCataloguePage() {
   const [domainId, setDomainId] = useState('');
   const [level, setLevel] = useState('');
 
-  const canEnroll = user?.role === 'LEARNER';
+  const canEnroll = !hasPlatformRole(user ?? null);
 
   const { data: domains = [] } = useQuery({
     queryKey: ['domains'],

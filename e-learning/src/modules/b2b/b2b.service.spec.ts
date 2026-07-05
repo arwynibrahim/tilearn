@@ -15,6 +15,7 @@ const mockPrisma = {
   licenseAssignment: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
   learningPath: { create: jest.fn(), findMany: jest.fn() },
   user: { findUnique: jest.fn(), create: jest.fn() },
+  membership: { create: jest.fn() },
 };
 
 const mockEmailService = { sendOrganizationWelcomeEmail: jest.fn() };
@@ -49,10 +50,12 @@ describe('B2bService', () => {
         return cb({
           organization: { create: mockPrisma.organization.create },
           user: { create: mockPrisma.user.create },
+          membership: { create: mockPrisma.membership.create },
         });
       });
       mockPrisma.organization.create.mockResolvedValue({ id: 'org-1', name: dto.name, type: dto.type });
-      mockPrisma.user.create.mockResolvedValue({ id: 'user-1', email: dto.adminEmail, role: 'ADMIN_INSTITUTION' });
+      mockPrisma.user.create.mockResolvedValue({ id: 'user-1', email: dto.adminEmail });
+      mockPrisma.membership.create.mockResolvedValue({});
       mockEmailService.sendOrganizationWelcomeEmail.mockResolvedValue(undefined);
 
       const result = await service.createOrganization(dto);
@@ -65,10 +68,14 @@ describe('B2bService', () => {
           passwordHash: 'hashed-password',
           nom: dto.adminNom,
           prenom: dto.adminPrenom,
-          role: 'ADMIN_INSTITUTION',
-          organizationId: 'org-1',
         },
       });
+      expect(mockPrisma.membership.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ contextType: 'INDIVIDUAL', role: 'LEARNER' }) }),
+      );
+      expect(mockPrisma.membership.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ contextType: 'ORGANIZATION', role: 'ADMIN' }) }),
+      );
       expect(mockEmailService.sendOrganizationWelcomeEmail).toHaveBeenCalledWith(
         dto.adminEmail, dto.adminPrenom, dto.name, dto.adminEmail, 'a1b2c3d4',
       );

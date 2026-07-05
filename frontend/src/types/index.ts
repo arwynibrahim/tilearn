@@ -3,7 +3,14 @@
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
-export type Role = 'LEARNER' | 'INSTRUCTOR' | 'ADMIN_INSTITUTION' | 'SUPER_ADMIN';
+export type Role = 'LEARNER' | 'CREATOR' | 'MANAGER' | 'ADMIN' | 'SUPER_ADMIN';
+export type ContextType = 'INDIVIDUAL' | 'ORGANIZATION' | 'PLATFORM';
+
+export interface Membership {
+  contextType: ContextType;
+  contextId: string | null;
+  role: Role;
+}
 
 export interface User {
   id: string;
@@ -11,12 +18,11 @@ export interface User {
   nom: string;
   prenom: string;
   telephone?: string | null;
-  role: Role;
+  memberships: Membership[];
   interests?: string[];
   avatar?: string | null;
   emailVerifiedAt?: string | null;
   lastLoginAt?: string | null;
-  organizationId?: string | null;
   createdAt: string;
   updatedAt?: string;
   deletedAt?: string | null;
@@ -42,7 +48,6 @@ export interface RegisterDto {
   email: string;
   password: string;
   telephone?: string;
-  role?: 'LEARNER' | 'INSTRUCTOR';
   interests?: string[];
 }
 
@@ -440,6 +445,36 @@ export interface RolePermissions {
 
 export interface UserWithPermissions extends User {
   permissions: string[];
+}
+
+export function hasPlatformRole(user: User | null): boolean {
+  return user?.memberships?.some((m) => m.contextType === 'PLATFORM') ?? false;
+}
+
+export function hasOrgAdminRole(user: User | null): boolean {
+  return user?.memberships?.some((m) => m.contextType === 'ORGANIZATION' && m.role === 'ADMIN') ?? false;
+}
+
+export function hasRole(user: User | null, role: Role): boolean {
+  return user?.memberships?.some((m) => m.role === role) ?? false;
+}
+
+export function getDashboardHref(user: User | null): string {
+  if (hasPlatformRole(user)) return '/super-admin';
+  if (hasOrgAdminRole(user)) return '/admin';
+  if (hasRole(user, 'CREATOR')) return '/dashboard/instructor';
+  return '/dashboard';
+}
+
+const ROLE_PRIORITY: Role[] = ['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'CREATOR', 'LEARNER'];
+
+export function getPrimaryRole(user: User | null): Role | null {
+  if (!user?.memberships?.length) return null;
+  const roles = user.memberships.map((m) => m.role);
+  for (const r of ROLE_PRIORITY) {
+    if (roles.includes(r)) return r;
+  }
+  return roles[0] ?? null;
 }
 
 export interface GroupedPermissions {

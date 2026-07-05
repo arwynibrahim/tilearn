@@ -9,6 +9,14 @@ import { usersApi } from '@/lib/api/users';
 import { b2bApi } from '@/lib/api/b2b';
 import { useAuthStore } from '@/stores/auth.store';
 import { formatDate } from '@/lib/utils';
+import { hasPlatformRole, getPrimaryRole } from '@/types';
+
+const ROLE_VARIANT = {
+  LEARNER: 'default', CREATOR: 'info', MANAGER: 'warning', ADMIN: 'warning', SUPER_ADMIN: 'secondary',
+} as const;
+const ROLE_LABELS = {
+  LEARNER: 'Apprenant', CREATOR: 'Formateur', MANAGER: 'Manager', ADMIN: 'Admin', SUPER_ADMIN: 'Super Admin',
+} as const;
 
 function StatCard({
   icon: Icon, title, value, sub, color,
@@ -33,7 +41,7 @@ function StatCard({
 
 export default function AdminDashboard() {
   const { user } = useAuthStore();
-  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+  const isSuperAdmin = hasPlatformRole(user ?? null);
 
   const { data: users } = useQuery({
     queryKey: ['admin-users'],
@@ -115,9 +123,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <Badge variant={u.role === 'SUPER_ADMIN' ? 'secondary' : u.role === 'INSTRUCTOR' ? 'info' : 'default'}>
-                        {u.role}
-                      </Badge>
+                      {(() => { const r = getPrimaryRole(u); return r ? <Badge variant={ROLE_VARIANT[r]}>{ROLE_LABELS[r]}</Badge> : <Badge variant="default">—</Badge>; })()}
                       <span className="text-xs text-gray-400">{formatDate(u.createdAt)}</span>
                     </div>
                   </div>

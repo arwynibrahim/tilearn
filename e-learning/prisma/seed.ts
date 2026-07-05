@@ -3,6 +3,13 @@ import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+async function ensureMembership(userId: string, contextType: string, contextId: string | null, role: string) {
+  const existing = await prisma.membership.findFirst({ where: { userId, contextType: contextType as any, contextId } });
+  if (!existing) {
+    await prisma.membership.create({ data: { userId, contextType: contextType as any, contextId, role: role as any } });
+  }
+}
+
 const ALL_PERMISSIONS = [
   // ─── Utilisateurs ─────────────────────────────────────────
   { name: 'user:create', group: 'USER', description: 'Créer des utilisateurs' },
@@ -93,18 +100,26 @@ const ROLE_PERMISSION_MAP: Record<string, string[]> = {
     'payment:create', 'payment:read', 'subscription:create', 'subscription:read',
     'review:create', 'review:read',
   ],
-  INSTRUCTOR: [
+  CREATOR: [
     'user:read', 'user:update', 'course:create', 'course:read', 'course:update', 'course:delete', 'course:publish',
     'domain:read', 'module:create', 'module:read', 'module:update', 'module:delete',
     'vrscene:create', 'vrscene:read', 'vrscene:update', 'enrollment:read', 'progress:read',
     'quiz:create', 'quiz:read', 'quiz:update', 'quiz:delete', 'quiz:attempt',
-    'certificate:create', 'certificate:read', 'payment:read', 'review:read', 'instructor:read',
-    'instructor:update', 'report:read', 'report:export',
+    'certificate:create', 'certificate:read', 'payment:read', 'review:create', 'review:read',
+    'instructor:read', 'instructor:update', 'report:read', 'report:export',
   ],
-  ADMIN_INSTITUTION: [
+  MANAGER: [
+    'user:read', 'user:update', 'course:read', 'module:read', 'enrollment:create',
+    'enrollment:read', 'enrollment:update', 'progress:read', 'organization:read',
+    'license:read', 'license:assign', 'license:revoke',
+    'learningpath:create', 'learningpath:read', 'learningpath:update', 'learningpath:delete',
+    'vrheadset:read', 'vrheadset:update', 'review:read', 'report:read', 'subscription:read',
+  ],
+  ADMIN: [
     'user:create', 'user:read', 'user:update', 'user:delete',
-    'course:create', 'course:read', 'course:update', 'course:publish', 'domain:read',
-    'module:create', 'module:read', 'module:update', 'vrscene:create', 'vrscene:read', 'vrscene:update',
+    'course:create', 'course:read', 'course:update', 'course:publish', 'course:delete', 'domain:read',
+    'module:create', 'module:read', 'module:update', 'module:delete',
+    'vrscene:create', 'vrscene:read', 'vrscene:update',
     'enrollment:create', 'enrollment:read', 'enrollment:update', 'progress:read',
     'quiz:read', 'quiz:attempt', 'certificate:create', 'certificate:read', 'payment:read',
     'organization:read', 'license:create', 'license:read', 'license:assign', 'license:revoke',
@@ -146,14 +161,16 @@ async function main() {
   await seedPermissions();
 
   const adminPassword = await hash('Admin@2026!', 12);
-  await prisma.user.upsert({
-    where: { email: 'admin@tilearning.net' },
+  const superAdmin = await prisma.user.upsert({
+    where: { email: 'superadmin@tilearning.net' },
     update: {},
     create: {
-      email: 'admin@tilearning.net', passwordHash: adminPassword,
-      nom: 'Admin', prenom: 'TIL', role: Role.SUPER_ADMIN, emailVerifiedAt: new Date(),
+      email: 'superadmin@tilearning.net', passwordHash: adminPassword,
+      nom: 'Admin', prenom: 'TIL', emailVerifiedAt: new Date(),
     },
   });
+  await ensureMembership(superAdmin.id, 'INDIVIDUAL', null, 'SUPER_ADMIN');
+  await ensureMembership(superAdmin.id, 'PLATFORM', null, 'SUPER_ADMIN');
   console.log('  ✓ Super admin created');
 
   const instructorPassword = await hash('Instructor@2026!', 12);
@@ -162,9 +179,10 @@ async function main() {
     update: {},
     create: {
       email: 'instructor@tilearning.net', passwordHash: instructorPassword,
-      nom: 'Formateur', prenom: 'Test', role: Role.INSTRUCTOR, emailVerifiedAt: new Date(),
+      nom: 'Formateur', prenom: 'Test', emailVerifiedAt: new Date(),
     },
   });
+  await ensureMembership(instructor.id, 'INDIVIDUAL', null, 'CREATOR');
   await prisma.instructorProfile.upsert({
     where: { userId: instructor.id },
     update: {},
@@ -178,14 +196,15 @@ async function main() {
   console.log('  ✓ Instructor created');
 
   const learnerPassword = await hash('Learner@2026!', 12);
-  await prisma.user.upsert({
+  const learner = await prisma.user.upsert({
     where: { email: 'learner@tilearning.net' },
     update: {},
     create: {
       email: 'learner@tilearning.net', passwordHash: learnerPassword,
-      nom: 'Apprenant', prenom: 'Test', role: Role.LEARNER, emailVerifiedAt: new Date(),
+      nom: 'Apprenant', prenom: 'Test', emailVerifiedAt: new Date(),
     },
   });
+  await ensureMembership(learner.id, 'INDIVIDUAL', null, 'LEARNER');
   console.log('  ✓ Learner created');
 
   const orgPassword = await hash('Admin@2026!', 12);
@@ -203,15 +222,16 @@ async function main() {
       isActive: true,
     },
   });
-  await prisma.user.upsert({
+  const orgAdmin = await prisma.user.upsert({
     where: { email: 'admin@universite.bf' },
     update: {},
     create: {
       email: 'admin@universite.bf', passwordHash: orgPassword,
-      nom: 'Dupont', prenom: 'Jean', role: Role.ADMIN_INSTITUTION, emailVerifiedAt: new Date(),
-      organizationId: org.id,
+      nom: 'Dupont', prenom: 'Jean', emailVerifiedAt: new Date(),
     },
   });
+  await ensureMembership(orgAdmin.id, 'INDIVIDUAL', null, 'LEARNER');
+  await ensureMembership(orgAdmin.id, 'ORGANIZATION', org.id, 'ADMIN');
   await prisma.license.upsert({
     where: { id: 'lic-uni-ouaga-001' },
     update: {},
@@ -226,7 +246,7 @@ async function main() {
       autoRenew: true,
     },
   });
-  console.log('  ✓ Organization "Université de Ouagadougou" created with ADMIN_INSTITUTION user and license');
+  console.log('  ✓ Organization "Université de Ouagadougou" created with ADMIN user and license');
 
   const domains = [
     { name: 'Développement Informatique', slug: 'developpement-informatique', icon: '💻', description: 'Programmation, Cloud, Cybersécurité, DevOps' },
@@ -480,7 +500,7 @@ async function main() {
 
   console.log('\n✅ Seed completed successfully!');
   console.log('\n📧 Test accounts:');
-  console.log('  Super Admin         : admin@tilearning.net / Admin@2026!');
+  console.log('  Super Admin         : superadmin@tilearning.net / Admin@2026!');
   console.log('  Instructor          : instructor@tilearning.net / Instructor@2026!');
   console.log('  Learner             : learner@tilearning.net / Learner@2026!');
   console.log('  Admin Institution   : admin@universite.bf / Admin@2026!');

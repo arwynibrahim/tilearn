@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/stores/auth.store';
 import type { LoginDto, RegisterDto } from '@/types';
+import { getDashboardHref } from '@/types';
 
 export function useLogin() {
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -14,12 +15,7 @@ export function useLogin() {
     mutationFn: (dto: LoginDto) => authApi.login(dto),
     onSuccess: (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
-      const dest = data.user.role === 'SUPER_ADMIN' || data.user.role === 'ADMIN_INSTITUTION'
-        ? '/admin'
-        : data.user.role === 'INSTRUCTOR'
-          ? '/dashboard/instructor'
-          : '/dashboard';
-      router.push(dest);
+      router.push(getDashboardHref(data.user));
     },
   });
 }

@@ -46,7 +46,7 @@ export default function InstructorsPage() {
   });
 
   const allUsers = usersData?.data ?? [];
-  const instructors = allUsers.filter((u) => u.role === 'INSTRUCTOR');
+  const instructors = allUsers.filter((u) => u.memberships?.some((m) => m.role === 'CREATOR'));
   const filtered = instructors.filter((u) => {
     if (!search) return true;
     const q = search.toLowerCase();

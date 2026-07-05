@@ -19,18 +19,21 @@ import { usersApi } from '@/lib/api/users';
 import { formatDate } from '@/lib/utils';
 import { getApiErrorMessage } from '@/lib/api/client';
 import type { Role, User } from '@/types';
+import { getPrimaryRole } from '@/types';
 
 const ROLE_VARIANT: Record<Role, 'default' | 'secondary' | 'info' | 'warning'> = {
   LEARNER: 'default',
-  INSTRUCTOR: 'info',
-  ADMIN_INSTITUTION: 'warning',
+  CREATOR: 'info',
+  MANAGER: 'warning',
+  ADMIN: 'warning',
   SUPER_ADMIN: 'secondary',
 };
 
 const ROLE_LABELS: Record<Role, string> = {
   LEARNER: 'Apprenant',
-  INSTRUCTOR: 'Instructeur',
-  ADMIN_INSTITUTION: 'Admin Institution',
+  CREATOR: 'Formateur',
+  MANAGER: 'Manager',
+  ADMIN: 'Admin Institution',
   SUPER_ADMIN: 'Super Admin',
 };
 
@@ -39,7 +42,6 @@ const editSchema = z.object({
   nom: z.string().min(1, 'Requis'),
   email: z.string().email('Email invalide'),
   telephone: z.string().optional(),
-  role: z.enum(['LEARNER', 'INSTRUCTOR', 'ADMIN_INSTITUTION', 'SUPER_ADMIN']),
 });
 type EditForm = z.infer<typeof editSchema>;
 
@@ -55,7 +57,6 @@ function EditModal({ user, onClose }: { user: User; onClose: () => void }) {
       nom: user.nom,
       email: user.email,
       telephone: user.telephone ?? '',
-      role: user.role,
     },
   });
 
@@ -122,19 +123,6 @@ function EditModal({ user, onClose }: { user: User; onClose: () => void }) {
           <div className="space-y-1.5">
             <Label htmlFor="telephone">Téléphone</Label>
             <Input id="telephone" type="tel" placeholder="+226 XX XX XX XX" {...register('telephone')} />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="role">Rôle</Label>
-            <select
-              id="role"
-              {...register('role')}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
-            >
-              {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
-                <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-              ))}
-            </select>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2">
@@ -265,7 +253,7 @@ export default function UsersPage() {
                         </div>
                       </td>
                       <td className="px-5 py-3.5">
-                        <Badge variant={ROLE_VARIANT[user.role]}>{ROLE_LABELS[user.role]}</Badge>
+                        {(() => { const r = getPrimaryRole(user); return r ? <Badge variant={ROLE_VARIANT[r]}>{ROLE_LABELS[r]}</Badge> : <Badge variant="default">—</Badge>; })()}
                       </td>
                       <td className="px-5 py-3.5 text-gray-500">{formatDate(user.createdAt)}</td>
                       <td className="px-5 py-3.5">

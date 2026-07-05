@@ -19,15 +19,19 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get()
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN_INSTITUTION)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @RequirePermissions(Permissions.USER_READ)
   @ApiOperation({ summary: 'Liste des utilisateurs (admin)' })
-  findAll(@Query('page') page = 1, @Query('limit') limit = 20, @CurrentUser() user: any) {
-    return this.usersService.findAll(+page, +limit, user.role, user.organizationId);
+  findAll(
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+    @Query('orgId') orgId?: string,
+  ) {
+    return this.usersService.findAll(+page, +limit, orgId);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Détail d\'un utilisateur' })
+  @ApiOperation({ summary: "Détail d'un utilisateur" })
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
@@ -36,7 +40,11 @@ export class UsersController {
   @Roles(Role.SUPER_ADMIN)
   @RequirePermissions(Permissions.USER_UPDATE)
   @ApiOperation({ summary: 'Modifier un utilisateur' })
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto, @CurrentUser('id') currentUserId: string) {
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @CurrentUser('id') currentUserId: string,
+  ) {
     return this.usersService.update(id, dto, currentUserId);
   }
 
