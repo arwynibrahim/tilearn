@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Sparkles, TrendingUp, Target, Lightbulb, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -95,9 +96,9 @@ export default function RecommendationsPage() {
             <p className="mb-4 text-xs text-gray-400">
               Renseignez vos centres d&apos;intérêt dans votre profil pour recevoir des recommandations personnalisées.
             </p>
-            <Button variant="outline" size="sm" asChild>
-              <a href="/dashboard/profile">Modifier mon profil</a>
-            </Button>
+            <Link href="/dashboard/profile">
+              <Button variant="outline" size="sm">Modifier mon profil</Button>
+            </Link>
           </CardContent>
         </Card>
       )}

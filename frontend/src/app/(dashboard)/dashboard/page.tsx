@@ -3,37 +3,22 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { BookOpen, BadgeCheck, GraduationCap, ArrowRight, Sparkles } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { learningApi } from '@/lib/api/learning';
 import { useAuthStore } from '@/stores/auth.store';
 import { formatDate } from '@/lib/utils';
-import type { EnrollmentStatus } from '@/types';
-
-const STATUS_VARIANT: Record<EnrollmentStatus, 'success' | 'info' | 'warning' | 'destructive'> = {
-  ACTIVE: 'info',
-  COMPLETED: 'success',
-  EXPIRED: 'warning',
-  DROPPED: 'destructive',
-};
-const STATUS_LABELS: Record<EnrollmentStatus, string> = {
-  ACTIVE: 'En cours',
-  COMPLETED: 'Terminé',
-  EXPIRED: 'Expiré',
-  DROPPED: 'Abandonné',
-};
+import { PageHeader, StatsCard, SectionCard, StatusBadge } from '@/components/dashboard';
 
 export default function LearnerDashboard() {
   const user = useAuthStore((s) => s.user);
 
-  const { data: enrollments = [] } = useQuery({
+  const { data: enrollments = [], isLoading: enrollLoading } = useQuery({
     queryKey: ['my-enrollments'],
     queryFn: learningApi.enrollments.list,
     retry: false,
   });
 
-  const { data: certificates = [] } = useQuery({
+  const { data: certificates = [], isLoading: certLoading } = useQuery({
     queryKey: ['my-certificates'],
     queryFn: learningApi.certificates.list,
     retry: false,
@@ -44,80 +29,73 @@ export default function LearnerDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black text-gray-900">
-          Bonjour {user?.prenom} 👋
-        </h1>
-        <p className="text-sm text-gray-500">Voici un aperçu de votre apprentissage</p>
-      </div>
+      <PageHeader
+        title={`Bonjour ${user?.prenom ?? ''}`}
+        description="Voici un aperçu de votre apprentissage"
+      />
 
-      {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        {[
-          { icon: BookOpen, label: 'Cours en cours', value: active, color: 'bg-brand' },
-          { icon: GraduationCap, label: 'Cours terminés', value: completed, color: 'bg-green-500' },
-          { icon: BadgeCheck, label: 'Certificats', value: certificates.length, color: 'bg-blue-500' },
-        ].map((s) => (
-          <Card key={s.label}>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className={`rounded-2xl p-3 ${s.color}`}>
-                <s.icon className="size-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">{s.label}</p>
-                <p className="text-2xl font-black text-gray-900">{s.value}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        <StatsCard icon={BookOpen} label="Cours en cours" value={enrollLoading ? '...' : active} colorClass="bg-stat-brand" />
+        <StatsCard icon={GraduationCap} label="Cours terminés" value={enrollLoading ? '...' : completed} colorClass="bg-stat-green" />
+        <StatsCard icon={BadgeCheck} label="Certificats" value={certLoading ? '...' : certificates.length} colorClass="bg-stat-blue" />
       </div>
 
-      {/* My courses */}
-      <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <BookOpen className="size-4 text-brand" />
-            Mes cours
-          </CardTitle>
+      <SectionCard
+        icon={BookOpen}
+        title="Mes cours"
+        action={
           <Link href="/dashboard/courses">
             <Button variant="ghost" size="sm" className="gap-1 text-brand">
               Tout voir <ArrowRight className="size-3.5" />
             </Button>
           </Link>
-        </CardHeader>
-        <CardContent>
-          {enrollments.length === 0 ? (
-            <div className="py-10 text-center">
-              <Sparkles className="mx-auto mb-3 size-10 text-gray-200" />
-              <p className="mb-4 text-sm text-gray-400">
-                Vous n&apos;êtes inscrit à aucun cours pour l&apos;instant.
-              </p>
-              <Link href="/#courses">
-                <Button className="gap-2">
-                  Explorer le catalogue <ArrowRight className="size-4" />
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {enrollments.slice(0, 5).map((e) => (
-                <div key={e.id} className="flex items-center justify-between py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand/10 text-sm font-bold text-brand">
-                      {e.course?.title?.[0] ?? '?'}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{e.course?.title ?? 'Cours'}</p>
-                      <p className="text-xs text-gray-400">Inscrit le {formatDate(e.enrolledAt)}</p>
-                    </div>
-                  </div>
-                  <Badge variant={STATUS_VARIANT[e.status]}>{STATUS_LABELS[e.status]}</Badge>
+        }
+      >
+        {enrollLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="skeleton size-9 rounded-lg" />
+                <div className="flex-1 space-y-1">
+                  <div className="skeleton h-3.5 w-2/5" />
+                  <div className="skeleton h-3 w-1/3" />
                 </div>
-              ))}
+                <div className="skeleton h-5 w-16 rounded-full" />
+              </div>
+            ))}
+          </div>
+        ) : enrollments.length === 0 ? (
+          <div className="flex flex-col items-center py-10 text-center">
+            <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-gray-50">
+              <Sparkles className="size-8 text-gray-300" />
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <p className="mb-1 text-base font-semibold text-gray-900">Aucun cours pour l&apos;instant</p>
+            <p className="mb-6 text-sm text-gray-400">Explorez le catalogue et commencez votre apprentissage.</p>
+            <Link href="/dashboard/catalogue">
+              <Button className="gap-2">
+                Explorer le catalogue <ArrowRight className="size-4" />
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            {enrollments.slice(0, 5).map((e) => (
+              <div key={e.id} className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-sm font-bold text-brand">
+                    {e.course?.title?.[0] ?? '?'}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-gray-900">{e.course?.title ?? 'Cours'}</p>
+                    <p className="text-xs text-gray-400">Inscrit le {formatDate(e.enrolledAt)}</p>
+                  </div>
+                </div>
+                <StatusBadge status={e.status} />
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
     </div>
   );
 }

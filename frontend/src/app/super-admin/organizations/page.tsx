@@ -16,6 +16,7 @@ import { LoadingState } from '@/components/ui/status';
 import { useToast } from '@/hooks/use-toast';
 import { b2bApi } from '@/lib/api/b2b';
 import { getApiErrorMessage } from '@/lib/api/client';
+import { PageHeader } from '@/components/dashboard';
 import { formatDate } from '@/lib/utils';
 import type { OrganizationType, Organization } from '@/types';
 
@@ -168,16 +169,16 @@ export default function OrganizationsPage() {
     <div className="space-y-6">
       {showCreate && <CreateOrgModal onClose={() => setShowCreate(false)} />}
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900">Organisations</h1>
-          <p className="text-sm text-gray-500">{orgs.length} organisation(s) partenaire(s)</p>
-        </div>
-        <Button onClick={() => setShowCreate(true)} className="gap-2">
-          <Plus className="size-4" aria-hidden="true" />
-          Nouvelle organisation
-        </Button>
-      </div>
+      <PageHeader
+        title="Organisations"
+        description={`${orgs.length} organisation(s) partenaire(s)`}
+        action={
+          <Button onClick={() => setShowCreate(true)} className="gap-2">
+            <Plus className="size-4" aria-hidden="true" />
+            Nouvelle organisation
+          </Button>
+        }
+      />
 
       {isLoading ? (
         <LoadingState />

@@ -15,6 +15,7 @@ import { Modal, ModalContent } from '@/components/ui/modal';
 import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogFooter } from '@/components/ui/confirm-dialog';
 import { LoadingState, ErrorBanner } from '@/components/ui/status';
 import { useToast } from '@/hooks/use-toast';
+import { PageHeader } from '@/components/dashboard';
 import { usersApi } from '@/lib/api/users';
 import { formatDate } from '@/lib/utils';
 import { getApiErrorMessage } from '@/lib/api/client';
@@ -199,12 +200,10 @@ export default function UsersPage() {
         </ConfirmDialogContent>
       </ConfirmDialog>
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900">Utilisateurs</h1>
-          <p className="text-sm text-gray-500">{data?.total ?? 0} utilisateurs au total</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Utilisateurs"
+        description={`${data?.total ?? 0} utilisateurs au total`}
+      />
 
       <Card>
         <CardHeader>
