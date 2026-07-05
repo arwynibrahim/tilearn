@@ -32,7 +32,15 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
     if (!user) throw new UnauthorizedException();
 
-    const permissions = RolePermissions[user.role] || [];
+    const dbPerms = await this.prisma.rolePermission.findMany({
+      where: { role: user.role },
+      include: { permission: { select: { name: true } } },
+    });
+
+    // DB is source of truth; fall back to static map if seed hasn't run yet
+    const permissions = dbPerms.length > 0
+      ? dbPerms.map((rp) => rp.permission.name)
+      : (RolePermissions[user.role] ?? []);
 
     return { ...user, permissions };
   }

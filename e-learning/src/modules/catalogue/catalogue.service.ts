@@ -1,11 +1,12 @@
 import {
-  Injectable, NotFoundException, ConflictException,
+  Injectable, NotFoundException, ConflictException, ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { CreateDomainDto } from './dto/create-domain.dto';
 import { CreateModuleDto } from './dto/create-module.dto';
+import { Role } from '../../common/enums/role.enum';
 
 @Injectable()
 export class CatalogueService {
@@ -110,9 +111,12 @@ export class CatalogueService {
     return course;
   }
 
-  async updateCourse(id: string, dto: UpdateCourseDto) {
+  async updateCourse(id: string, dto: UpdateCourseDto, userId: string, role: Role) {
     const course = await this.prisma.course.findUnique({ where: { id } });
     if (!course) throw new NotFoundException('Cours non trouvé');
+    if (role === Role.INSTRUCTOR && course.createdBy !== userId) {
+      throw new ForbiddenException('Vous ne pouvez modifier que vos propres cours');
+    }
     return this.prisma.course.update({ where: { id }, data: dto, include: { domain: true } });
   }
 
@@ -123,9 +127,12 @@ export class CatalogueService {
 
   // ─── Modules ────────────────────────────────────────────────
 
-  async createModule(dto: CreateModuleDto) {
+  async createModule(dto: CreateModuleDto, userId: string, role: Role) {
     const course = await this.prisma.course.findUnique({ where: { id: dto.courseId } });
     if (!course) throw new NotFoundException('Cours non trouvé');
+    if (role === Role.INSTRUCTOR && course.createdBy !== userId) {
+      throw new ForbiddenException('Vous ne pouvez ajouter des modules qu\'à vos propres cours');
+    }
 
     const maxOrder = await this.prisma.module.aggregate({
       where: { courseId: dto.courseId },
@@ -147,9 +154,15 @@ export class CatalogueService {
     });
   }
 
-  async updateModule(id: string, dto: Partial<CreateModuleDto>) {
-    const mod = await this.prisma.module.findUnique({ where: { id } });
+  async updateModule(id: string, dto: Partial<CreateModuleDto>, userId: string, role: Role) {
+    const mod = await this.prisma.module.findUnique({
+      where: { id },
+      include: { course: { select: { createdBy: true } } },
+    });
     if (!mod) throw new NotFoundException('Module non trouvé');
+    if (role === Role.INSTRUCTOR && mod.course.createdBy !== userId) {
+      throw new ForbiddenException('Vous ne pouvez modifier que les modules de vos propres cours');
+    }
     return this.prisma.module.update({ where: { id }, data: dto });
   }
 

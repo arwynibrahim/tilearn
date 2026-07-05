@@ -111,9 +111,9 @@ describe('CatalogueController', () => {
       const dto = { title: 'Updated' };
       mockCatalogueService.updateCourse.mockResolvedValue({ id: 'c1', title: 'Updated' });
 
-      const result = await controller.updateCourse('c1', dto);
+      const result = await controller.updateCourse('c1', dto, 'user-1', 'SUPER_ADMIN' as any);
 
-      expect(mockCatalogueService.updateCourse).toHaveBeenCalledWith('c1', dto);
+      expect(mockCatalogueService.updateCourse).toHaveBeenCalledWith('c1', dto, 'user-1', 'SUPER_ADMIN');
       expect(result).toEqual({ id: 'c1', title: 'Updated' });
     });
   });
@@ -134,9 +134,9 @@ describe('CatalogueController', () => {
       const dto = { title: 'Module 1', type: 'VIDEO' as const, courseId: 'c1' };
       mockCatalogueService.createModule.mockResolvedValue({ id: 'm1', ...dto });
 
-      const result = await controller.createModule(dto);
+      const result = await controller.createModule(dto, 'user-1', 'SUPER_ADMIN' as any);
 
-      expect(mockCatalogueService.createModule).toHaveBeenCalledWith(dto);
+      expect(mockCatalogueService.createModule).toHaveBeenCalledWith(dto, 'user-1', 'SUPER_ADMIN');
       expect(result).toEqual({ id: 'm1', ...dto });
     });
   });
@@ -158,9 +158,9 @@ describe('CatalogueController', () => {
       const dto = { title: 'Updated' };
       mockCatalogueService.updateModule.mockResolvedValue({ id: 'm1', title: 'Updated' });
 
-      const result = await controller.updateModule('m1', dto);
+      const result = await controller.updateModule('m1', dto, 'user-1', 'SUPER_ADMIN' as any);
 
-      expect(mockCatalogueService.updateModule).toHaveBeenCalledWith('m1', dto);
+      expect(mockCatalogueService.updateModule).toHaveBeenCalledWith('m1', dto, 'user-1', 'SUPER_ADMIN');
       expect(result).toEqual({ id: 'm1', title: 'Updated' });
     });
   });

@@ -72,8 +72,9 @@ const ALL_PERMISSIONS = [
   { name: 'review:read', group: 'REVIEW', description: 'Voir avis' },
   { name: 'review:moderate', group: 'REVIEW', description: 'Modérer avis' },
   { name: 'instructor:verify', group: 'INSTRUCTOR', description: 'Vérifier formateur' },
-  // ─── Administration ───────────────────────────────────────
   { name: 'instructor:read', group: 'INSTRUCTOR', description: 'Voir profils formateurs' },
+  { name: 'instructor:update', group: 'INSTRUCTOR', description: 'Modifier son profil formateur' },
+  // ─── Administration ───────────────────────────────────────
   { name: 'role:manage', group: 'ADMIN', description: 'Gérer rôles et permissions' },
   { name: 'settings:read', group: 'ADMIN', description: 'Lire configuration' },
   { name: 'settings:update', group: 'ADMIN', description: 'Modifier configuration' },
@@ -98,7 +99,7 @@ const ROLE_PERMISSION_MAP: Record<string, string[]> = {
     'vrscene:create', 'vrscene:read', 'vrscene:update', 'enrollment:read', 'progress:read',
     'quiz:create', 'quiz:read', 'quiz:update', 'quiz:delete', 'quiz:attempt',
     'certificate:create', 'certificate:read', 'payment:read', 'review:read', 'instructor:read',
-    'report:read', 'report:export',
+    'instructor:update', 'report:read', 'report:export',
   ],
   ADMIN_INSTITUTION: [
     'user:create', 'user:read', 'user:update', 'user:delete',

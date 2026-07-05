@@ -12,7 +12,7 @@
     "prisma:generate": "npm run prisma:merge && prisma generate",
     "prisma:migrate": "npm run prisma:merge && prisma migrate dev",
     "prisma:push": "npm run prisma:merge && prisma db push",
-    "prisma:seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts",
+    "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "jest",

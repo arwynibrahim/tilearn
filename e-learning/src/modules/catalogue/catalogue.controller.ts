@@ -100,8 +100,13 @@ export class CatalogueController {
   @RequirePermissions(Permissions.COURSE_UPDATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Modifier un cours' })
-  updateCourse(@Param('id') id: string, @Body() dto: UpdateCourseDto) {
-    return this.catalogueService.updateCourse(id, dto);
+  updateCourse(
+    @Param('id') id: string,
+    @Body() dto: UpdateCourseDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: Role,
+  ) {
+    return this.catalogueService.updateCourse(id, dto, userId, role);
   }
 
   @Delete('courses/:id')
@@ -122,8 +127,12 @@ export class CatalogueController {
   @RequirePermissions(Permissions.MODULE_CREATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Créer un module' })
-  createModule(@Body() dto: CreateModuleDto) {
-    return this.catalogueService.createModule(dto);
+  createModule(
+    @Body() dto: CreateModuleDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: Role,
+  ) {
+    return this.catalogueService.createModule(dto, userId, role);
   }
 
   @Get('courses/:courseId/modules')
@@ -138,8 +147,13 @@ export class CatalogueController {
   @RequirePermissions(Permissions.MODULE_UPDATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Modifier un module' })
-  updateModule(@Param('id') id: string, @Body() dto: Partial<CreateModuleDto>) {
-    return this.catalogueService.updateModule(id, dto);
+  updateModule(
+    @Param('id') id: string,
+    @Body() dto: Partial<CreateModuleDto>,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: Role,
+  ) {
+    return this.catalogueService.updateModule(id, dto, userId, role);
   }
 
   @Delete('modules/:id')

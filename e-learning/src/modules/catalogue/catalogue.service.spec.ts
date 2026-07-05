@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { CatalogueService } from './catalogue.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Role } from '../../common/enums/role.enum';
 
 const mockPrisma = {
   domain: {
@@ -195,7 +196,7 @@ describe('CatalogueService', () => {
       mockPrisma.course.findUnique.mockResolvedValue(existing);
       mockPrisma.course.update.mockResolvedValue(updated);
 
-      const result = await service.updateCourse('c1', dto);
+      const result = await service.updateCourse('c1', dto, 'user-1', Role.SUPER_ADMIN);
 
       expect(mockPrisma.course.update).toHaveBeenCalledWith({
         where: { id: 'c1' },
@@ -208,7 +209,7 @@ describe('CatalogueService', () => {
     it('should throw NotFoundException if course not found', async () => {
       mockPrisma.course.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateCourse('unknown', { title: 'New' })).rejects.toThrow(NotFoundException);
+      await expect(service.updateCourse('unknown', { title: 'New' }, 'user-1', Role.SUPER_ADMIN)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -236,7 +237,7 @@ describe('CatalogueService', () => {
       mockPrisma.module.aggregate.mockResolvedValue({ _max: { order: 0 } });
       mockPrisma.module.create.mockResolvedValue(created);
 
-      const result = await service.createModule(dto);
+      const result = await service.createModule(dto, 'user-1', Role.SUPER_ADMIN);
 
       expect(mockPrisma.module.create).toHaveBeenCalledWith({
         data: { ...dto, order: 1 },
@@ -250,7 +251,7 @@ describe('CatalogueService', () => {
       mockPrisma.course.findUnique.mockResolvedValue({ id: 'course-1' });
       mockPrisma.module.create.mockResolvedValue({ id: 'mod-1', ...dto, order: 5, course: {} });
 
-      const result = await service.createModule(dto);
+      const result = await service.createModule(dto, 'user-1', Role.SUPER_ADMIN);
 
       expect(mockPrisma.module.create).toHaveBeenCalledWith({
         data: { ...dto, order: 5 },
@@ -262,7 +263,7 @@ describe('CatalogueService', () => {
       mockPrisma.course.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.createModule({ title: 'Mod', type: 'VIDEO' as const, courseId: 'bad' }),
+        service.createModule({ title: 'Mod', type: 'VIDEO' as const, courseId: 'bad' }, 'user-1', Role.SUPER_ADMIN),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -285,12 +286,12 @@ describe('CatalogueService', () => {
 
   describe('updateModule', () => {
     it('should update a module', async () => {
-      const existing = { id: 'm1', title: 'Old' };
+      const existing = { id: 'm1', title: 'Old', course: { createdBy: 'user-1' } };
       const dto = { title: 'New' };
       mockPrisma.module.findUnique.mockResolvedValue(existing);
       mockPrisma.module.update.mockResolvedValue({ id: 'm1', title: 'New' });
 
-      const result = await service.updateModule('m1', dto);
+      const result = await service.updateModule('m1', dto, 'user-1', Role.SUPER_ADMIN);
 
       expect(mockPrisma.module.update).toHaveBeenCalledWith({ where: { id: 'm1' }, data: dto });
       expect(result).toEqual({ id: 'm1', title: 'New' });
@@ -299,7 +300,7 @@ describe('CatalogueService', () => {
     it('should throw NotFoundException if module not found', async () => {
       mockPrisma.module.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateModule('unknown', { title: 'New' })).rejects.toThrow(NotFoundException);
+      await expect(service.updateModule('unknown', { title: 'New' }, 'user-1', Role.SUPER_ADMIN)).rejects.toThrow(NotFoundException);
     });
   });
 });

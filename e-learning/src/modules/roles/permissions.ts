@@ -85,6 +85,7 @@ export const Permissions = {
 
   INSTRUCTOR_VERIFY: 'instructor:verify',
   INSTRUCTOR_READ: 'instructor:read',
+  INSTRUCTOR_UPDATE: 'instructor:update',
 
   // ─── Administration ───────────────────────────────────────
   ROLE_MANAGE: 'role:manage',
@@ -152,6 +153,7 @@ export const RolePermissions: Record<string, PermissionName[]> = {
     Permissions.REVIEW_CREATE,
     Permissions.REVIEW_READ,
     Permissions.INSTRUCTOR_READ,
+    Permissions.INSTRUCTOR_UPDATE,
     Permissions.REPORT_READ,
     Permissions.REPORT_EXPORT,
   ],

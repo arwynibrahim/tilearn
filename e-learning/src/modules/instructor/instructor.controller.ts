@@ -26,7 +26,7 @@ export class InstructorController {
   }
 
   @Patch('instructor/profile')
-  @RequirePermissions(Permissions.INSTRUCTOR_READ)
+  @RequirePermissions(Permissions.INSTRUCTOR_UPDATE)
   @ApiOperation({ summary: 'Mettre à jour mon profil instructeur' })
   updateProfile(
     @CurrentUser('id') userId: string,
