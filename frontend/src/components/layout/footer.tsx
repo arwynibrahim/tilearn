@@ -27,7 +27,7 @@ export function Footer() {
           <div>
             <h4 className="mb-3 text-sm font-semibold text-white">Produit</h4>
             <ul className="space-y-2 text-sm">
-              {[['/#courses', 'Cours'], ['/#vr', 'Démos VR'], ['/#pricing', 'Tarifs']].map(
+              {[['/#courses', 'Cours'], ['/#vr-demo', 'Démos VR'], ['/#pricing', 'Tarifs']].map(
                 ([href, label]) => (
                   <li key={href}>
                     <Link href={href} className="hover:text-brand transition-colors">
@@ -43,7 +43,7 @@ export function Footer() {
           <div>
             <h4 className="mb-3 text-sm font-semibold text-white">Entreprise</h4>
             <ul className="space-y-2 text-sm">
-              {[['#', 'À propos'], ['#', 'Carrières'], ['#', 'Blog'], ['#', 'Contact']].map(
+              {[['/about', 'À propos'], ['/careers', 'Carrières'], ['/blog', 'Blog'], ['/contact', 'Contact']].map(
                 ([href, label]) => (
                   <li key={label}>
                     <Link href={href} className="hover:text-brand transition-colors">
@@ -59,7 +59,7 @@ export function Footer() {
           <div>
             <h4 className="mb-3 text-sm font-semibold text-white">Légal</h4>
             <ul className="space-y-2 text-sm">
-              {[['#', 'Confidentialité'], ['#', 'CGU'], ['#', 'Mentions légales']].map(
+              {[['/privacy', 'Confidentialité'], ['/terms', 'CGU'], ['/legal-notice', 'Mentions légales']].map(
                 ([href, label]) => (
                   <li key={label}>
                     <Link href={href} className="hover:text-brand transition-colors">

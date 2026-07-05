@@ -135,7 +135,7 @@ export function HeroSection() {
           </div>
 
           {/* Right: visual */}
-          <div className="relative hidden lg:block">
+          <div id="vr-demo" className="relative hidden scroll-mt-24 lg:block">
             <div className="glass mx-auto max-w-sm overflow-hidden rounded-3xl">
               <video
                 ref={videoRef}
