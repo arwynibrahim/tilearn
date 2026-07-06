@@ -9,6 +9,7 @@ import { ArrowLeft, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useT } from '@/hooks/use-t';
 import { authApi } from '@/lib/api/auth';
 import { getApiErrorMessage } from '@/lib/api/client';
 
@@ -16,6 +17,7 @@ const schema = z.object({ email: z.string().email('Email invalide') });
 type FormData = z.infer<typeof schema>;
 
 export default function ForgotPasswordPage() {
+  const t = useT();
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,7 @@ export default function ForgotPasswordPage() {
       await authApi.forgotPassword(email);
       setSent(true);
     } catch (err) {
-      setError(getApiErrorMessage(err, 'Une erreur est survenue.'));
+      setError(getApiErrorMessage(err, t('auth.forgot_error_generic')));
     } finally {
       setLoading(false);
     }
@@ -41,17 +43,18 @@ export default function ForgotPasswordPage() {
     return (
       <div className="text-center">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand/10">
-          <Mail className="size-8 text-brand" />
+          <Mail className="size-8 text-brand" aria-hidden="true" />
         </div>
-        <h1 className="mb-2 text-2xl font-black text-gray-900">Email envoyé !</h1>
-        <p className="mb-6 text-gray-500 text-sm">
-          Si un compte existe pour <span className="font-medium text-gray-700">{getValues('email')}</span>,
-          vous recevrez un lien de réinitialisation dans quelques minutes.
+        <h1 className="mb-2 text-2xl font-black text-gray-900">{t('auth.forgot_sent_title')}</h1>
+        <p className="mb-6 text-sm text-gray-500">
+          {t('auth.forgot_sent_prefix')}{' '}
+          <span className="font-medium text-gray-700">{getValues('email')}</span>,{' '}
+          {t('auth.forgot_sent_suffix')}
         </p>
         <Link href="/login">
           <Button variant="outline" className="gap-2">
-            <ArrowLeft className="size-4" />
-            Retour à la connexion
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            {t('auth.back_to_login')}
           </Button>
         </Link>
       </div>
@@ -61,14 +64,12 @@ export default function ForgotPasswordPage() {
   return (
     <div>
       <Link href="/login" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-        <ArrowLeft className="size-4" />
-        Retour à la connexion
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        {t('auth.back_to_login')}
       </Link>
 
-      <h1 className="mb-1 text-2xl font-black text-gray-900">Mot de passe oublié</h1>
-      <p className="mb-8 text-sm text-gray-500">
-        Entrez votre adresse email. Nous vous enverrons un lien pour réinitialiser votre mot de passe.
-      </p>
+      <h1 className="mb-1 text-2xl font-black text-gray-900">{t('auth.forgot_title')}</h1>
+      <p className="mb-8 text-sm text-gray-500">{t('auth.forgot_subtitle')}</p>
 
       {error && (
         <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600">
@@ -78,7 +79,7 @@ export default function ForgotPasswordPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="email">Adresse email</Label>
+          <Label htmlFor="email">{t('auth.email')}</Label>
           <Input
             id="email"
             type="email"
@@ -90,7 +91,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <Button type="submit" className="w-full" size="lg" loading={loading}>
-          {loading ? 'Envoi en cours...' : 'Envoyer le lien'}
+          {loading ? t('auth.forgot_sending') : t('auth.forgot_cta')}
         </Button>
       </form>
     </div>

@@ -8,8 +8,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { CheckCircle2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/auth/password-input';
+import { useT } from '@/hooks/use-t';
 import { authApi } from '@/lib/api/auth';
 import { getApiErrorMessage } from '@/lib/api/client';
 
@@ -25,6 +26,7 @@ const schema = z
 type FormData = z.infer<typeof schema>;
 
 function ResetForm() {
+  const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
@@ -37,7 +39,7 @@ function ResetForm() {
   });
 
   const onSubmit = async ({ password }: FormData) => {
-    if (!token) { setError('Lien invalide ou expiré.'); return; }
+    if (!token) { setError(t('auth.reset_invalid_or_expired')); return; }
     setLoading(true);
     setError(null);
     try {
@@ -45,7 +47,7 @@ function ResetForm() {
       setDone(true);
       setTimeout(() => router.push('/login'), 2500);
     } catch (err) {
-      setError(getApiErrorMessage(err, 'Lien invalide ou expiré.'));
+      setError(getApiErrorMessage(err, t('auth.reset_invalid_or_expired')));
     } finally {
       setLoading(false);
     }
@@ -54,8 +56,8 @@ function ResetForm() {
   if (!token) {
     return (
       <div className="text-center">
-        <p className="mb-4 text-gray-500">Lien de réinitialisation invalide.</p>
-        <Link href="/forgot-password"><Button variant="outline">Demander un nouveau lien</Button></Link>
+        <p className="mb-4 text-gray-500">{t('auth.reset_invalid_link')}</p>
+        <Link href="/forgot-password"><Button variant="outline">{t('auth.reset_request_new_link')}</Button></Link>
       </div>
     );
   }
@@ -64,10 +66,10 @@ function ResetForm() {
     return (
       <div className="text-center">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50">
-          <CheckCircle2 className="size-8 text-green-500" />
+          <CheckCircle2 className="size-8 text-green-500" aria-hidden="true" />
         </div>
-        <h1 className="mb-2 text-2xl font-black text-gray-900">Mot de passe mis à jour !</h1>
-        <p className="text-sm text-gray-500">Redirection vers la connexion...</p>
+        <h1 className="mb-2 text-2xl font-black text-gray-900">{t('auth.reset_success_title')}</h1>
+        <p className="text-sm text-gray-500">{t('auth.reset_success_subtitle')}</p>
       </div>
     );
   }
@@ -75,12 +77,12 @@ function ResetForm() {
   return (
     <div>
       <Link href="/login" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-        <ArrowLeft className="size-4" />
-        Retour à la connexion
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        {t('auth.back_to_login')}
       </Link>
 
-      <h1 className="mb-1 text-2xl font-black text-gray-900">Nouveau mot de passe</h1>
-      <p className="mb-8 text-sm text-gray-500">Choisissez un mot de passe sécurisé d&apos;au moins 8 caractères.</p>
+      <h1 className="mb-1 text-2xl font-black text-gray-900">{t('auth.reset_title')}</h1>
+      <p className="mb-8 text-sm text-gray-500">{t('auth.reset_subtitle')}</p>
 
       {error && (
         <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600">
@@ -90,10 +92,9 @@ function ResetForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="password">Nouveau mot de passe</Label>
-          <Input
+          <Label htmlFor="password">{t('auth.reset_new_password')}</Label>
+          <PasswordInput
             id="password"
-            type="password"
             placeholder="••••••••"
             {...register('password')}
             className={errors.password ? 'border-red-400' : ''}
@@ -102,10 +103,9 @@ function ResetForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="confirm">Confirmer le mot de passe</Label>
-          <Input
+          <Label htmlFor="confirm">{t('auth.confirm_password')}</Label>
+          <PasswordInput
             id="confirm"
-            type="password"
             placeholder="••••••••"
             {...register('confirm')}
             className={errors.confirm ? 'border-red-400' : ''}
@@ -114,7 +114,7 @@ function ResetForm() {
         </div>
 
         <Button type="submit" className="w-full" size="lg" loading={loading}>
-          {loading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+          {loading ? t('auth.reset_updating') : t('auth.reset_cta')}
         </Button>
       </form>
     </div>
@@ -122,8 +122,9 @@ function ResetForm() {
 }
 
 export default function ResetPasswordPage() {
+  const t = useT();
   return (
-    <Suspense fallback={<div className="animate-pulse text-gray-400 text-sm">Chargement...</div>}>
+    <Suspense fallback={<div className="animate-pulse text-sm text-gray-400">{t('auth.loading')}</div>}>
       <ResetForm />
     </Suspense>
   );
