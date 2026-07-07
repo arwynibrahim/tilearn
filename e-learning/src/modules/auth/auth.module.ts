@@ -8,6 +8,7 @@ import { JwtStrategy } from '../../common/guards/jwt.strategy';
 import { GoogleStrategy } from './oauth/google.strategy';
 import { LinkedInStrategy } from './oauth/linkedin.strategy';
 import { OAuthController } from './oauth/oauth.controller';
+import { normalizePemKey } from '../../common/utils/pem.util';
 
 @Module({
   imports: [
@@ -16,8 +17,8 @@ import { OAuthController } from './oauth/oauth.controller';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        privateKey: config.get<string>('JWT_PRIVATE_KEY'),
-        publicKey: config.get<string>('JWT_PUBLIC_KEY'),
+        privateKey: normalizePemKey(config.get<string>('JWT_PRIVATE_KEY')),
+        publicKey: normalizePemKey(config.get<string>('JWT_PUBLIC_KEY')),
         signOptions: {
           expiresIn: config.get<string>('JWT_ACCESS_EXPIRATION', '15m') as any,
           algorithm: 'RS256',

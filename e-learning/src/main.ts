@@ -51,8 +51,9 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = configService.get<number>('PORT', 3000);
-  await app.listen(port);
-  console.log(`🚀 TIL API running on http://localhost:${port}/api/docs`);
+  // Bind to 0.0.0.0 so the container is reachable on Railway / any PaaS
+  await app.listen(port, '0.0.0.0');
+  console.log(`🚀 TIL API running on port ${port} (docs at /api/docs)`);
 }
 
 bootstrap();

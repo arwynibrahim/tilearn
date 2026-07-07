@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RolePermissions } from '../../modules/roles/permissions';
+import { normalizePemKey } from '../utils/pem.util';
 
 interface JwtPayload {
   sub: string;
@@ -19,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_PUBLIC_KEY')!,
+      secretOrKey: normalizePemKey(configService.get<string>('JWT_PUBLIC_KEY'))!,
       algorithms: ['RS256'],
     });
   }

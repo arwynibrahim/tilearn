@@ -15,8 +15,10 @@ import { InstructorModule } from './modules/instructor/instructor.module';
 import { MarketplaceModule } from './modules/marketplace/marketplace.module';
 import { EmailModule } from './modules/email/email.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { HealthController } from './health/health.controller';
 
 @Module({
+  controllers: [HealthController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,

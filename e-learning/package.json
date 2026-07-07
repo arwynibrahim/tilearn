@@ -8,6 +8,7 @@
     "dev": "nest start --watch",
     "start": "nest start",
     "start:prod": "node dist/main",
+    "start:prod:migrate": "prisma migrate deploy && node dist/main",
     "prisma:merge": "node prisma/merge-schema.js",
     "prisma:generate": "npm run prisma:merge && prisma generate",
     "prisma:migrate": "npm run prisma:merge && prisma migrate dev",
