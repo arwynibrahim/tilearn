@@ -29,6 +29,37 @@ export class EmailService {
     });
   }
 
+  async sendWelcomeEmail(to: string, prenom: string) {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3001');
+    await this.sendMail(
+      to,
+      'Bienvenue sur Total Innovation Learning 🎉',
+      `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #E8650A 0%, #C45408 100%); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Total Innovation Learning</h1>
+        </div>
+        <div style="padding: 30px; background: #f9f9f9;">
+          <h2>Bienvenue ${prenom} !</h2>
+          <p>Votre compte a bien été créé. Vous pouvez dès maintenant explorer notre catalogue de cours,
+             suivre des modules interactifs (vidéo, VR, quiz) et obtenir vos certificats.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${frontendUrl}/dashboard"
+               style="background: #E8650A; color: white; padding: 14px 28px; text-decoration: none;
+                      border-radius: 5px; font-size: 16px; display: inline-block;">
+              Accéder à mon espace
+            </a>
+          </div>
+          <p style="color: #999; font-size: 13px;">Si vous n'êtes pas à l'origine de cette inscription, ignorez cet email.</p>
+        </div>
+        <div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">
+          &copy; ${new Date().getFullYear()} Total Innovation Learning
+        </div>
+      </div>
+      `,
+    );
+  }
+
   async sendOrganizationWelcomeEmail(
     to: string,
     prenom: string,

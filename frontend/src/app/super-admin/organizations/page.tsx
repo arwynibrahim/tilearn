@@ -26,6 +26,12 @@ const TYPE_LABELS: Record<OrganizationType, string> = {
   HOSPITAL: 'Hôpital',
   NGO: 'ONG',
   GOV: 'Gouvernement',
+  BANK: 'Banque',
+  INSTITUTE: 'Institut',
+  SCHOOL: 'École',
+  TRAINING_CENTER: 'Centre de formation',
+  ASSOCIATION: 'Association',
+  OTHER: 'Autre',
 };
 
 const TYPE_VARIANT: Record<OrganizationType, 'info' | 'default' | 'success' | 'secondary' | 'warning'> = {
@@ -34,11 +40,17 @@ const TYPE_VARIANT: Record<OrganizationType, 'info' | 'default' | 'success' | 's
   HOSPITAL: 'warning',
   NGO: 'success',
   GOV: 'secondary',
+  BANK: 'info',
+  INSTITUTE: 'info',
+  SCHOOL: 'success',
+  TRAINING_CENTER: 'default',
+  ASSOCIATION: 'success',
+  OTHER: 'secondary',
 };
 
 const schema = z.object({
   name: z.string().min(2, 'Nom requis'),
-  type: z.enum(['UNIVERSITY', 'COMPANY', 'HOSPITAL', 'NGO', 'GOV']),
+  type: z.enum(['UNIVERSITY', 'COMPANY', 'HOSPITAL', 'NGO', 'GOV', 'BANK', 'INSTITUTE', 'SCHOOL', 'TRAINING_CENTER', 'ASSOCIATION', 'OTHER']),
   country: z.string().optional(),
   emailDomain: z.string().optional(),
   phone: z.string().optional(),

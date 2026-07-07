@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -10,6 +10,8 @@ import { MembershipSlim, assertOrgAccess } from '../../common/utils/membership.u
 
 @Injectable()
 export class B2bService {
+  private readonly logger = new Logger(B2bService.name);
+
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
@@ -57,8 +59,12 @@ export class B2bService {
         adminEmail,
         rawPassword,
       );
-    } catch {
-      // L'email n'a pas pu être envoyé, mais l'organisation est créée
+    } catch (err) {
+      // L'organisation est créée même si l'email échoue, mais on trace l'erreur
+      // car l'admin ne recevrait pas son mot de passe temporaire.
+      this.logger.error(
+        `Organisation "${org.name}" créée mais l'email d'accès à ${adminEmail} a échoué: ${err}`,
+      );
     }
 
     return org;

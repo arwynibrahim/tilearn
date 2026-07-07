@@ -242,7 +242,7 @@ export interface LigdiCashInitResponse {
 
 // ─── B2B ─────────────────────────────────────────────────────────────────────
 
-export type OrganizationType = 'UNIVERSITY' | 'COMPANY' | 'HOSPITAL' | 'NGO' | 'GOV';
+export type OrganizationType = 'UNIVERSITY' | 'COMPANY' | 'HOSPITAL' | 'NGO' | 'GOV' | 'BANK' | 'INSTITUTE' | 'SCHOOL' | 'TRAINING_CENTER' | 'ASSOCIATION' | 'OTHER';
 export type LicensePlan = 'STARTER_10' | 'PRO_30' | 'PREMIUM_50' | 'ENTERPRISE_100' | 'UNLIMITED';
 
 export interface Organization {

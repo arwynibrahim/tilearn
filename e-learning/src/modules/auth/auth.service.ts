@@ -1,5 +1,5 @@
 import {
-  Injectable, ConflictException, UnauthorizedException, BadRequestException,
+  Injectable, Logger, ConflictException, UnauthorizedException, BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +14,8 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -43,6 +45,13 @@ export class AuthService {
     await this.prisma.membership.create({
       data: { userId: user.id, contextType: 'INDIVIDUAL', role: 'LEARNER' },
     });
+
+    // Best-effort welcome email — never block registration on SMTP failure
+    try {
+      await this.emailService.sendWelcomeEmail(user.email, user.prenom);
+    } catch (err) {
+      this.logger.warn(`Échec de l'envoi de l'email de bienvenue à ${user.email}: ${err}`);
+    }
 
     const tokens = await this.generateTokens(user);
     return {
@@ -160,6 +169,13 @@ export class AuthService {
       await this.prisma.membership.create({
         data: { userId: user.id, contextType: 'INDIVIDUAL', role: 'LEARNER' },
       });
+
+      // Welcome email only for freshly created OAuth accounts
+      try {
+        await this.emailService.sendWelcomeEmail(user.email, user.prenom);
+      } catch (err) {
+        this.logger.warn(`Échec de l'envoi de l'email de bienvenue à ${user.email}: ${err}`);
+      }
     }
 
     await this.prisma.user.update({

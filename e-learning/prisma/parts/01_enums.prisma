@@ -79,6 +79,12 @@ enum OrganizationType {
   HOSPITAL
   NGO
   GOV
+  BANK
+  INSTITUTE
+  SCHOOL
+  TRAINING_CENTER
+  ASSOCIATION
+  OTHER
 }
 
 enum VRHeadsetModel {
