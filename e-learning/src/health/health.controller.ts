@@ -1,7 +1,12 @@
 import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { PrismaService } from '../prisma/prisma.service';
 
+// Never rate-limit the healthcheck — it must stay reachable even if the
+// throttler's Redis backend (REDIS_URL) is slow or unreachable, otherwise
+// Railway would mark the container unhealthy and restart it.
+@SkipThrottle()
 @ApiExcludeController()
 @Controller({ path: 'health', version: VERSION_NEUTRAL })
 export class HealthController {
