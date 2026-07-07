@@ -9,7 +9,7 @@ import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { OAuthButtons } from '@/components/auth/oauth-buttons';
+import { OAuthButtons, OAUTH_ENABLED } from '@/components/auth/oauth-buttons';
 import { PasswordInput } from '@/components/auth/password-input';
 import { useRegister } from '@/hooks/use-auth';
 import { useT } from '@/hooks/use-t';
@@ -73,14 +73,16 @@ export default function RegisterPage() {
 
       <OAuthButtons />
 
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200" />
+      {OAUTH_ENABLED && (
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-white px-3 text-gray-400">{t('auth.or_continue')}</span>
+          </div>
         </div>
-        <div className="relative flex justify-center text-xs">
-          <span className="bg-white px-3 text-gray-400">{t('auth.or_continue')}</span>
-        </div>
-      </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-brand">

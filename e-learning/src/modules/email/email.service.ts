@@ -9,10 +9,18 @@ export class EmailService {
 
   constructor(private configService: ConfigService) {
     this.from = this.configService.get<string>('SMTP_FROM', 'Total Innovation Learning <noreply@tilearning.net>')!;
+
+    // Env vars are strings — coerce explicitly. nodemailer's `secure` uses `!!value`,
+    // so the string "false" would wrongly enable SSL. Parse it properly, and default
+    // `secure` to true for port 465 (implicit SSL) / false otherwise (STARTTLS).
+    const port = Number(this.configService.get<string>('SMTP_PORT', '587'));
+    const secureRaw = this.configService.get<string>('SMTP_SECURE');
+    const secure = secureRaw !== undefined ? secureRaw.toLowerCase() === 'true' : port === 465;
+
     this.transporter = nodemailer.createTransport({
       host: this.configService.get<string>('SMTP_HOST', 'smtp.gmail.com'),
-      port: this.configService.get<number>('SMTP_PORT', 587),
-      secure: this.configService.get<boolean>('SMTP_SECURE', false),
+      port,
+      secure,
       auth: {
         user: this.configService.get<string>('SMTP_USER'),
         pass: this.configService.get<string>('SMTP_PASS'),

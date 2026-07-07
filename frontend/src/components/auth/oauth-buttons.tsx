@@ -4,8 +4,14 @@ import { Button } from '@/components/ui/button';
 import { useT } from '@/hooks/use-t';
 import { authApi } from '@/lib/api/auth';
 
+// Connexion OAuth (Google / LinkedIn) désactivée pour l'instant — email + mot de
+// passe uniquement. Repasser à `true` pour réactiver les boutons et le séparateur.
+export const OAUTH_ENABLED = false;
+
 export function OAuthButtons() {
   const t = useT();
+
+  if (!OAUTH_ENABLED) return null;
 
   return (
     <div className="mb-6 grid grid-cols-2 gap-3">
