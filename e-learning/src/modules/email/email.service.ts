@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 @Injectable()
 export class EmailService implements OnModuleInit {
@@ -30,16 +31,25 @@ export class EmailService implements OnModuleInit {
         user: this.configService.get<string>('SMTP_USER'),
         pass: this.configService.get<string>('SMTP_PASS'),
       },
+      // Force IPv4: many PaaS containers (Railway…) have no outbound IPv6, but the
+      // SMTP host may resolve to an AAAA record first → `connect ENETUNREACH <ipv6>`.
+      // `family` is passed through to the socket but isn't in nodemailer's typings.
+      family: 4,
       // Fail fast with a clear error instead of hanging ~2 min on a blocked/wrong host
       connectionTimeout: 10_000,
       greetingTimeout: 10_000,
       socketTimeout: 20_000,
-    });
+    } as SMTPTransport.Options);
   }
 
   // Verify SMTP config at startup so a bad setup is obvious in the Railway logs,
   // instead of only surfacing when the first email (org welcome, reset…) fails.
-  async onModuleInit() {
+  // Fire-and-forget so a slow/blocked SMTP host never delays app startup.
+  onModuleInit() {
+    void this.verifyConnection();
+  }
+
+  private async verifyConnection() {
     if (!this.configService.get<string>('SMTP_USER')) {
       this.logger.warn('SMTP non configuré (SMTP_USER absent) — les emails ne seront pas envoyés.');
       return;
@@ -50,7 +60,7 @@ export class EmailService implements OnModuleInit {
     } catch (err) {
       this.logger.error(
         `Connexion SMTP impossible (${this.host}:${this.port}, secure=${this.secure}): ${err}. ` +
-        'Vérifier SMTP_HOST/PORT/SECURE/USER/PASS. Railway bloque parfois le port 465 — essayer 587 + SMTP_SECURE=false.',
+        'Vérifier SMTP_HOST/PORT/SECURE/USER/PASS. Railway bloque parfois le SMTP sortant — essayer 587 + SMTP_SECURE=false.',
       );
     }
   }
