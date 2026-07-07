@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Building2, Globe, AtSign, Phone, Headphones, BadgeCheck } from 'lucide-react';
+import { Plus, Building2, Globe, AtSign, Phone, Headphones, BadgeCheck, Pencil, Trash2, Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Modal, ModalContent } from '@/components/ui/modal';
+import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogFooter } from '@/components/ui/confirm-dialog';
 import { LoadingState } from '@/components/ui/status';
 import { useToast } from '@/hooks/use-toast';
 import { b2bApi } from '@/lib/api/b2b';
@@ -48,18 +49,30 @@ const TYPE_VARIANT: Record<OrganizationType, 'info' | 'default' | 'success' | 's
   OTHER: 'secondary',
 };
 
-const schema = z.object({
+const ORG_TYPE_VALUES = Object.keys(TYPE_LABELS) as [OrganizationType, ...OrganizationType[]];
+
+// Fields common to create & edit (the Organization's own columns)
+const orgFields = {
   name: z.string().min(2, 'Nom requis'),
-  type: z.enum(['UNIVERSITY', 'COMPANY', 'HOSPITAL', 'NGO', 'GOV', 'BANK', 'INSTITUTE', 'SCHOOL', 'TRAINING_CENTER', 'ASSOCIATION', 'OTHER']),
+  type: z.enum(ORG_TYPE_VALUES),
   country: z.string().optional(),
   emailDomain: z.string().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
+};
+
+const schema = z.object({
+  ...orgFields,
   adminEmail: z.string().email('Email invalide'),
   adminPrenom: z.string().min(2, 'Prénom requis'),
   adminNom: z.string().min(2, 'Nom requis'),
 });
 type FormData = z.infer<typeof schema>;
+
+const editSchema = z.object(orgFields);
+type EditFormData = z.infer<typeof editSchema>;
+
+const selectClass = 'flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20';
 
 function CreateOrgModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
@@ -167,9 +180,95 @@ function CreateOrgModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+function EditOrgModal({ org, onClose }: { org: Organization; onClose: () => void }) {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+
+  const { register, handleSubmit, formState: { errors } } = useForm<EditFormData>({
+    resolver: zodResolver(editSchema),
+    defaultValues: {
+      name: org.name,
+      type: org.type,
+      country: org.country ?? '',
+      emailDomain: org.emailDomain ?? '',
+      phone: org.phone ?? '',
+      address: org.address ?? '',
+    },
+  });
+
+  const updateMut = useMutation({
+    mutationFn: (d: EditFormData) => b2bApi.organizations.update(org.id, d),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-orgs'] });
+      toast({ title: 'Organisation modifiée', variant: 'success' });
+      onClose();
+    },
+    onError: (err) => {
+      toast({ title: 'Erreur', description: getApiErrorMessage(err, 'Modification impossible'), variant: 'destructive' });
+    },
+  });
+
+  return (
+    <Modal open onOpenChange={(open) => !open && onClose()}>
+      <ModalContent title="Modifier l'organisation" description={`Mettez à jour les informations de ${org.name}.`}>
+        <form onSubmit={handleSubmit((d) => updateMut.mutate(d))} className="space-y-4">
+          {updateMut.error && (
+            <div role="alert" className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
+              {getApiErrorMessage(updateMut.error)}
+            </div>
+          )}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Nom</Label>
+              <Input {...register('name')} />
+              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Type</Label>
+              <select {...register('type')} className={selectClass}>
+                {(Object.keys(TYPE_LABELS) as OrganizationType[]).map((t) => (
+                  <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Pays</Label>
+              <Input {...register('country')} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Domaine email</Label>
+              <Input {...register('emailDomain')} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Téléphone</Label>
+              <Input {...register('phone')} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Adresse</Label>
+              <Input {...register('address')} />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button type="button" variant="ghost" onClick={onClose}>Annuler</Button>
+            <Button type="submit" loading={updateMut.isPending} className="gap-2">
+              <Save className="size-4" aria-hidden="true" />
+              Enregistrer
+            </Button>
+          </div>
+        </form>
+      </ModalContent>
+    </Modal>
+  );
+}
+
 export default function OrganizationsPage() {
   const [showCreate, setShowCreate] = useState(false);
+  const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
+  const [deletingOrg, setDeletingOrg] = useState<Organization | null>(null);
   const qc = useQueryClient();
+  const { toast } = useToast();
 
   const { data: orgs = [], isLoading } = useQuery({
     queryKey: ['admin-orgs'],
@@ -177,9 +276,40 @@ export default function OrganizationsPage() {
     retry: false,
   });
 
+  const deleteMut = useMutation({
+    mutationFn: b2bApi.organizations.remove,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-orgs'] });
+      toast({ title: 'Organisation supprimée', variant: 'success' });
+      setDeletingOrg(null);
+    },
+    onError: (err) => {
+      toast({ title: 'Erreur', description: getApiErrorMessage(err, 'Suppression impossible'), variant: 'destructive' });
+    },
+  });
+
   return (
     <div className="space-y-6">
       {showCreate && <CreateOrgModal onClose={() => setShowCreate(false)} />}
+      {editingOrg && <EditOrgModal org={editingOrg} onClose={() => setEditingOrg(null)} />}
+
+      <ConfirmDialog open={!!deletingOrg} onOpenChange={(open) => !open && setDeletingOrg(null)}>
+        <ConfirmDialogContent
+          title="Supprimer l'organisation"
+          description={`Êtes-vous sûr de vouloir supprimer ${deletingOrg?.name} ? Cette action est irréversible. Une organisation ayant des licences, parcours ou casques associés ne peut pas être supprimée.`}
+        >
+          <ConfirmDialogFooter>
+            <Button variant="outline" onClick={() => setDeletingOrg(null)}>Annuler</Button>
+            <Button
+              variant="destructive"
+              loading={deleteMut.isPending}
+              onClick={() => deletingOrg && deleteMut.mutate(deletingOrg.id)}
+            >
+              Supprimer
+            </Button>
+          </ConfirmDialogFooter>
+        </ConfirmDialogContent>
+      </ConfirmDialog>
 
       <PageHeader
         title="Organisations"
@@ -250,6 +380,26 @@ export default function OrganizationsPage() {
                     {org._count?.vrHeadsets ?? 0} casque(s)
                   </span>
                   <span className="ml-auto">{formatDate(org.createdAt)}</span>
+                </div>
+                <div className="mt-3 flex items-center justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 hover:bg-blue-50 hover:text-blue-600"
+                    onClick={() => setEditingOrg(org)}
+                    aria-label={`Modifier ${org.name}`}
+                  >
+                    <Pencil className="size-4" aria-hidden="true" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 hover:bg-red-50 hover:text-red-600"
+                    onClick={() => setDeletingOrg(org)}
+                    aria-label={`Supprimer ${org.name}`}
+                  >
+                    <Trash2 className="size-4" aria-hidden="true" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>

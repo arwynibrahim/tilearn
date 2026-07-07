@@ -273,6 +273,17 @@ export interface CreateOrganizationDto {
   adminNom: string;
 }
 
+// Only the Organization's own columns are editable — the admin account fields
+// (adminEmail/adminPrenom/adminNom) belong to a separate User and are set at creation.
+export interface UpdateOrganizationDto {
+  name?: string;
+  type?: OrganizationType;
+  emailDomain?: string;
+  address?: string;
+  country?: string;
+  phone?: string;
+}
+
 export interface LicenseAssignment {
   id: string;
   licenseId: string;

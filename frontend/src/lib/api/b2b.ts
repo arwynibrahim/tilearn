@@ -3,6 +3,7 @@ import type {
   CreateLicenseDto,
   CreateLearningPathDto,
   CreateOrganizationDto,
+  UpdateOrganizationDto,
   LearningPath,
   License,
   Organization,
@@ -21,6 +22,13 @@ export const b2bApi = {
     create: async (payload: CreateOrganizationDto): Promise<Organization> => {
       const { data } = await apiClient.post('/b2b/organizations', payload);
       return data;
+    },
+    update: async (id: string, payload: UpdateOrganizationDto): Promise<Organization> => {
+      const { data } = await apiClient.patch(`/b2b/organizations/${id}`, payload);
+      return data;
+    },
+    remove: async (id: string): Promise<void> => {
+      await apiClient.delete(`/b2b/organizations/${id}`);
     },
   },
 

@@ -1,16 +1,121 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { GraduationCap, Search } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { GraduationCap, Search, Pencil, Save } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LoadingState } from '@/components/ui/status';
+import { Label } from '@/components/ui/label';
+import { Modal, ModalContent } from '@/components/ui/modal';
+import { LoadingState, ErrorBanner } from '@/components/ui/status';
+import { useToast } from '@/hooks/use-toast';
 import { usersApi } from '@/lib/api/users';
+import { getApiErrorMessage } from '@/lib/api/client';
 import type { User } from '@/types';
 
-function InstructorCard({ user }: { user: User }) {
+const editSchema = z.object({
+  prenom: z.string().min(1, 'Requis'),
+  nom: z.string().min(1, 'Requis'),
+  email: z.string().email('Email invalide'),
+  telephone: z.string().optional(),
+});
+type EditForm = z.infer<typeof editSchema>;
+
+function EditInstructorModal({ user, onClose }: { user: User; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const { register, handleSubmit, formState: { errors } } = useForm<EditForm>({
+    resolver: zodResolver(editSchema),
+    defaultValues: {
+      prenom: user.prenom,
+      nom: user.nom,
+      email: user.email,
+      telephone: user.telephone ?? '',
+    },
+  });
+
+  const updateMut = useMutation({
+    mutationFn: (data: Partial<User>) => usersApi.update(user.id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-users-list'] });
+      toast({ title: 'Instructeur modifié', variant: 'success' });
+      onClose();
+    },
+    onError: (err) => setError(getApiErrorMessage(err, 'Erreur lors de la mise à jour.')),
+  });
+
+  const onSubmit = (data: EditForm) => {
+    setError(null);
+    updateMut.mutate(data);
+  };
+
+  return (
+    <Modal open onOpenChange={(open) => !open && onClose()}>
+      <ModalContent title="Modifier l'instructeur" description={`Modifiez les informations de ${user.prenom} ${user.nom}.`}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {error && <ErrorBanner message={error} />}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="prenom">Prénom</Label>
+              <Input
+                id="prenom"
+                {...register('prenom')}
+                aria-invalid={!!errors.prenom}
+                className={errors.prenom ? 'border-red-400' : ''}
+              />
+              {errors.prenom && <p className="text-xs text-red-500">{errors.prenom.message}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="nom">Nom</Label>
+              <Input
+                id="nom"
+                {...register('nom')}
+                aria-invalid={!!errors.nom}
+                className={errors.nom ? 'border-red-400' : ''}
+              />
+              {errors.nom && <p className="text-xs text-red-500">{errors.nom.message}</p>}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              {...register('email')}
+              aria-invalid={!!errors.email}
+              className={errors.email ? 'border-red-400' : ''}
+            />
+            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="telephone">Téléphone</Label>
+            <Input id="telephone" type="tel" placeholder="+226 XX XX XX XX" {...register('telephone')} />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+            <Button type="submit" loading={updateMut.isPending} className="gap-2">
+              <Save className="size-4" aria-hidden="true" />
+              Enregistrer
+            </Button>
+          </div>
+        </form>
+      </ModalContent>
+    </Modal>
+  );
+}
+
+function InstructorCard({ user, onEdit }: { user: User; onEdit: () => void }) {
   return (
     <Card className="card-hover">
       <CardContent className="p-5">
@@ -30,6 +135,15 @@ function InstructorCard({ user }: { user: User }) {
           {user.lastLoginAt && (
             <span>· Dernière connexion le {new Date(user.lastLoginAt).toLocaleDateString('fr-FR')}</span>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto size-8 hover:bg-blue-50 hover:text-blue-600"
+            onClick={onEdit}
+            aria-label={`Modifier ${user.prenom} ${user.nom}`}
+          >
+            <Pencil className="size-4" aria-hidden="true" />
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -38,6 +152,7 @@ function InstructorCard({ user }: { user: User }) {
 
 export default function InstructorsPage() {
   const [search, setSearch] = useState('');
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const { data: usersData, isLoading } = useQuery({
     queryKey: ['admin-users-list'],
@@ -55,6 +170,8 @@ export default function InstructorsPage() {
 
   return (
     <div className="space-y-6">
+      {editingUser && <EditInstructorModal user={editingUser} onClose={() => setEditingUser(null)} />}
+
       <div>
         <h1 className="text-2xl font-black text-gray-900">Instructeurs</h1>
         <p className="text-sm text-gray-500">{instructors.length} instructeur(s) enregistré(s)</p>
@@ -85,7 +202,7 @@ export default function InstructorsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((user) => (
-            <InstructorCard key={user.id} user={user} />
+            <InstructorCard key={user.id} user={user} onEdit={() => setEditingUser(user)} />
           ))}
         </div>
       )}
