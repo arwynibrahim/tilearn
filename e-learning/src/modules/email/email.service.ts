@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService implements OnModuleInit {
@@ -11,17 +12,27 @@ export class EmailService implements OnModuleInit {
   private host: string;
   private port: number;
   private secure: boolean;
+  // When RESEND_API_KEY is set, emails go through Resend's HTTP API (port 443,
+  // no SMTP/IPv6 egress issues on Railway). Otherwise fall back to SMTP.
+  private resend: Resend | null = null;
 
   constructor(private configService: ConfigService) {
     this.from = this.configService.get<string>('SMTP_FROM', 'Total Innovation Learning <noreply@tilearning.net>')!;
+
+    const resendKey = this.configService.get<string>('RESEND_API_KEY');
+    if (resendKey) {
+      this.resend = new Resend(resendKey);
+    }
 
     // Env vars are strings — coerce explicitly. nodemailer's `secure` uses `!!value`,
     // so the string "false" would wrongly enable SSL. Parse it properly, and default
     // `secure` to true for port 465 (implicit SSL) / false otherwise (STARTTLS).
     this.host = this.configService.get<string>('SMTP_HOST', 'smtp.gmail.com')!;
     this.port = Number(this.configService.get<string>('SMTP_PORT', '587'));
-    const secureRaw = this.configService.get<string>('SMTP_SECURE');
-    this.secure = secureRaw !== undefined ? secureRaw.toLowerCase() === 'true' : this.port === 465;
+    const secureRaw = this.configService.get('SMTP_SECURE');
+    this.secure = secureRaw !== undefined && secureRaw !== null
+      ? String(secureRaw).toLowerCase() === 'true'
+      : this.port === 465;
 
     this.transporter = nodemailer.createTransport({
       host: this.host,
@@ -42,30 +53,40 @@ export class EmailService implements OnModuleInit {
     } as SMTPTransport.Options);
   }
 
-  // Verify SMTP config at startup so a bad setup is obvious in the Railway logs,
-  // instead of only surfacing when the first email (org welcome, reset…) fails.
-  // Fire-and-forget so a slow/blocked SMTP host never delays app startup.
+  // Report the active email provider at startup so config issues are obvious in
+  // the Railway logs. Fire-and-forget so a slow SMTP host never delays app boot.
   onModuleInit() {
     void this.verifyConnection();
   }
 
   private async verifyConnection() {
+    if (this.resend) {
+      this.logger.log(`Email via Resend (expéditeur: ${this.from})`);
+      return;
+    }
     if (!this.configService.get<string>('SMTP_USER')) {
-      this.logger.warn('SMTP non configuré (SMTP_USER absent) — les emails ne seront pas envoyés.');
+      this.logger.warn('Aucun provider email configuré (ni RESEND_API_KEY, ni SMTP_USER) — les emails ne seront pas envoyés.');
       return;
     }
     try {
       await this.transporter.verify();
-      this.logger.log(`SMTP prêt (${this.host}:${this.port}, secure=${this.secure})`);
+      this.logger.log(`Email via SMTP prêt (${this.host}:${this.port}, secure=${this.secure})`);
     } catch (err) {
       this.logger.error(
         `Connexion SMTP impossible (${this.host}:${this.port}, secure=${this.secure}): ${err}. ` +
-        'Vérifier SMTP_HOST/PORT/SECURE/USER/PASS. Railway bloque parfois le SMTP sortant — essayer 587 + SMTP_SECURE=false.',
+        'Vérifier SMTP_HOST/PORT/SECURE/USER/PASS, ou définir RESEND_API_KEY pour passer par l\'API HTTP.',
       );
     }
   }
 
   async sendMail(to: string, subject: string, html: string) {
+    if (this.resend) {
+      const { error } = await this.resend.emails.send({ from: this.from, to, subject, html });
+      // Resend returns errors in the response body rather than throwing — surface
+      // them so callers' try/catch (auth, b2b) handle failures consistently.
+      if (error) throw new Error(`Resend: ${error.message ?? error.name}`);
+      return;
+    }
     await this.transporter.sendMail({
       from: this.from,
       to,
