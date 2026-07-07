@@ -21,6 +21,14 @@ COPY . .
 RUN npm run prisma:generate \
     && npm run build
 
+# Precompile the DB seed to plain JS so it can run with `node` in the
+# production image (ts-node is a devDependency, absent from the runner).
+# Output lands in dist/ and is copied into the runner alongside the app.
+RUN npx tsc prisma/seed.ts \
+    --outDir dist --rootDir prisma \
+    --module commonjs --target ES2021 \
+    --moduleResolution node --esModuleInterop --skipLibCheck
+
 ###############################################
 # Stage 2 — Runner (production image)         #
 ###############################################

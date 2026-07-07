@@ -40,9 +40,15 @@ openssl rsa -in private.key -pubout -out public.key
 ## 4. Seed (optionnel, une fois)
 Pour créer les comptes de démo, ouvrir un shell Railway sur le service et lancer :
 ```bash
-npm run prisma:seed
+npm run prisma:seed:prod
 ```
-(nécessite les devDependencies — sinon exécuter le seed en local pointé sur la `DATABASE_URL` de prod).
+> ⚠️ Dans le conteneur de production, utiliser `prisma:seed:prod` (exécute le seed
+> précompilé `dist/seed.js` avec `node`). La commande `npm run prisma:seed` échoue
+> car elle dépend de `ts-node`, une devDependency absente de l'image de prod.
+>
+> Alternative sans shell distant : lancer le seed depuis la machine locale en
+> pointant `DATABASE_URL` sur l'URL publique de la base Railway :
+> `DATABASE_URL="postgresql://…public…" npm run prisma:seed`
 
 ## 5. Vérifier
 - `GET /health` → `{ "status": "ok", ... }` (liveness, sans DB)
