@@ -10,6 +10,11 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
+  // Behind Railway's edge proxy: trust X-Forwarded-For so req.ip is the real
+  // client. Without this, the rate-limiter buckets every user under the proxy's
+  // single IP → shared 60/min limit → spurious 429s.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

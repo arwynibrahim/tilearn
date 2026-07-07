@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
-export class EmailService {
+export class EmailService implements OnModuleInit {
+  private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter;
   private from: string;
+  private host: string;
+  private port: number;
+  private secure: boolean;
 
   constructor(private configService: ConfigService) {
     this.from = this.configService.get<string>('SMTP_FROM', 'Total Innovation Learning <noreply@tilearning.net>')!;
@@ -13,19 +17,42 @@ export class EmailService {
     // Env vars are strings — coerce explicitly. nodemailer's `secure` uses `!!value`,
     // so the string "false" would wrongly enable SSL. Parse it properly, and default
     // `secure` to true for port 465 (implicit SSL) / false otherwise (STARTTLS).
-    const port = Number(this.configService.get<string>('SMTP_PORT', '587'));
+    this.host = this.configService.get<string>('SMTP_HOST', 'smtp.gmail.com')!;
+    this.port = Number(this.configService.get<string>('SMTP_PORT', '587'));
     const secureRaw = this.configService.get<string>('SMTP_SECURE');
-    const secure = secureRaw !== undefined ? secureRaw.toLowerCase() === 'true' : port === 465;
+    this.secure = secureRaw !== undefined ? secureRaw.toLowerCase() === 'true' : this.port === 465;
 
     this.transporter = nodemailer.createTransport({
-      host: this.configService.get<string>('SMTP_HOST', 'smtp.gmail.com'),
-      port,
-      secure,
+      host: this.host,
+      port: this.port,
+      secure: this.secure,
       auth: {
         user: this.configService.get<string>('SMTP_USER'),
         pass: this.configService.get<string>('SMTP_PASS'),
       },
+      // Fail fast with a clear error instead of hanging ~2 min on a blocked/wrong host
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
     });
+  }
+
+  // Verify SMTP config at startup so a bad setup is obvious in the Railway logs,
+  // instead of only surfacing when the first email (org welcome, reset…) fails.
+  async onModuleInit() {
+    if (!this.configService.get<string>('SMTP_USER')) {
+      this.logger.warn('SMTP non configuré (SMTP_USER absent) — les emails ne seront pas envoyés.');
+      return;
+    }
+    try {
+      await this.transporter.verify();
+      this.logger.log(`SMTP prêt (${this.host}:${this.port}, secure=${this.secure})`);
+    } catch (err) {
+      this.logger.error(
+        `Connexion SMTP impossible (${this.host}:${this.port}, secure=${this.secure}): ${err}. ` +
+        'Vérifier SMTP_HOST/PORT/SECURE/USER/PASS. Railway bloque parfois le port 465 — essayer 587 + SMTP_SECURE=false.',
+      );
+    }
   }
 
   async sendMail(to: string, subject: string, html: string) {
